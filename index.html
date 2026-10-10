@@ -40,7 +40,7 @@
         <button id="menuShopBtn" class="big-menu-btn shop-menu-btn" type="button">
           <span class="btn-emoji">📦</span>
           <span class="btn-label">МАГАЗИН</span>
-          <small class="btn-sub">Ящик бойцов • 100 🪙</small>
+          <small class="btn-sub">Контейнер • 1 000 🪙 | Бокс • 50 🪙 | Стражник • 50 000 🪙</small>
         </button>
 
         <button id="menuPlayBtn" class="big-menu-btn play-menu-btn" type="button">
@@ -56,35 +56,80 @@
     </div>
   </div>
 
-  <!-- ==================== 2. МАГАЗИН (1 ЯЩИК И КАРТИНКА С РЕДКОСТЯМИ) ==================== -->
+  <!-- ==================== 2. МАГАЗИН (2 ВКЛАДКИ: КОНТЕЙНЕР БОЙЦОВ + СТРАЖНИК НЕБЕС | БОКС БОЙЦОВ) ==================== -->
   <div id="shopScreen" class="screen-view hidden">
     <div class="paper-screen-card shop-screen-card paper-card">
       <div class="screen-top-bar">
         <button id="shopBackBtn" class="back-nav-btn" type="button">← В МЕНЮ</button>
-        <h2 class="screen-title">📦 МАГАЗИН</h2>
+        <h2 class="screen-title">✨ НЕБЕСНАЯ ЛАВКА И МАГАЗИН ✨</h2>
         <div class="coin-pill">🪙 <strong id="shopCoinsVal">100</strong></div>
       </div>
 
-      <!-- Витрина магазина: пока что только 1 ящик -->
-      <div id="shopShelfView" class="shop-shelf-view">
-        <p class="shop-hint">Нажмите на ящик, чтобы посмотреть шансы по редкости и открыть его:</p>
-        <button id="shopCrateItemBtn" class="crate-showcase-card paper-inner-card" type="button">
-          <div class="crate-art-box">
-            <div class="crate-icon-big">📦</div>
-            <span class="crate-sparkles">✨ 55 БОЙЦОВ ВНУТРИ ✨</span>
-          </div>
-          <h3 class="crate-title">ЯЩИК БОЙЦОВ</h3>
-          <p class="crate-desc">Содержит всех персонажей по редкости, кроме стартового Мечника! Повторка авто-продаётся за +20 🪙</p>
-          <div class="crate-price-badge">НАЖМИТЕ, ЧТОБЫ ОТКРЫТЬ • 100 🪙</div>
+      <!-- Вкладки магазина: «Контейнер бойцов» и новая вкладка «Бокс бойцов» -->
+      <div class="shop-tabs-bar">
+        <button id="shopTabContainerBtn" class="shop-tab-btn active-shop-tab" type="button">
+          📦 КОНТЕЙНЕР БОЙЦОВ (1 000 🪙) И СТРАЖНИК НЕБЕС
+        </button>
+        <button id="shopTabFighterBoxBtn" class="shop-tab-btn" type="button">
+          🎁 БОКС БОЙЦОВ (50 🪙 • 16 НОВЫХ БОЙЦОВ)
         </button>
       </div>
 
-      <!-- Картинка ящика (открывается при нажатии на ящик): по центру кнопка Открыть за 100 монет, снизу редкости и персонажи -->
+      <!-- ВКЛАДКА 1: Контейнер бойцов и рядом с ним стоит Стражник небес (50 000 монет)! -->
+      <div id="shopShelfView" class="shop-shelf-view">
+        <div class="shop-awning-banner">
+          <span>🏮 ДОБРО ПОЖАЛОВАТЬ В МАГАЗИН АРЕНЫ! ВЫБЕРИТЕ КОНТЕЙНЕР БОЙЦОВ, БОКС БОЙЦОВ ИЛИ ЛЕГЕНДУ НЕБЕС 🏮</span>
+        </div>
+
+        <div class="shop-showcase-row">
+          <!-- 1. Контейнер бойцов (1 000 монет) -->
+          <button id="shopCrateItemBtn" class="crate-showcase-card paper-inner-card" type="button">
+            <div class="shop-item-ribbon crate-ribbon">ХИТ ПРОДАЖ • 1 000 🪙</div>
+            <div class="crate-art-box">
+              <div class="crate-icon-big">📦</div>
+              <span class="crate-sparkles">✨ 55 БОЙЦОВ ВНУТРИ ✨</span>
+            </div>
+            <h3 class="crate-title">КОНТЕЙНЕР БОЙЦОВ</h3>
+            <p class="crate-desc">Содержит основных персонажей всех 5 редкостей, кроме стартового Мечника! Повторка авто-продаётся за +20 🪙</p>
+            <div class="crate-price-badge">🔓 НАЖМИТЕ, ЧТОБЫ ОТКРЫТЬ • 1 000 🪙</div>
+          </button>
+
+          <!-- 2. Персонаж «Стражник небес» стоит рядом с контейнером (50 000 монет) -->
+          <div id="shopGuardianCard" class="guardian-showcase-card paper-inner-card">
+            <div class="shop-item-ribbon guardian-ribbon">👼 ЭКСКЛЮЗИВ ВИТРИНЫ • ЗАНИМАЕТ 3 МЕСТА</div>
+            <div class="guardian-pedestal-stage">
+              <div class="guardian-halo-glow"></div>
+              <canvas id="shopSkyGuardianCanvas" width="160" height="104"></canvas>
+              <div class="guardian-pedestal-base">☀️ НЕБЕСНЫЙ ПЬЕДЕСТАЛ ☀️</div>
+            </div>
+
+            <h3 class="guardian-title">СТРАЖНИК НЕБЕС</h3>
+
+            <div class="guardian-stats-pills">
+              <span class="g-pill hp-pill">❤️ 700 ЗДОРОВЬЯ</span>
+              <span class="g-pill beam-pill">☀️ ЛУЧ 360°: -150 HP ВСЕМ</span>
+              <span class="g-pill shield-pill">🛡️ ЩИТ 1.5 С (РАЗ В 10 С)</span>
+              <span class="g-pill slots-pill">👑 ЗАНИМАЕТ СРАЗУ 3 МЕСТА</span>
+            </div>
+
+            <p class="guardian-desc">
+              Когда бьётся о соперников — сам урона не наносит и просто отлетает. Каждые <strong>10 секунд</strong> замирает на <strong>1.5 с</strong> в непробиваемом щите и стреляет лучом во все стороны, снося всем врагам ровно <strong>150 HP</strong>! Не может быть с другими бойцами — занимает сразу все 3 места.
+            </p>
+
+            <button id="buySkyGuardianBtn" class="buy-guardian-btn" type="button">
+              👑 КУПИТЬ ЗА 50 000 МОНЕТ 🪙
+            </button>
+            <div id="shopGuardianStatusMsg" class="guardian-status-msg">Накопите 50 000 🪙, чтобы призвать Стражника небес в свою коллекцию!</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Картинка Контейнера бойцов (открывается при нажатии на Контейнер): по центру кнопка Открыть за 1 000 монет, снизу редкости и персонажи -->
       <div id="cratePictureView" class="crate-picture-view hidden">
         <div class="crate-picture-center paper-inner-card">
           <div class="crate-center-header">
             <button id="crateClosePictureBtn" class="mini-back-link" type="button">← Назад к витрине</button>
-            <span class="crate-center-title">📦 ЯЩИК С БОЙЦАМИ (ВСЕ КРОМЕ МЕЧНИКА)</span>
+            <span class="crate-center-title">📦 КОНТЕЙНЕР БОЙЦОВ (55 ПЕРСОНАЖЕЙ ВСЕХ 5 РЕДКОСТЕЙ)</span>
           </div>
 
           <div class="crate-center-visual">
@@ -98,17 +143,49 @@
             </div>
           </div>
 
-          <!-- По центру кнопка ОТКРЫТЬ ЗА 100 МОНЕТ -->
+          <!-- По центру кнопка ОТКРЫТЬ ЗА 1 000 МОНЕТ -->
           <button id="openCrate100Btn" class="open-crate-center-btn" type="button">
-            🔓 ОТКРЫТЬ ЗА 100 МОНЕТ 🪙
+            🔓 ОТКРЫТЬ КОНТЕЙНЕР ЗА 1 000 МОНЕТ 🪙
           </button>
           <div id="crateOpenStatusMsg" class="crate-status-msg">Чем выше редкость, тем меньше шанс выпадения! Если выпадает повторка — она автоматически продаётся за +20 🪙!</div>
         </div>
 
-        <!-- Снизу: редкость персонажей и сами персонажи в ящике -->
+        <!-- Снизу: редкость персонажей и сами персонажи в контейнере -->
         <div class="crate-rarities-bottom">
-          <div class="crate-rarities-title">ШАНСЫ ВЫПАДЕНИЯ ПО РЕДКОСТИ (55 БОЙЦОВ В ЯЩИКЕ):</div>
+          <div class="crate-rarities-title">ШАНСЫ ВЫПАДЕНИЯ ПО РЕДКОСТИ (55 БОЙЦОВ В КОНТЕЙНЕРЕ БОЙЦОВ):</div>
           <div id="crateRaritiesList" class="crate-rarities-list"></div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 2: НОВАЯ ВКЛАДКА «БОКС БОЙЦОВ» (5 НОВЫХ СЛАБЫХ ОБЫЧНЫХ БЕЗ СПОСОБНОСТЕЙ, 5 НОВЫХ РЕДКИХ, 6 НОВЫХ ЭПИЧЕСКИХ) -->
+      <div id="fighterBoxTabView" class="crate-picture-view hidden">
+        <div class="crate-picture-center fighter-box-center paper-inner-card">
+          <div class="crate-center-header">
+            <button id="fighterBoxBackToShelfBtn" class="mini-back-link" type="button">← К Контейнеру и Стражнику</button>
+            <span class="crate-center-title">🎁 БОКС БОЙЦОВ (5 ОБЫЧНЫХ БЕЗ СПОСОБНОСТЕЙ • 5 РЕДКИХ • 6 ЭПИЧЕСКИХ)</span>
+          </div>
+
+          <div class="crate-center-visual">
+            <div class="crate-box-illustration" id="fighterBoxIllustration">🎁</div>
+            <div id="fighterBoxUnboxedResult" class="crate-unboxed-result hidden">
+              <div class="unboxed-header" id="fighterBoxUnboxedHeader">🎉 ВАМ ВЫПАЛ БОЕЦ ИЗ БОКСА!</div>
+              <canvas id="fighterBoxUnboxedCanvas" width="96" height="72"></canvas>
+              <div id="fighterBoxUnboxedName" class="unboxed-name">РОНИН ВЕТРА</div>
+              <div id="fighterBoxUnboxedRarity" class="unboxed-rarity-badge">Эпическая</div>
+            </div>
+          </div>
+
+          <button id="openFighterBox50Btn" class="open-crate-center-btn open-fighter-box-btn" type="button">
+            🔓 ОТКРЫТЬ БОКС БОЙЦОВ ЗА 50 МОНЕТ 🪙
+          </button>
+          <div id="fighterBoxStatusMsg" class="crate-status-msg">
+            В Боксе бойцов находятся 16 особых персонажей: 5 очень слабых обычных (без способностей), 5 новых редких и 6 новых эпических! Повторка продаётся за +20 🪙.
+          </div>
+        </div>
+
+        <div class="crate-rarities-bottom">
+          <div class="crate-rarities-title">СОДЕРЖИМОЕ «БОКСА БОЙЦОВ» (16 ЭКСКЛЮЗИВНЫХ БОЙЦОВ: 5 ОБЫЧНЫХ, 5 РЕДКИХ, 6 ЭПИЧЕСКИХ):</div>
+          <div id="fighterBoxRaritiesList" class="crate-rarities-list"></div>
         </div>
       </div>
     </div>
@@ -130,7 +207,7 @@
           <span class="hub-level-word">УРОВЕНЬ</span>
         </div>
         <div class="hub-enemy-preview" id="hubEnemyPreviewText">
-          На 1 уровне вас ждёт соперник: <strong>🐒 Бибизяна</strong> • Награда за победу: <strong>+40 🪙</strong>
+          На 1 уровне вас ждёт соперник: <strong>🐒 Бибизяна</strong> • Награда за победу: <strong>+20 🪙</strong>
         </div>
 
         <!-- Панель выбора до 3 ваших бойцов на бой (максимум на арене 6 бойцов) -->
@@ -163,7 +240,7 @@
       <div class="hub-cells-section">
         <div class="hub-cells-header">
           <span>ЯЧЕЙКИ ВАШИХ ПЕРСОНАЖЕЙ ПО РЕДКОСТИ</span>
-          <span id="hubUnlockedCountLabel">Открыто: 1 / 56</span>
+          <span id="hubUnlockedCountLabel">Открыто: 1 / 73</span>
         </div>
         <div id="hubRarityCellsGrid" class="hub-rarity-cells-grid"></div>
       </div>
@@ -213,7 +290,7 @@
     </div>
   </div>
 
-  <!-- ==================== 5. ЭКРАН АРЕНЫ (АРЕНА В 2 РАЗА МЕНЬШЕ!) ==================== -->
+  <!-- ==================== 5. ЭКРАН АРЕНЫ (УВЕЛИЧЕННАЯ АРЕНА 680x400!) ==================== -->
   <div class="paper-app hidden" id="arenaAppContainer">
     <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
     <header class="top-bar">
@@ -227,14 +304,15 @@
         <button id="nextLevelBtn" class="mini-nav-btn" title="Следующий уровень">▶</button>
       </div>
 
-      <!-- Центральная кнопка СТАРТ -->
+      <!-- Центральная кнопка СТАРТ + ускорение 1x / 2x и отдельная кнопка 3x -->
       <div class="start-zone">
         <button id="startBtn" class="start-btn">
           <span class="start-swords">⚔️</span>
           <span id="startBtnText">СТАРТ</span>
         </button>
         <button id="resetArenaBtn" class="secondary-top-btn hidden" title="Вернуться к расстановке">↺ СБРОС</button>
-        <button id="speedToggleBtn" class="secondary-top-btn" title="Скорость боя">1x</button>
+        <button id="speedToggleBtn" class="secondary-top-btn" title="Переключить скорость боя (1x / 2x / 3x)">1x</button>
+        <button id="speed3xBtn" class="secondary-top-btn speed-3x-btn" title="Ускорить бой в 3 раза (3x)">3x</button>
         <button id="soundToggleBtn" class="secondary-top-btn" title="Звуковые эффекты">🔊</button>
       </div>
 
@@ -242,7 +320,7 @@
       <div class="bots-scaling-box paper-card" id="botScalingCard" title="Баланс монет и сложность уровня">
         <div class="coin-pill arena-coin-pill">🪙 <strong id="arenaCoinsVal">100</strong></div>
         <div class="scaling-text-wrap">
-          <span class="scaling-main" id="arenaEnemyHeader">НАГРАДА ЗА ПОБЕДУ: +40 🪙</span>
+          <span class="scaling-main" id="arenaEnemyHeader">НАГРАДА ЗА ПОБЕДУ: +20 🪙</span>
           <span class="scaling-sub" id="scalingSubtext">Уровень 1 • Соперник: Бибизяна</span>
         </div>
       </div>
@@ -328,7 +406,7 @@
         </div>
       </aside>
 
-      <!-- ЦЕНТРАЛЬНЫЙ РИНГ (АРЕНА ЧУТЬ ПОБОЛЬШЕ: 520x310) -->
+      <!-- ЦЕНТРАЛЬНЫЙ РИНГ (УВЕЛИЧЕННАЯ АРЕНА: 680x400) -->
       <section class="arena-section">
         <div class="arena-frame compact-arena-frame" id="arenaFrame">
           <!-- Декоративные угловые крепления ринга -->
@@ -337,11 +415,11 @@
           <div class="corner-post bl"></div>
           <div class="corner-post br"></div>
 
-          <canvas id="arenaCanvas" width="520" height="310"></canvas>
+          <canvas id="arenaCanvas" width="680" height="400"></canvas>
 
           <!-- Подсказка внизу ринга -->
           <div class="arena-hint" id="arenaHint">
-            💡 Арена уменьшена в 2 раза! Победите врагов и получите +40 монет 🪙
+            💡 Увеличенная арена! Победите врагов и получите +20 монет 🪙
           </div>
 
           <!-- Оверлей победы / поражения -->

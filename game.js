@@ -95,24 +95,24 @@ class BattleRoyalPaperGame {
   resizeCanvas() {
     const frame = document.getElementById('arenaFrame');
     if (!frame) return;
-    const displayWidth = frame.clientWidth || 520;
-    const displayHeight = frame.clientHeight || 310;
+    const displayWidth = frame.clientWidth || 680;
+    const displayHeight = frame.clientHeight || 400;
 
-    // Арена сделана чуть побольше (логическое разрешение 520×310)!
-    const w = 520;
-    const h = 310;
+    // Увеличенная арена (логическое разрешение 680×400)!
+    const w = 680;
+    const h = 400;
 
     if (this.canvas.width !== w || this.canvas.height !== h) {
-      const oldW = this.canvas.width || 520;
-      const oldH = this.canvas.height || 310;
+      const oldW = this.canvas.width || 680;
+      const oldH = this.canvas.height || 400;
       this.canvas.width = w;
       this.canvas.height = h;
 
       const sx = w / oldW;
       const sy = h / oldH;
       for (const bp of [...this.playerBlueprints, ...this.botBlueprints]) {
-        bp.x = Math.max(24, Math.min(w - 24, bp.x * sx));
-        bp.y = Math.max(24, Math.min(h - 24, bp.y * sy));
+        bp.x = Math.max(28, Math.min(w - 28, bp.x * sx));
+        bp.y = Math.max(28, Math.min(h - 28, bp.y * sy));
       }
       if (this.state === 'prep') {
         this.syncUnitsFromBlueprints();
@@ -121,8 +121,8 @@ class BattleRoyalPaperGame {
   }
 
   loadReferenceDefaultTeams() {
-    const w = this.canvas.width || 520;
-    const h = this.canvas.height || 310;
+    const w = this.canvas.width || 680;
+    const h = this.canvas.height || 400;
 
     this.playerBlueprints = [
       this.createBlueprint('swordsman', 'player', w * 0.23, h * 0.50, { hp: 100, speed: 3, damage: 10 })
@@ -139,14 +139,14 @@ class BattleRoyalPaperGame {
 
   createBlueprint(classId, team, x, y, customStats = null) {
     const cls = getFighterClass(classId);
-    const w = this.canvas.width || 520;
-    const h = this.canvas.height || 310;
+    const w = this.canvas.width || 680;
+    const h = this.canvas.height || 400;
 
     if (x == null || y == null) {
-      const minX = team === 'player' ? 30 : w * 0.56;
-      const maxX = team === 'player' ? w * 0.44 : w - 30;
+      const minX = team === 'player' ? 36 : w * 0.56;
+      const maxX = team === 'player' ? w * 0.44 : w - 36;
       x = minX + Math.random() * (maxX - minX);
-      y = 32 + Math.random() * (h - 64);
+      y = 38 + Math.random() * (h - 76);
     }
 
     return {
@@ -183,7 +183,7 @@ class BattleRoyalPaperGame {
     const multiEnemyBalance = enemyCount >= 4 ? 0.42 : (enemyCount === 3 ? 0.50 : (enemyCount === 2 ? 0.64 : 0.82));
     const statScale = (0.58 + lvl * 0.09) * multiEnemyBalance;
 
-    const orderedByRarity = getFightersSortedByRarity();
+    const orderedByRarity = getFightersSortedByRarity().filter(fc => fc.id !== 'sky_guardian');
     const maxPoolIdx = Math.min(orderedByRarity.length - 1, 7 + lvl * 3);
     const enemies = [];
     for (let i = 0; i < enemyCount; i++) {
@@ -200,8 +200,8 @@ class BattleRoyalPaperGame {
   }
 
   generateBotTeamForLevel(lvl) {
-    const w = this.canvas.width || 520;
-    const h = this.canvas.height || 310;
+    const w = this.canvas.width || 680;
+    const h = this.canvas.height || 400;
 
     const enemies = this.getCampaignEnemiesForLevel(lvl);
     const newBots = enemies.map((eCfg, idx) => {
@@ -248,8 +248,10 @@ class BattleRoyalPaperGame {
       : (Math.PI + (Math.random() * 0.9 - 0.45));
 
     const speedPx = (bp.speed || 3) * 38;
-    const baseRadius = isMinion ? 9 : 16;
     const abilityId = bp.abilityId || bp.classId;
+    const isSkyGuardian = bp.classId === 'sky_guardian' || abilityId === 'sky_guardian';
+    // Все бойцы на арене сделаны чуть-чуть побольше (обычные бойцы 20px, Стражник небес 23px)!
+    const baseRadius = isMinion ? 11 : (isSkyGuardian ? 23 : 20);
 
     // Для Червя (гусеницы) создаём цепочку из 7 сегментов хвоста!
     const segments = [];
@@ -257,9 +259,9 @@ class BattleRoyalPaperGame {
       const dir = bp.team === 'player' ? -1 : 1;
       for (let s = 1; s <= 7; s++) {
         segments.push({
-          x: bp.x + dir * s * 12,
+          x: bp.x + dir * s * 14,
           y: bp.y + Math.sin(s * 0.8) * 4,
-          r: Math.max(8, baseRadius * (0.86 - s * 0.06))
+          r: Math.max(9, baseRadius * (0.86 - s * 0.06))
         });
       }
     }
@@ -276,6 +278,7 @@ class BattleRoyalPaperGame {
     if (abilityId === 'pavuk') initialCd = 1.8;         // Павук каждые 5 с стреляет паутиной
     if (abilityId === 'bibizyana') initialCd = 2.2;     // Бибизяна каждые 7 с кидает 1 банан на 45 урона
     if (abilityId === 'medusa') initialCd = 0.15;       // Медуза оставляет за собой электрический след
+    if (abilityId === 'sky_guardian') initialCd = 10.0; // Стражник небес каждые 10 с замирает на 1.5 с и бьёт лучом во все стороны!
 
     return {
       id: bp.id || this.nextUid(),
@@ -321,6 +324,9 @@ class BattleRoyalPaperGame {
       shockTick: 0,           // интервал урона током (каждые 0.5 с по 10 HP)
       shockDmg: 10,
       shockAttacker: null,
+      skyGuardianTimer: 10.0, // Стражник небес: каждые 10 с замирает в непробиваемом щите и бьёт лучом во все стороны на 150 HP!
+      skyBeamTimer: 0,        // Длительность 1.5 с, пока Стражник небес стоит в щите и стреляет лучом во все стороны
+      skySavedSpeedAng: angle,
       thrustTimer: 0,
       hitImmunityMap: {},
       // Статус-эффекты
@@ -426,15 +432,31 @@ class BattleRoyalPaperGame {
       this.stopBattleToPrep();
     });
 
-    // 2. Кнопки Магазина и Ящика
+    // 2. Кнопки Магазина: вкладка «Контейнер бойцов» и новая вкладка «Бокс бойцов»
     document.getElementById('shopBackBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.showScreen('menu');
     });
 
+    document.getElementById('shopTabContainerBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('container');
+    });
+
+    document.getElementById('shopTabFighterBoxBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('fighter_box');
+    });
+
+    document.getElementById('fighterBoxBackToShelfBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('container');
+    });
+
     document.getElementById('shopCrateItemBtn')?.addEventListener('click', () => {
       window.sfx.click();
       document.getElementById('shopShelfView')?.classList.add('hidden');
+      document.getElementById('fighterBoxTabView')?.classList.add('hidden');
       document.getElementById('cratePictureView')?.classList.remove('hidden');
       document.getElementById('crateUnboxedResult')?.classList.add('hidden');
       this.renderCrateRaritiesAndFighters();
@@ -443,12 +465,19 @@ class BattleRoyalPaperGame {
 
     document.getElementById('crateClosePictureBtn')?.addEventListener('click', () => {
       window.sfx.click();
-      document.getElementById('cratePictureView')?.classList.add('hidden');
-      document.getElementById('shopShelfView')?.classList.remove('hidden');
+      this.switchShopTab('container');
     });
 
     document.getElementById('openCrate100Btn')?.addEventListener('click', () => {
       this.openCrateFor100Coins();
+    });
+
+    document.getElementById('openFighterBox50Btn')?.addEventListener('click', () => {
+      this.openFighterBoxFor50Coins();
+    });
+
+    document.getElementById('buySkyGuardianBtn')?.addEventListener('click', () => {
+      this.buySkyGuardianFor50000Coins();
     });
 
     // 3. Кнопки Локации Уровня и Ячеек персонажей
@@ -496,7 +525,15 @@ class BattleRoyalPaperGame {
       this.openCampaignHubScreen();
     });
 
+    this.renderShopSkyGuardianShowcase();
     this.updateAllCoinsUI();
+  }
+
+  // Подсчёт занятых мест в отряде (Стражник небес занимает сразу все 3 места!)
+  getSquadSlotsUsed(squadList = this.campaignSquad) {
+    if (!squadList || squadList.length === 0) return 0;
+    if (squadList.includes('sky_guardian')) return 3;
+    return Math.min(3, squadList.length);
   }
 
   addSelectedFighterToCampaignSquad() {
@@ -505,13 +542,102 @@ class BattleRoyalPaperGame {
       window.sfx.defeat();
       return;
     }
-    if (this.campaignSquad.length >= 3) {
+
+    // Если выбран Стражник небес — он занимает сразу 3 места и не может быть с другими бойцами!
+    if (cid === 'sky_guardian') {
+      if (this.campaignSquad.includes('sky_guardian')) {
+        window.sfx.defeat();
+        return;
+      }
+      window.sfx.click();
+      this.campaignSquad = ['sky_guardian'];
+      this.renderCampaignHub();
+      return;
+    }
+
+    // Если в отряде уже стоит Стражник небес (занимает все 3 места) или уже 3 бойца — больше добавить нельзя!
+    if (this.getSquadSlotsUsed() >= 3) {
       window.sfx.defeat();
       return;
     }
+
     window.sfx.click();
     this.campaignSquad.push(cid);
     this.renderCampaignHub();
+  }
+
+  // Отрисовка Стражника небес на пьедестале в магазине рядом с Контейнером бойцов
+  renderShopSkyGuardianShowcase() {
+    const cnv = document.getElementById('shopSkyGuardianCanvas');
+    if (!cnv) return;
+    const ctx = cnv.getContext('2d');
+    const w = cnv.width;
+    const h = cnv.height;
+    ctx.clearRect(0, 0, w, h);
+
+    const cx = w * 0.46;
+    const cy = h * 0.56;
+    const r = 24;
+
+    // Небесные солнечные лучи во все стороны на витрине
+    ctx.save();
+    for (let i = 0; i < 12; i++) {
+      const ang = (i * Math.PI * 2) / 12;
+      ctx.strokeStyle = i % 2 === 0 ? 'rgba(250, 204, 21, 0.7)' : 'rgba(56, 189, 248, 0.55)';
+      ctx.lineWidth = i % 2 === 0 ? 3 : 2;
+      ctx.beginPath();
+      ctx.moveTo(cx + Math.cos(ang) * (r + 6), cy + Math.sin(ang) * (r + 6));
+      ctx.lineTo(cx + Math.cos(ang) * (r + 28), cy + Math.sin(ang) * (r + 28));
+      ctx.stroke();
+    }
+
+    // Непробиваемый щит-купол вокруг Стражника небес
+    ctx.fillStyle = 'rgba(224, 242, 254, 0.45)';
+    ctx.strokeStyle = '#0284c7';
+    ctx.lineWidth = 2.5;
+    ctx.setLineDash([6, 4]);
+    ctx.beginPath();
+    ctx.arc(cx, cy, r + 14, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+
+    // Корпус, крылья, нимб и солнечное ядро Стражника небес
+    drawFighterBody(ctx, 'hexagon', cx, cy, r, '#38bdf8', '#1c1a17', 2.8, 0);
+    if (typeof drawSkyGuardianDetails === 'function') {
+      drawSkyGuardianDetails(ctx, cx, cy, r, 0);
+    }
+    drawWeaponGraphic(ctx, 'sky_guardian', cx + r + 15, cy + 2, 1.05, 0, 'player');
+  }
+
+  // Покупка Стражника небес в магазине рядом с Контейнером бойцов за 50 000 монет
+  buySkyGuardianFor50000Coins() {
+    if (this.unlockedFighters.has('sky_guardian')) {
+      window.sfx.click();
+      this.selectedCampaignFighterId = 'sky_guardian';
+      this.campaignSquad = ['sky_guardian'];
+      this.openCampaignHubScreen();
+      return;
+    }
+
+    if (this.coins < 50000) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 50000;
+    this.unlockedFighters.add('sky_guardian');
+    this.selectedCampaignFighterId = 'sky_guardian';
+    // При покупке сразу ставим его в отряд (занимает сразу все 3 места!)
+    this.campaignSquad = ['sky_guardian'];
+    window.sfx.victory();
+
+    const statusMsg = document.getElementById('shopGuardianStatusMsg');
+    if (statusMsg) {
+      statusMsg.textContent = '🎉 СТРАЖНИК НЕБЕС КУПЛЕН ЗА 50 000 🪙 И ДОБАВЛЕН В ВАШИ ЯЧЕЙКИ (ЗАНИМАЕТ 3 МЕСТА)!';
+    }
+    this.updateAllCoinsUI();
   }
 
   showScreen(screenName) {
@@ -542,27 +668,98 @@ class BattleRoyalPaperGame {
     if (playSub) {
       playSub.textContent = `${this.campaignLevel} уровень • В бой!`;
     }
+
+    // 1. Кнопка открытия «Контейнера бойцов» (1 000 монет)
     const openBtn = document.getElementById('openCrate100Btn');
     const statusMsg = document.getElementById('crateOpenStatusMsg');
     if (openBtn) {
-      openBtn.disabled = this.coins < 100;
-      openBtn.textContent = this.coins >= 100
-        ? '🔓 ОТКРЫТЬ ЗА 100 МОНЕТ 🪙'
-        : `🔒 НУЖНО 100 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+      openBtn.disabled = this.coins < 1000;
+      openBtn.textContent = this.coins >= 1000
+        ? '🔓 ОТКРЫТЬ КОНТЕЙНЕР ЗА 1 000 МОНЕТ 🪙'
+        : `🔒 НУЖНО 1 000 МОНЕТ (У ВАС ${this.coins} 🪙)`;
     }
-    if (statusMsg && this.coins < 100) {
-      statusMsg.textContent = `Побеждайте на уровнях (+40 🪙 за победу), чтобы накопить 100 монет на ящик!`;
+    if (statusMsg && this.coins < 1000) {
+      statusMsg.textContent = `Побеждайте на уровнях (+20 🪙 за победу), чтобы накопить 1 000 монет на Контейнер бойцов!`;
+    }
+
+    // 2. Кнопка открытия «Бокса бойцов» (50 монет)
+    const openBoxBtn = document.getElementById('openFighterBox50Btn');
+    const boxStatusMsg = document.getElementById('fighterBoxStatusMsg');
+    if (openBoxBtn) {
+      openBoxBtn.disabled = this.coins < 50;
+      openBoxBtn.textContent = this.coins >= 50
+        ? '🔓 ОТКРЫТЬ БОКС БОЙЦОВ ЗА 50 МОНЕТ 🪙'
+        : `🔒 НУЖНО 50 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+    }
+    if (boxStatusMsg && this.coins < 50) {
+      boxStatusMsg.textContent = `Побеждайте на уровнях (+20 🪙 за победу), чтобы накопить 50 монет на Бокс бойцов!`;
+    }
+
+    // 3. Кнопка покупки Стражника небес за 50 000 монет на витрине магазина
+    const buyGuardianBtn = document.getElementById('buySkyGuardianBtn');
+    const guardianMsg = document.getElementById('shopGuardianStatusMsg');
+    if (buyGuardianBtn) {
+      const isOwned = this.unlockedFighters && this.unlockedFighters.has('sky_guardian');
+      if (isOwned) {
+        buyGuardianBtn.disabled = false;
+        buyGuardianBtn.classList.add('guardian-owned');
+        buyGuardianBtn.textContent = '✅ КУПЛЕНО! ВЗЯТЬ В БОЙ (ЗАНИМАЕТ 3 МЕСТА) ➔';
+        if (guardianMsg) {
+          guardianMsg.textContent = '👼 Стражник небес уже открыт в ваших ячейках! Нажмите, чтобы взять его в бой.';
+        }
+      } else if (this.coins >= 50000) {
+        buyGuardianBtn.disabled = false;
+        buyGuardianBtn.classList.remove('guardian-owned');
+        buyGuardianBtn.textContent = '👑 КУПИТЬ ЗА 50 000 МОНЕТ 🪙';
+        if (guardianMsg) {
+          guardianMsg.textContent = '✨ У вас достаточно монет! Нажмите, чтобы купить Стражника небес!';
+        }
+      } else {
+        buyGuardianBtn.disabled = true;
+        buyGuardianBtn.classList.remove('guardian-owned');
+        buyGuardianBtn.textContent = `🔒 КУПИТЬ ЗА 50 000 🪙 (У ВАС ${this.coins} 🪙)`;
+        if (guardianMsg) {
+          guardianMsg.textContent = `Побеждайте в боях (+20 🪙) и продавайте повторки — осталось накопить ${50000 - this.coins} 🪙!`;
+        }
+      }
     }
   }
 
-  openShopScreen() {
-    document.getElementById('shopShelfView')?.classList.remove('hidden');
-    document.getElementById('cratePictureView')?.classList.add('hidden');
+  switchShopTab(tabName) {
+    const tabContainerBtn = document.getElementById('shopTabContainerBtn');
+    const tabBoxBtn = document.getElementById('shopTabFighterBoxBtn');
+    const shelfView = document.getElementById('shopShelfView');
+    const crateView = document.getElementById('cratePictureView');
+    const boxView = document.getElementById('fighterBoxTabView');
+
+    if (tabName === 'fighter_box') {
+      tabContainerBtn?.classList.remove('active-shop-tab');
+      tabBoxBtn?.classList.add('active-shop-tab');
+      shelfView?.classList.add('hidden');
+      crateView?.classList.add('hidden');
+      boxView?.classList.remove('hidden');
+      document.getElementById('fighterBoxUnboxedResult')?.classList.add('hidden');
+      this.renderFighterBoxRaritiesAndFighters();
+    } else {
+      tabContainerBtn?.classList.add('active-shop-tab');
+      tabBoxBtn?.classList.remove('active-shop-tab');
+      shelfView?.classList.remove('hidden');
+      crateView?.classList.add('hidden');
+      boxView?.classList.add('hidden');
+      this.renderShopSkyGuardianShowcase();
+    }
+    this.updateAllCoinsUI();
+  }
+
+  openShopScreen(initialTab = 'container') {
+    this.renderShopSkyGuardianShowcase();
     this.renderCrateRaritiesAndFighters();
+    this.renderFighterBoxRaritiesAndFighters();
+    this.switchShopTab(initialTab);
     this.showScreen('shop');
   }
 
-  // Отрисовка нижней части картинки ящика: редкости и все 55 персонажей (кроме Мечника) с шансами выпадения
+  // Отрисовка нижней части «Контейнера бойцов»: 5 редкостей и 55 основных персонажей
   renderCrateRaritiesAndFighters() {
     const listEl = document.getElementById('crateRaritiesList');
     if (!listEl) return;
@@ -603,14 +800,58 @@ class BattleRoyalPaperGame {
     }
   }
 
-  // Открытие ящика за 100 монет с учётом редкости (если падает повторка — автоматически продаётся за 20 монет!)
+  // Отрисовка нижней части новой вкладки «Бокс бойцов»: 5 обычных (слабых без способностей), 5 редких и 6 эпических
+  renderFighterBoxRaritiesAndFighters() {
+    const listEl = document.getElementById('fighterBoxRaritiesList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    for (const tier of FIGHTER_RARITIES) {
+      const boxFighters = FIGHTER_CLASSES.filter(fc => fc.rarity === tier.id && fc.inFighterBox);
+      if (boxFighters.length === 0) continue;
+
+      const block = document.createElement('div');
+      block.className = 'rarity-tier-block';
+      block.style.borderColor = tier.border;
+      block.style.background = tier.bg;
+
+      const perFighterChance = boxFighters[0]?.dropChance || 0;
+      const extraNote = tier.id === 'common' ? ' (очень слабые, без способностей)' : '';
+      block.innerHTML = `
+        <div class="rarity-tier-header">
+          <span class="rarity-tier-pill" style="background:${tier.color}">${tier.name} редкость${extraNote}</span>
+          <span>Шанс редкости в боксе: <strong>${tier.boxTierChance}%</strong> (${boxFighters.length} шт. • по ${perFighterChance}%)</span>
+        </div>
+        <div class="rarity-fighters-row"></div>
+      `;
+
+      const row = block.querySelector('.rarity-fighters-row');
+      for (const fc of boxFighters) {
+        const isUnlocked = this.unlockedFighters.has(fc.id);
+        const item = document.createElement('div');
+        item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
+        item.innerHTML = `
+          <canvas width="64" height="36"></canvas>
+          <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${fc.name}</span>
+          <span class="cfm-chance">❤️${fc.hp} ⚔️${fc.damage} • ${fc.dropChance}%</span>
+        `;
+        const cnv = item.querySelector('canvas');
+        renderFighterThumbnail(cnv, fc, 'player', false);
+        row.appendChild(item);
+      }
+
+      listEl.appendChild(block);
+    }
+  }
+
+  // Открытие «Контейнера бойцов» за 1 000 монет
   openCrateFor100Coins() {
-    if (this.coins < 100) {
+    if (this.coins < 1000) {
       window.sfx.defeat();
       return;
     }
 
-    this.coins -= 100;
+    this.coins -= 1000;
     window.sfx.victory();
 
     const boxIll = document.getElementById('crateBoxIllustration');
@@ -620,7 +861,6 @@ class BattleRoyalPaperGame {
       boxIll.classList.add('crate-shake');
     }
 
-    // Выбираем редкость по новым весам (53.5% Обычная, 33% Редкая, 8% Эпическая, 4% Мифическая, 1.5% Легендарная)
     const roll = Math.random() * 100;
     let cumulative = 0;
     let chosenTier = FIGHTER_RARITIES[0];
@@ -632,20 +872,17 @@ class BattleRoyalPaperGame {
       }
     }
 
-    // Все персонажи выбранной редкости в ящике (кроме Мечника!)
     const pool = FIGHTER_CLASSES.filter(fc => fc.inCrate && fc.rarity === chosenTier.id);
     const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
     const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
 
     if (wasAlreadyUnlocked) {
-      // Если падает повторка — она автоматически продаётся за 20 монет!
       this.coins += 20;
     } else {
       this.unlockedFighters.add(droppedFighter.id);
       this.selectedCampaignFighterId = droppedFighter.id;
     }
 
-    // Показываем выпавшего бойца по центру
     const resBox = document.getElementById('crateUnboxedResult');
     const headerEl = document.getElementById('unboxedHeaderTitle');
     const cnv = document.getElementById('unboxedFighterCanvas');
@@ -670,10 +907,81 @@ class BattleRoyalPaperGame {
     if (msgEl) {
       msgEl.textContent = wasAlreadyUnlocked
         ? `🔄 Выпала повторка «${droppedFighter.name}» — автоматически продана за +20 монет!`
-        : `🎉 Новый боец «${droppedFighter.name}» добавлен в вашу ячейку по редкости!`;
+        : `🎉 Новый боец «${droppedFighter.name}» из Контейнера бойцов добавлен в вашу ячейку!`;
     }
 
     this.renderCrateRaritiesAndFighters();
+    this.updateAllCoinsUI();
+  }
+
+  // Открытие «Бокса бойцов» за 50 монет (содержит только 5 новых слабых обычных без способностей, 5 редких и 6 эпических)
+  openFighterBoxFor50Coins() {
+    if (this.coins < 50) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 50;
+    window.sfx.victory();
+
+    const boxIll = document.getElementById('fighterBoxIllustration');
+    if (boxIll) {
+      boxIll.classList.remove('crate-shake');
+      void boxIll.offsetWidth;
+      boxIll.classList.add('crate-shake');
+    }
+
+    const boxTiers = FIGHTER_RARITIES.filter(t => (t.boxTierChance || 0) > 0);
+    const roll = Math.random() * 100;
+    let cumulative = 0;
+    let chosenTier = boxTiers[0];
+    for (const tier of boxTiers) {
+      cumulative += tier.boxTierChance;
+      if (roll <= cumulative) {
+        chosenTier = tier;
+        break;
+      }
+    }
+
+    const pool = FIGHTER_CLASSES.filter(fc => fc.inFighterBox && fc.rarity === chosenTier.id);
+    const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
+    const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
+
+    if (wasAlreadyUnlocked) {
+      this.coins += 20;
+    } else {
+      this.unlockedFighters.add(droppedFighter.id);
+      this.selectedCampaignFighterId = droppedFighter.id;
+    }
+
+    const resBox = document.getElementById('fighterBoxUnboxedResult');
+    const headerEl = document.getElementById('fighterBoxUnboxedHeader');
+    const cnv = document.getElementById('fighterBoxUnboxedCanvas');
+    const nameEl = document.getElementById('fighterBoxUnboxedName');
+    const rarEl = document.getElementById('fighterBoxUnboxedRarity');
+    const msgEl = document.getElementById('fighterBoxStatusMsg');
+
+    if (resBox && cnv && nameEl && rarEl) {
+      resBox.classList.remove('hidden');
+      renderFighterThumbnail(cnv, droppedFighter, 'player', true);
+      nameEl.textContent = droppedFighter.name.toUpperCase();
+      rarEl.textContent = wasAlreadyUnlocked
+        ? `ПОВТОРКА • ПРОДАНА ЗА +20 🪙`
+        : `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
+      rarEl.style.background = wasAlreadyUnlocked ? '#d97706' : droppedFighter.rarityColor;
+    }
+    if (headerEl) {
+      headerEl.textContent = wasAlreadyUnlocked
+        ? '🔄 ПОВТОРКА! АВТОПРОДАЖА +20 🪙'
+        : '🎉 НОВЫЙ БОЕЦ ИЗ БОКСА!';
+    }
+    if (msgEl) {
+      msgEl.textContent = wasAlreadyUnlocked
+        ? `🔄 Выпала повторка «${droppedFighter.name}» — автоматически продана за +20 монет!`
+        : `🎉 Новый боец «${droppedFighter.name}» из Бокса бойцов добавлен в вашу коллекцию!`;
+    }
+
+    this.renderFighterBoxRaritiesAndFighters();
     this.updateAllCoinsUI();
   }
 
@@ -687,68 +995,115 @@ class BattleRoyalPaperGame {
     const lvlNumEl = document.getElementById('hubLevelNumber');
     if (lvlNumEl) lvlNumEl.textContent = this.campaignLevel;
 
-    // Следим, чтобы в отряде были только открытые бойцы и максимум 3 наших бойца
+    // Следим, чтобы в отряде были только открытые бойцы и максимум 3 места
     this.campaignSquad = (this.campaignSquad || []).filter(id => this.unlockedFighters.has(id)).slice(0, 3);
+    // Если в отряде есть Стражник небес — он занимает сразу все 3 места и не может быть ещё с 2 бойцами!
+    if (this.campaignSquad.includes('sky_guardian')) {
+      this.campaignSquad = ['sky_guardian'];
+    }
     if (this.campaignSquad.length === 0 && this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId)) {
       this.campaignSquad = [this.selectedCampaignFighterId];
     }
+
+    const slotsUsed = this.getSquadSlotsUsed();
+    const hasGuardianInSquad = this.campaignSquad.includes('sky_guardian');
 
     const enemies = this.getCampaignEnemiesForLevel(this.campaignLevel);
     const enemyNames = enemies.map(e => getFighterClass(e.classId).name).join(', ');
     const previewEl = document.getElementById('hubEnemyPreviewText');
     if (previewEl) {
       previewEl.innerHTML =
-        `На <strong>${this.campaignLevel} уровне</strong> вас ждёт (${enemies.length} шт., макс. 6 бойцов на арене): <strong>${enemyNames}</strong> • Награда: <strong>+40 🪙</strong>`;
+        `На <strong>${this.campaignLevel} уровне</strong> вас ждёт (${enemies.length} шт., макс. 6 бойцов на арене): <strong>${enemyNames}</strong> • Награда: <strong>+20 🪙</strong>`;
     }
 
-    // Отрисовываем панель отряда (до 3 ваших бойцов)
+    // Отрисовываем панель отряда (до 3 мест; Стражник небес занимает сразу 3 места!)
     const squadCountEl = document.getElementById('hubSquadCountLabel');
     if (squadCountEl) {
-      squadCountEl.textContent = `${this.campaignSquad.length} / 3`;
+      squadCountEl.textContent = hasGuardianInSquad
+        ? '3 / 3 (Стражник небес — 3 места!)'
+        : `${slotsUsed} / 3`;
     }
 
     const addSquadBtn = document.getElementById('hubAddSelectedToSquadBtn');
     if (addSquadBtn) {
-      const canAdd = this.campaignSquad.length < 3 && this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId);
-      addSquadBtn.disabled = !canAdd;
-      const selName = this.selectedCampaignFighterId ? getFighterClass(this.selectedCampaignFighterId).name : '';
-      addSquadBtn.textContent = this.campaignSquad.length >= 3
-        ? 'МАКСИМУМ 3 ВАШИХ БОЙЦА'
-        : `➕ ВЗЯТЬ В ОТРЯД: ${selName.toUpperCase()} (${this.campaignSquad.length}/3)`;
+      const selId = this.selectedCampaignFighterId;
+      const selUnlocked = selId && this.unlockedFighters.has(selId);
+      const selName = selId ? getFighterClass(selId).name : '';
+
+      if (selId === 'sky_guardian' && selUnlocked) {
+        addSquadBtn.disabled = hasGuardianInSquad;
+        addSquadBtn.textContent = hasGuardianInSquad
+          ? '👑 СТРАЖНИК НЕБЕС УЖЕ В ОТРЯДЕ (ЗАНИМАЕТ ВСЕ 3 МЕСТА)'
+          : '👑 ВЗЯТЬ СТРАЖНИКА НЕБЕС (ЗАЙМЁТ СРАЗУ ВСЕ 3 МЕСТА!)';
+      } else if (hasGuardianInSquad) {
+        addSquadBtn.disabled = true;
+        addSquadBtn.textContent = '👑 СТРАЖНИК НЕБЕС ЗАНИМАЕТ ВСЕ 3 МЕСТА (УБЕРИТЕ ЕГО ✕)';
+      } else {
+        const canAdd = slotsUsed < 3 && selUnlocked;
+        addSquadBtn.disabled = !canAdd;
+        addSquadBtn.textContent = slotsUsed >= 3
+          ? 'ЗАНЯТЫ ВСЕ 3 МЕСТА В ОТРЯДЕ'
+          : `➕ ВЗЯТЬ В ОТРЯД: ${selName.toUpperCase()} (${slotsUsed}/3)`;
+      }
     }
 
     const squadSlotsEl = document.getElementById('hubSquadSlots');
     if (squadSlotsEl) {
       squadSlotsEl.innerHTML = '';
-      for (let i = 0; i < 3; i++) {
-        const cid = this.campaignSquad[i];
+      if (hasGuardianInSquad) {
+        // Стражник небес занимает сразу все 3 слота!
+        const cls = getFighterClass('sky_guardian');
+        const st = this.getUpgradedFighterStats('sky_guardian');
         const slotEl = document.createElement('div');
-        if (cid) {
-          const cls = getFighterClass(cid);
-          const st = this.getUpgradedFighterStats(cid);
-          slotEl.className = 'hub-squad-slot-card';
-          slotEl.innerHTML = `
-            <canvas width="36" height="24"></canvas>
-            <span>#${i + 1} ${cls.name} (❤️${st.hp} ⚔️${st.damage})</span>
-            <button type="button" class="hub-squad-remove-btn" title="Убрать из отряда">✕</button>
-          `;
-          const cnv = slotEl.querySelector('canvas');
-          renderFighterThumbnail(cnv, cls, 'player', false);
-          slotEl.querySelector('.hub-squad-remove-btn').addEventListener('click', (e) => {
-            e.stopPropagation();
-            window.sfx.click();
-            this.campaignSquad.splice(i, 1);
-            this.renderCampaignHub();
-          });
-        } else {
-          slotEl.className = 'hub-squad-slot-card empty-squad-slot';
-          slotEl.textContent = `+ Слот #${i + 1} (нажмите, чтобы добавить)`;
-          slotEl.style.cursor = 'pointer';
-          slotEl.addEventListener('click', () => {
-            this.addSelectedFighterToCampaignSquad();
-          });
-        }
+        slotEl.className = 'hub-squad-slot-card guardian-triple-slot';
+        slotEl.innerHTML = `
+          <canvas width="44" height="28"></canvas>
+          <span>👑 МЕСТА #1, #2 и #3 (ВСЕ 3 МЕСТА): ${cls.name.toUpperCase()} (❤️${st.hp} • ☀️Луч ${st.damage} HP всем)</span>
+          <button type="button" class="hub-squad-remove-btn" title="Убрать Стражника небес и освободить 3 места">✕</button>
+        `;
+        const cnv = slotEl.querySelector('canvas');
+        renderFighterThumbnail(cnv, cls, 'player', false);
+        slotEl.querySelector('.hub-squad-remove-btn').addEventListener('click', (e) => {
+          e.stopPropagation();
+          window.sfx.click();
+          this.campaignSquad = [];
+          if (this.selectedCampaignFighterId === 'sky_guardian') {
+            this.selectedCampaignFighterId = 'swordsman';
+          }
+          this.renderCampaignHub();
+        });
         squadSlotsEl.appendChild(slotEl);
+      } else {
+        for (let i = 0; i < 3; i++) {
+          const cid = this.campaignSquad[i];
+          const slotEl = document.createElement('div');
+          if (cid) {
+            const cls = getFighterClass(cid);
+            const st = this.getUpgradedFighterStats(cid);
+            slotEl.className = 'hub-squad-slot-card';
+            slotEl.innerHTML = `
+              <canvas width="36" height="24"></canvas>
+              <span>#${i + 1} ${cls.name} (❤️${st.hp} ⚔️${st.damage})</span>
+              <button type="button" class="hub-squad-remove-btn" title="Убрать из отряда">✕</button>
+            `;
+            const cnv = slotEl.querySelector('canvas');
+            renderFighterThumbnail(cnv, cls, 'player', false);
+            slotEl.querySelector('.hub-squad-remove-btn').addEventListener('click', (e) => {
+              e.stopPropagation();
+              window.sfx.click();
+              this.campaignSquad.splice(i, 1);
+              this.renderCampaignHub();
+            });
+          } else {
+            slotEl.className = 'hub-squad-slot-card empty-squad-slot';
+            slotEl.textContent = `+ Слот #${i + 1} (нажмите, чтобы добавить)`;
+            slotEl.style.cursor = 'pointer';
+            slotEl.addEventListener('click', () => {
+              this.addSelectedFighterToCampaignSquad();
+            });
+          }
+          squadSlotsEl.appendChild(slotEl);
+        }
       }
     }
 
@@ -764,7 +1119,9 @@ class BattleRoyalPaperGame {
     if (this.campaignSquad.length > 0) {
       if (playBtn) {
         playBtn.disabled = false;
-        playBtn.textContent = `⚔️ ИГРАТЬ (ВАШИХ БОЙЦОВ: ${this.campaignSquad.length} ПРОТИВ ${enemies.length})`;
+        playBtn.textContent = hasGuardianInSquad
+          ? `⚔️ ИГРАТЬ (СТРАЖНИК НЕБЕС [3 МЕСТА] ПРОТИВ ${enemies.length})`
+          : `⚔️ ИГРАТЬ (ВАШИХ БОЙЦОВ: ${this.campaignSquad.length} ПРОТИВ ${enemies.length})`;
       }
     } else {
       if (playBtn) {
@@ -781,18 +1138,20 @@ class BattleRoyalPaperGame {
         upgBtn.textContent = `⬆️ ПРОКАЧАТЬ (${selCls.name.toUpperCase()})`;
       }
       if (hintEl) {
-        hintEl.textContent = `Выбран: ${selCls.name} (❤️ ${st.hp} HP • ⚔️ ${st.damage} урона). Можно взять до 3 наших бойцов (всего на арене макс. 6)!`;
+        hintEl.textContent = selCls.id === 'sky_guardian'
+          ? `Выбран: 👼 ${selCls.name} (❤️ ${st.hp} HP • ☀️ Луч ${st.damage} урона всем каждые 10 с в непробиваемом щите). Занимает сразу все 3 места!`
+          : `Выбран: ${selCls.name} (❤️ ${st.hp} HP • ⚔️ ${st.damage} урона). Можно взять до 3 наших бойцов (всего на арене макс. 6)!`;
       }
     } else {
       if (upgBtn) {
         upgBtn.classList.add('hidden');
       }
       if (hintEl) {
-        hintEl.textContent = '👇 Выберите персонажа в ячейках снизу, чтобы добавить в отряд (до 3) или прокачать!';
+        hintEl.textContent = '👇 Выберите персонажа в ячейках снизу, чтобы добавить в отряд (до 3 мест) или прокачать!';
       }
     }
 
-    // Отрисовываем сетку с ячейками по редкости (все 56 мест)
+    // Отрисовываем сетку с ячейками по редкости (все 73 места)
     const grid = document.getElementById('hubRarityCellsGrid');
     if (!grid) return;
     grid.innerHTML = '';
@@ -812,7 +1171,9 @@ class BattleRoyalPaperGame {
 
       if (isUnlocked) {
         const st = this.getUpgradedFighterStats(fc.id);
-        const countBadge = inSquadCount > 0 ? ` (×${inSquadCount})` : '';
+        const countBadge = inSquadCount > 0
+          ? (fc.id === 'sky_guardian' ? ' (3/3 места)' : ` (×${inSquadCount})`)
+          : '';
         cell.innerHTML = `
           <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}${countBadge}</div>
           <canvas class="hcc-canvas" width="60" height="32"></canvas>
@@ -824,8 +1185,10 @@ class BattleRoyalPaperGame {
 
         cell.addEventListener('click', () => {
           window.sfx.click();
-          if (this.selectedCampaignFighterId === fc.id && this.campaignSquad.length < 3) {
-            // Повторный клик по выбранному бойцу сразу добавляет его в отряд (до 3 бойцов)!
+          if (fc.id === 'sky_guardian') {
+            this.selectedCampaignFighterId = 'sky_guardian';
+            this.campaignSquad = ['sky_guardian'];
+          } else if (this.selectedCampaignFighterId === fc.id && this.getSquadSlotsUsed() < 3) {
             this.campaignSquad.push(fc.id);
           } else {
             this.selectedCampaignFighterId = fc.id;
@@ -835,11 +1198,37 @@ class BattleRoyalPaperGame {
           }
           this.renderCampaignHub();
         });
+      } else if (fc.id === 'sky_guardian') {
+        cell.innerHTML = `
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <div class="hcc-lock">👼</div>
+          <div class="hcc-name">В магазине</div>
+          <div class="hcc-stats">50 000 🪙</div>
+        `;
+        cell.style.cursor = 'pointer';
+        cell.title = 'Нажмите, чтобы перейти в Магазин к Стражнику небес (50 000 🪙)';
+        cell.addEventListener('click', () => {
+          window.sfx.click();
+          this.openShopScreen('container');
+        });
+      } else if (fc.inFighterBox) {
+        cell.innerHTML = `
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <div class="hcc-lock">🎁</div>
+          <div class="hcc-name">В боксе</div>
+          <div class="hcc-stats">${fc.dropChance}%</div>
+        `;
+        cell.style.cursor = 'pointer';
+        cell.title = 'Нажмите, чтобы перейти во вкладку «Бокс бойцов» (50 🪙)';
+        cell.addEventListener('click', () => {
+          window.sfx.click();
+          this.openShopScreen('fighter_box');
+        });
       } else {
         cell.innerHTML = `
           <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
           <div class="hcc-lock">🔒</div>
-          <div class="hcc-name">В ящике</div>
+          <div class="hcc-name">В контейнере</div>
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
       }
@@ -877,7 +1266,6 @@ class BattleRoyalPaperGame {
     const descEl = document.getElementById('upgradeFighterDesc');
     if (descEl) descEl.textContent = cls.desc;
 
-    // Надписи ЗДОРОВЬЕ и УРОН, а над ними ЧИСЛО здоровья и урона выбранного бойца!
     const hpNumEl = document.getElementById('upgradeStatHpNum');
     const dmgNumEl = document.getElementById('upgradeStatDmgNum');
     if (hpNumEl) hpNumEl.textContent = st.hp;
@@ -938,8 +1326,8 @@ class BattleRoyalPaperGame {
     this.showScreen('arena');
     this.resizeCanvas();
 
-    const w = this.canvas.width || 520;
-    const h = this.canvas.height || 310;
+    const w = this.canvas.width || 680;
+    const h = this.canvas.height || 400;
 
     // Ставим всех выбранных в отряд бойцов игрока (от 1 до 3) с их прокачанными здоровьем и уроном
     this.playerBlueprints = validSquad.map((cid, idx) => {
@@ -969,7 +1357,6 @@ class BattleRoyalPaperGame {
     document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
       btn.classList.toggle('active-mobile-tab', btn.dataset.mobileTab === tabName);
     });
-    // Пересчитываем размер холста, если при переключении вкладок изменилась высота
     requestAnimationFrame(() => this.resizeCanvas());
   }
 
@@ -1048,10 +1435,23 @@ class BattleRoyalPaperGame {
       this.stopBattleToPrep();
     });
 
-    document.getElementById('speedToggleBtn').addEventListener('click', (e) => {
+    const syncSpeedButtonsUI = () => {
+      const toggleBtn = document.getElementById('speedToggleBtn');
+      const btn3x = document.getElementById('speed3xBtn');
+      if (toggleBtn) toggleBtn.textContent = this.simSpeed + 'x';
+      if (btn3x) btn3x.classList.toggle('active-3x', this.simSpeed === 3);
+    };
+
+    document.getElementById('speedToggleBtn')?.addEventListener('click', () => {
       window.sfx.click();
-      this.simSpeed = this.simSpeed === 1 ? 2 : 1;
-      e.currentTarget.textContent = this.simSpeed + 'x';
+      this.simSpeed = this.simSpeed === 1 ? 2 : (this.simSpeed === 2 ? 3 : 1);
+      syncSpeedButtonsUI();
+    });
+
+    document.getElementById('speed3xBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.simSpeed = this.simSpeed === 3 ? 1 : 3;
+      syncSpeedButtonsUI();
     });
 
     document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
@@ -1227,18 +1627,55 @@ class BattleRoyalPaperGame {
       `🎲 Боты +${bonusPct}% • Реролл`;
   }
 
+  getTeamUsedSlots(list) {
+    let used = 0;
+    for (const u of list) {
+      used += (u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian') ? 3 : 1;
+    }
+    return used;
+  }
+
   addUnitToTeam(team, classId) {
     if (this.state !== 'prep') this.stopBattleToPrep();
+    const list = team === 'player' ? this.playerBlueprints : this.botBlueprints;
+    const hasGuardian = list.some(u => u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian');
+
+    // Стражник небес занимает сразу 3 места и не может быть с другими бойцами в команде!
+    if (classId === 'sky_guardian') {
+      if (hasGuardian) {
+        window.sfx.defeat();
+        return;
+      }
+      window.sfx.click();
+      const bp = this.createBlueprint(classId, team);
+      if (team === 'player') {
+        this.playerBlueprints = [bp];
+        this.selectedPlayerUnitId = bp.id;
+      } else {
+        this.botBlueprints = [bp];
+        this.selectedBotUnitId = bp.id;
+      }
+      this.syncUnitsFromBlueprints();
+      this.refreshAllUI();
+      return;
+    }
+
+    // Если в команде уже стоит Стражник небес — больше никого добавить нельзя!
+    if (hasGuardian) {
+      window.sfx.defeat();
+      return;
+    }
+
     const totalUnits = this.playerBlueprints.length + this.botBlueprints.length;
     if (totalUnits >= 6) {
       window.sfx.defeat();
       return;
     }
-    if (team === 'player' && this.playerBlueprints.length >= 3) {
+    if (team === 'player' && this.getTeamUsedSlots(this.playerBlueprints) >= 3) {
       window.sfx.defeat();
       return;
     }
-    if (team === 'bot' && this.botBlueprints.length >= 4) {
+    if (team === 'bot' && this.getTeamUsedSlots(this.botBlueprints) >= 4) {
       window.sfx.defeat();
       return;
     }
@@ -1259,20 +1696,24 @@ class BattleRoyalPaperGame {
 
   duplicateSelectedUnit(team) {
     if (this.state !== 'prep') this.stopBattleToPrep();
+    const list = team === 'player' ? this.playerBlueprints : this.botBlueprints;
+    if (list.some(u => u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian')) {
+      window.sfx.defeat();
+      return;
+    }
     const totalUnits = this.playerBlueprints.length + this.botBlueprints.length;
     if (totalUnits >= 6) {
       window.sfx.defeat();
       return;
     }
-    if (team === 'player' && this.playerBlueprints.length >= 3) {
+    if (team === 'player' && this.getTeamUsedSlots(this.playerBlueprints) >= 3) {
       window.sfx.defeat();
       return;
     }
-    if (team === 'bot' && this.botBlueprints.length >= 4) {
+    if (team === 'bot' && this.getTeamUsedSlots(this.botBlueprints) >= 4) {
       window.sfx.defeat();
       return;
     }
-    const list = team === 'player' ? this.playerBlueprints : this.botBlueprints;
     const selId = team === 'player' ? this.selectedPlayerUnitId : this.selectedBotUnitId;
     const orig = list.find(u => u.id === selId) || list[list.length - 1];
     if (!orig) return;
@@ -1516,14 +1957,14 @@ class BattleRoyalPaperGame {
       if (this.isCampaignBattle) {
         const finishedLvl = this.campaignLevel;
         this.completedLevels.add(finishedLvl);
-        this.coins += 40;
+        this.coins += 20;
         this.campaignLevel += 1;
         this.level = this.campaignLevel;
         this.updateAllCoinsUI();
         this.renderLevelBar();
         icon.textContent = '🪙';
-        title.textContent = `УРОВЕНЬ ${finishedLvl} ПРОЙДЕН! +40 МОНЕТ!`;
-        sub.textContent = `Начислено +40 монет (всего: ${this.coins} 🪙)! Переход к Уровню ${this.campaignLevel}...`;
+        title.textContent = `УРОВЕНЬ ${finishedLvl} ПРОЙДЕН! +20 МОНЕТ!`;
+        sub.textContent = `Начислено +20 монет (всего: ${this.coins} 🪙)! Переход к Уровню ${this.campaignLevel}...`;
         nextBtn.textContent = `К ЯЧЕЙКАМ (${this.campaignLevel} УРОВЕНЬ) ➔`;
         nextBtn.classList.remove('hidden');
         if (this.campaignReturnTimer) clearTimeout(this.campaignReturnTimer);
@@ -1883,6 +2324,63 @@ class BattleRoyalPaperGame {
       const targetRadius = u.baseRadius * (u.isMinion ? 1.0 : endgameSizeMult) * giantMult;
       u.radius += (targetRadius - u.radius) * Math.min(1, dt * 8);
 
+      for (const k of Object.keys(u.hitImmunityMap)) {
+        u.hitImmunityMap[k] -= dt;
+        if (u.hitImmunityMap[k] <= 0) delete u.hitImmunityMap[k];
+      }
+
+      // СТРАЖНИК НЕБЕС: каждые 10 секунд замирает на 1.5 с в непробиваемом щите и стреляет лучом во все стороны, снося всем соперникам ровно 150 HP!
+      if ((u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian') && !u.isMinion) {
+        if (u.skyBeamTimer > 0) {
+          u.skyBeamTimer -= dt;
+          u.vx = 0;
+          u.vy = 0;
+          u.burnTimer = 0;
+          u.shockTimer = 0;
+          u.stunTimer = 0;
+          u.cocoonTimer = 0;
+          u.slowTimer = 0;
+
+          if (u.skyBeamTimer <= 0) {
+            u.skyBeamTimer = 0;
+            const resumeAng = u.skySavedSpeedAng !== undefined ? u.skySavedSpeedAng : (Math.random() * Math.PI * 2);
+            const spd = u.baseSpeed * 44 * endgameSpeedMult;
+            u.vx = Math.cos(resumeAng) * spd;
+            u.vy = Math.sin(resumeAng) * spd;
+          } else {
+            continue;
+          }
+        } else {
+          if (Math.hypot(u.vx, u.vy) > 1) {
+            u.skySavedSpeedAng = Math.atan2(u.vy, u.vx);
+          }
+          u.skyGuardianTimer = (u.skyGuardianTimer !== undefined ? u.skyGuardianTimer : 10.0) - dt;
+          if (u.skyGuardianTimer <= 0) {
+            u.skyGuardianTimer = 10.0; // Каждые 10 секунд!
+            u.skyBeamTimer = 1.5;      // Замирает в непробиваемом щите и стреляет лучом на 1.5 секунды!
+            u.vx = 0;
+            u.vy = 0;
+            u.burnTimer = 0;
+            u.shockTimer = 0;
+            u.stunTimer = 0;
+            u.cocoonTimer = 0;
+            u.slowTimer = 0;
+
+            window.sfx.lightning();
+            window.sfx.shieldBash();
+            this.spawnConfetti(u.x, u.y, '#fde047', 16);
+            this.addFloatingText(u.x, u.y - u.radius - 22, '🛡️ НЕПРОБИВАЕМЫЙ ЩИТ + ☀️ ЛУЧ 360° (-150 ВСЕМ)!', '#0284c7');
+
+            const beamDmg = u.damage || 150;
+            for (const enemyUnit of this.units) {
+              if (enemyUnit.team === u.team || enemyUnit.hp <= 0) continue;
+              this.applyDamage(enemyUnit, beamDmg, u, '#eab308', true);
+            }
+            continue;
+          }
+        }
+      }
+
       // Горение
       if (u.burnTimer > 0) {
         u.burnTimer -= dt;
@@ -1903,11 +2401,6 @@ class BattleRoyalPaperGame {
           this.applyDamage(u, u.shockDmg || 10, u.shockAttacker || null, '#0891b2');
           this.spawnConfetti(u.x, u.y - 4, '#22d3ee', 3);
         }
-      }
-
-      for (const k of Object.keys(u.hitImmunityMap)) {
-        u.hitImmunityMap[k] -= dt;
-        if (u.hitImmunityMap[k] <= 0) delete u.hitImmunityMap[k];
       }
 
       if (u.stunTimer > 0) {
@@ -2223,8 +2716,8 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    // Контактные бойцы держат оружие по курсу к врагу
-    if (['shield', 'vampire', 'worm', 'claws', 'robo_mech', 'boxer', 'zombie', 'werewolf', 'death', 'doubler', 'lumberjack', 'musketeer'].includes(u.abilityId)) {
+    // Контактные бойцы и Стражник небес держат оружие по курсу к врагу
+    if (['shield', 'vampire', 'worm', 'claws', 'robo_mech', 'boxer', 'zombie', 'werewolf', 'death', 'doubler', 'lumberjack', 'musketeer', 'sky_guardian'].includes(u.abilityId)) {
       u.weaponAngle = u.aimAngle;
       return;
     }
@@ -3382,6 +3875,245 @@ class BattleRoyalPaperGame {
         this.addFloatingText(u.x, u.y - u.radius - 18, '⚡ ГРОЗА ЗЕВСА!', '#eab308');
         break;
       }
+
+      // ==================== СПОСОБНОСТИ РЕДКИХ И ЭПИЧЕСКИХ БОЙЦОВ ИЗ «БОКСА БОЙЦОВ» ====================
+      // (5 обычных бойцов из «Бокса бойцов» — paper_recruit, cardboard_pug, wooden_dummy, origami_frog, tin_peasant — НЕ имеют никаких способностей!)
+      case 'crossbow_scout': {
+        if (!enemy) break;
+        u.cooldown = 2.6;
+        window.sfx.shootArrow();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'arrow',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 430,
+          vy: Math.sin(ang) * 430,
+          radius: 5,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'fencer_fox': {
+        if (!enemy) break;
+        u.cooldown = 3.2;
+        window.sfx.bounce();
+        const ang = Math.atan2(enemy.y - u.y, enemy.x - u.x);
+        u.vx = Math.cos(ang) * 290;
+        u.vy = Math.sin(ang) * 290;
+        this.addFloatingText(u.x, u.y - u.radius - 14, '🦊 ВЫПАД РАПИРОЙ!', '#ea580c');
+        break;
+      }
+
+      case 'snow_thrower': {
+        if (!enemy) break;
+        u.cooldown = 2.8;
+        window.sfx.magicIce();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'ice_shard',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 350,
+          vy: Math.sin(ang) * 350,
+          radius: 6,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'torch_bearer': {
+        if (!enemy) break;
+        u.cooldown = 3.4;
+        window.sfx.magicFire();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'fireball',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 320,
+          vy: Math.sin(ang) * 320,
+          radius: 7,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'anchor_sailor': {
+        if (!enemy) break;
+        u.cooldown = 3.8;
+        window.sfx.shieldBash();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'shuriken',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 10),
+          y: u.y + Math.sin(ang) * (u.radius + 10),
+          vx: Math.cos(ang) * 330,
+          vy: Math.sin(ang) * 330,
+          spin: 0,
+          knockback: 260,
+          radius: 8,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'wind_ronin': {
+        if (!enemy) break;
+        u.cooldown = 3.1;
+        window.sfx.shootArrow();
+        const baseAng = u.aimAngle;
+        for (const sp of [-0.16, 0.16]) {
+          const ang = baseAng + sp;
+          this.projectiles.push({
+            type: 'piercing_bullet',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 9),
+            y: u.y + Math.sin(ang) * (u.radius + 9),
+            vx: Math.cos(ang) * 470,
+            vy: Math.sin(ang) * 470,
+            radius: 6,
+            damage: u.damage,
+            piercing: true,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 14, '🌪️ ВИХРЬ КАТАНЫ!', '#0d9488');
+        break;
+      }
+
+      case 'tesla_bot': {
+        if (!enemy) break;
+        u.cooldown = 3.3;
+        window.sfx.lightning();
+        let hits = 0;
+        for (const other of this.units) {
+          if (other.team === u.team || other.hp <= 0) continue;
+          if (Math.hypot(other.x - u.x, other.y - u.y) <= 270 && hits < 2) {
+            hits++;
+            this.lightnings.push({
+              x1: u.x,
+              y1: u.y,
+              x2: other.x,
+              y2: other.y,
+              color: '#38bdf8',
+              life: 0.28
+            });
+            other.stunTimer = 0.35;
+            this.applyDamage(other, u.damage, u, '#0284c7');
+          }
+        }
+        break;
+      }
+
+      case 'witch_brew': {
+        if (!enemy) break;
+        u.cooldown = 3.4;
+        window.sfx.magicFire();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'acid_flask',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 280,
+          vy: Math.sin(ang) * 280,
+          targetX: enemy.x,
+          targetY: enemy.y,
+          radius: 7,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'magma_guard': {
+        if (!enemy) break;
+        u.cooldown = 3.6;
+        window.sfx.magicFire();
+        for (let k = 0; k < 3; k++) {
+          const ang = u.aimAngle + ((k - 1) * 0.45);
+          this.projectiles.push({
+            type: 'fireball',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 9),
+            y: u.y + Math.sin(ang) * (u.radius + 9),
+            vx: Math.cos(ang) * 310,
+            vy: Math.sin(ang) * 310,
+            radius: 8,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 14, '🌋 ВСПЛЕСК МАГМЫ!', '#c2410c');
+        break;
+      }
+
+      case 'crystal_sniper': {
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        window.sfx.pistolShot();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'piercing_bullet',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 10),
+          y: u.y + Math.sin(ang) * (u.radius + 10),
+          vx: Math.cos(ang) * 580,
+          vy: Math.sin(ang) * 580,
+          radius: 6,
+          damage: u.damage,
+          piercing: true,
+          hitSet: new Set()
+        });
+        this.addFloatingText(u.x, u.y - u.radius - 14, '💎 КРИСТАЛЛ-ЛУЧ!', '#db2777');
+        break;
+      }
+
+      case 'shadow_scythe': {
+        if (!enemy) break;
+        u.cooldown = 4.0;
+        const backAng = (enemy.aimAngle || 0) + Math.PI;
+        const destX = Math.max(30, Math.min(this.canvas.width - 30, enemy.x + Math.cos(backAng) * (enemy.radius + u.radius + 4)));
+        const destY = Math.max(30, Math.min(this.canvas.height - 30, enemy.y + Math.sin(backAng) * (enemy.radius + u.radius + 4)));
+        this.lightnings.push({
+          x1: u.x,
+          y1: u.y,
+          x2: destX,
+          y2: destY,
+          color: '#7e22ce',
+          life: 0.25
+        });
+        u.x = destX;
+        u.y = destY;
+        window.sfx.hit();
+        this.applyDamage(enemy, u.damage, u, '#6b21a8');
+        this.addFloatingText(enemy.x, enemy.y - 24, `🌑 ЖАТВА ТЕНИ -${u.damage}!`, '#7e22ce');
+        break;
+      }
     }
   }
 
@@ -3397,20 +4129,42 @@ class BattleRoyalPaperGame {
     const ny = dy / dist;
     const overlap = minDist - dist;
 
-    a.x -= nx * overlap * 0.5;
-    a.y -= ny * overlap * 0.5;
-    b.x += nx * overlap * 0.5;
-    b.y += ny * overlap * 0.5;
+    const aFrozenShield = a.skyBeamTimer > 0;
+    const bFrozenShield = b.skyBeamTimer > 0;
 
-    const kx = a.vx - b.vx;
-    const ky = a.vy - b.vy;
-    const p = 2 * (nx * kx + ny * ky) / 2;
+    if (aFrozenShield && !bFrozenShield) {
+      // Стражник небес замер в непробиваемом щите — стоит на месте, соперник отлетает от щита!
+      b.x += nx * overlap;
+      b.y += ny * overlap;
+      const spdB = Math.max(150, Math.hypot(b.vx, b.vy));
+      b.vx = nx * spdB;
+      b.vy = ny * spdB;
+      a.vx = 0;
+      a.vy = 0;
+    } else if (bFrozenShield && !aFrozenShield) {
+      a.x -= nx * overlap;
+      a.y -= ny * overlap;
+      const spdA = Math.max(150, Math.hypot(a.vx, a.vy));
+      a.vx = -nx * spdA;
+      a.vy = -ny * spdA;
+      b.vx = 0;
+      b.vy = 0;
+    } else {
+      a.x -= nx * overlap * 0.5;
+      a.y -= ny * overlap * 0.5;
+      b.x += nx * overlap * 0.5;
+      b.y += ny * overlap * 0.5;
 
-    if (p > 0) {
-      a.vx -= p * nx;
-      a.vy -= p * ny;
-      b.vx += p * nx;
-      b.vy += p * ny;
+      const kx = a.vx - b.vx;
+      const ky = a.vy - b.vy;
+      const p = 2 * (nx * kx + ny * ky) / 2;
+
+      if (p > 0) {
+        a.vx -= p * nx;
+        a.vy -= p * ny;
+        b.vx += p * nx;
+        b.vy += p * ny;
+      }
     }
 
     a.scaleX = 0.85; a.scaleY = 1.15;
@@ -3425,6 +4179,11 @@ class BattleRoyalPaperGame {
 
   handleContactDamage(attacker, target) {
     if (attacker.hitImmunityMap[target.id]) return;
+
+    // 0. СТРАЖНИК НЕБЕС: не наносит никакого урона при столкновении (только получает урон от соперника и просто отлетает)!
+    if (attacker.abilityId === 'sky_guardian' || attacker.classId === 'sky_guardian') {
+      return;
+    }
 
     // 1. Щитоносец: урон щитом только по ГОЛОЙ СТОРОНЕ соперника!
     if (attacker.abilityId === 'shield' && !attacker.isMinion) {
@@ -3598,18 +4357,24 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    // 10. Робо-Мех, Зомби, Оборотень, Червь, Сферы Призывателя, Ассасин и новые бойцы в ближнем бою
+    // 10. Робо-Мех, Зомби, Оборотень, Червь, Сферы Призывателя, Ассасин, 5 обычных бойцов из «Бокса бойцов», а также ЛЮБОЙ соперник, об которого бьётся Стражник небес!
     if (
       attacker.isMinion ||
+      target.classId === 'sky_guardian' ||
+      target.abilityId === 'sky_guardian' ||
       [
         'assassin', 'worm', 'robo_mech', 'zombie', 'werewolf',
         'blacksmith', 'musketeer', 'samurai', 'cactus',
-        'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus'
+        'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus',
+        'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant',
+        'fencer_fox', 'torch_bearer', 'anchor_sailor', 'wind_ronin', 'magma_guard', 'shadow_scythe'
       ].includes(attacker.abilityId) ||
       [
         'robo_mech', 'zombie', 'werewolf',
         'blacksmith', 'musketeer', 'samurai', 'cactus',
-        'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus'
+        'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus',
+        'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant',
+        'fencer_fox', 'torch_bearer', 'anchor_sailor', 'wind_ronin', 'magma_guard', 'shadow_scythe'
       ].includes(attacker.classId)
     ) {
       attacker.hitImmunityMap[target.id] = 0.42;
@@ -3807,6 +4572,14 @@ class BattleRoyalPaperGame {
             break;
           }
 
+          if (u.skyBeamTimer > 0) {
+            window.sfx.parry();
+            this.addFloatingText(u.x, u.y - u.radius - 16, '🛡️ НЕПРОБИВАЕМЫЙ ЩИТ!', '#0284c7');
+            this.spawnConfetti(p.x, p.y, '#fde047', 6);
+            destroyed = true;
+            break;
+          }
+
           const angleFromTarget = Math.atan2(p.y - u.y, p.x - u.x);
           if (!p.piercing && this.isTargetProtectedAtAngle(u, angleFromTarget)) {
             window.sfx.parry();
@@ -3886,9 +4659,17 @@ class BattleRoyalPaperGame {
     }
   }
 
-  applyDamage(target, rawAmount, attacker = null, textColor = null) {
+  applyDamage(target, rawAmount, attacker = null, textColor = null, isExactDamage = false) {
+    // СТРАЖНИК НЕБЕС: во время замирания на 1.5 сек находится в непробиваемом щите, который нельзя пробить!
+    if (target.skyBeamTimer > 0) {
+      window.sfx.parry();
+      this.addFloatingText(target.x, target.y - target.radius - 14, '🛡️ НЕПРОБИВАЕМЫЙ ЩИТ!', '#0284c7');
+      this.spawnConfetti(target.x, target.y, '#fde047', 5);
+      return;
+    }
+
     // РОБО-МЕХ: на каждую атаку есть шанс 20%, что атака полностью не засчитается и ХП не снимут!
-    if (target.classId === 'robo_mech' || target.abilityId === 'robo_mech') {
+    if (!isExactDamage && (target.classId === 'robo_mech' || target.abilityId === 'robo_mech')) {
       if (Math.random() < 0.20) {
         window.sfx.parry();
         this.addFloatingText(target.x, target.y - target.radius - 14, '🤖 БРОНЯ: 0 УРОНА!', '#0284c7');
@@ -3898,7 +4679,7 @@ class BattleRoyalPaperGame {
     }
 
     // МУШКЕТЁР: с шансом 30% парирует атаку шпагой и отвечает уколом!
-    if (target.classId === 'musketeer' || target.abilityId === 'musketeer') {
+    if (!isExactDamage && (target.classId === 'musketeer' || target.abilityId === 'musketeer')) {
       if (Math.random() < 0.30) {
         window.sfx.parry();
         this.addFloatingText(target.x, target.y - target.radius - 14, '🤺 ПАРИРОВАНИЕ!', '#2563eb');
@@ -3912,7 +4693,7 @@ class BattleRoyalPaperGame {
     }
 
     let dmg = rawAmount;
-    if (target.vulnTimer > 0) {
+    if (!isExactDamage && target.vulnTimer > 0) {
       dmg = Math.round(dmg * 1.25);
     }
     dmg = Math.max(1, Math.round(dmg));
@@ -4362,6 +5143,25 @@ class BattleRoyalPaperGame {
         ctx.stroke();
         break;
       }
+
+      case 'sky_guardian': {
+        // Непробиваемый щит + лучи 360° во все стороны
+        ctx.strokeStyle = '#eab308';
+        ctx.lineWidth = 2.2;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.arc(u.x, u.y, u.radius + 11, 0, Math.PI * 2);
+        ctx.stroke();
+        for (let r = 0; r < 8; r++) {
+          const ang = (r * Math.PI) / 4;
+          ctx.beginPath();
+          ctx.moveTo(u.x + Math.cos(ang) * (u.radius + 13), u.y + Math.sin(ang) * (u.radius + 13));
+          ctx.lineTo(u.x + Math.cos(ang) * (u.radius + 54), u.y + Math.sin(ang) * (u.radius + 54));
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        break;
+      }
     }
 
     ctx.restore();
@@ -4387,6 +5187,66 @@ class BattleRoyalPaperGame {
     let fillColor = getUnitTeamColor(u.team, u.classId);
     if (u.flashTimer > 0) fillColor = '#ffffff';
     else if (u.slowTimer > 0) fillColor = '#93c5fd';
+
+    // СТРАЖНИК НЕБЕС: во время замирания на 1.5 сек (skyBeamTimer > 0) стреляет лучами 360° во все стороны!
+    if ((u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian') && u.skyBeamTimer > 0) {
+      ctx.save();
+      const pulse = 0.78 + Math.sin(timeSec * 28) * 0.22;
+      const beamSpin = timeSec * 1.1;
+      const rayCount = 16;
+      const maxRayLen = 920;
+
+      // 16 солнечных небесных лучей во все стороны (360°)
+      for (let r = 0; r < rayCount; r++) {
+        const ang = beamSpin + (r * Math.PI * 2) / rayCount;
+        const sx = u.x + Math.cos(ang) * (u.radius + 6);
+        const sy = u.y + Math.sin(ang) * (u.radius + 6);
+        const ex = u.x + Math.cos(ang) * maxRayLen;
+        const ey = u.y + Math.sin(ang) * maxRayLen;
+
+        ctx.strokeStyle = `rgba(250, 204, 21, ${0.58 * pulse})`;
+        ctx.lineWidth = 7.5;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+
+        ctx.strokeStyle = `rgba(56, 189, 248, ${0.75 * pulse})`;
+        ctx.lineWidth = 3.6;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.6;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+      }
+
+      // Прицельные небесные лучи прямо в каждого живого соперника на арене
+      for (const other of this.units) {
+        if (other.team === u.team || other.hp <= 0) continue;
+        ctx.strokeStyle = 'rgba(234, 179, 8, 0.85)';
+        ctx.lineWidth = 9;
+        ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(u.x, u.y);
+        ctx.lineTo(other.x, other.y);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(u.x, u.y);
+        ctx.lineTo(other.x, other.y);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
 
     // Если это Червь (гусеница) — сначала рисуем сегменты его длинного хвоста!
     if (u.segments && u.segments.length > 0) {
@@ -4563,6 +5423,31 @@ class BattleRoyalPaperGame {
     if (u.classId === 'medusa' || u.abilityId === 'medusa') {
       const medusaAng = this.state === 'prep' ? (u.team === 'player' ? 0 : Math.PI) : Math.atan2(u.vy, u.vx);
       drawMedusaDetails(ctx, u.x, u.y, u.radius, medusaAng);
+    }
+
+    // Крылья ангела, нимб и золотая звезда Стражника небес + непробиваемый купол-щит при замирании
+    if (u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian') {
+      drawSkyGuardianDetails(ctx, u.x, u.y, u.radius, timeSec);
+      if (u.skyBeamTimer > 0) {
+        ctx.save();
+        const shieldR = u.radius + 14 + Math.sin(timeSec * 20) * 1.5;
+        ctx.fillStyle = 'rgba(56, 189, 248, 0.24)';
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 3.8;
+        ctx.beginPath();
+        ctx.arc(u.x, u.y, shieldR, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.strokeStyle = '#0284c7';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.arc(u.x, u.y, shieldR + 4, timeSec * 4, timeSec * 4 + Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
     }
 
     // Усики и глазки Червя (гусеницы)
@@ -4754,7 +5639,7 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'robo_mech', 'zombie', 'fairy', 'card_master', 'checkmate', 'doubler', 'musician', 'pavuk', 'bibizyana'].includes(u.abilityId)) {
+    if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'robo_mech', 'zombie', 'fairy', 'card_master', 'checkmate', 'doubler', 'musician', 'pavuk', 'bibizyana', 'sky_guardian', 'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant', 'crossbow_scout', 'fencer_fox', 'snow_thrower', 'torch_bearer', 'anchor_sailor', 'wind_ronin', 'tesla_bot', 'witch_brew', 'magma_guard', 'crystal_sniper', 'shadow_scythe'].includes(u.abilityId)) {
       const ang = this.state === 'prep' ? (isPlayer ? 0 : Math.PI) : u.aimAngle;
       const dist = u.radius + 7;
       drawWeaponGraphic(ctx, u.abilityId, u.x + Math.cos(ang) * dist, u.y + Math.sin(ang) * dist, 0.95, ang, u.team);

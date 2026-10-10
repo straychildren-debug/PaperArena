@@ -711,10 +711,245 @@ const FIGHTER_CLASSES = [
     damage: 65,
     cardSub: '400 HP / гроза Олимпа 65',
     desc: '⚡ Верховный Зевс (400 HP): каждые 3.5 с поражает врагов небесной молнией Олимпа на 65 HP с оглушением!'
+  },
+  // 👼 ЭКСКЛЮЗИВ МАГАЗИНА РЯДОМ С КОНТЕЙНЕРОМ (№57):
+  {
+    id: 'sky_guardian',
+    num: 57,
+    name: 'Стражник небес',
+    shape: 'hexagon',
+    baseColor: '#38bdf8',
+    hp: 700,
+    speed: 3.2,
+    damage: 150,
+    squadWeight: 3,
+    shopPrice: 50000,
+    cardSub: '700 HP • луч 150 (3 места)',
+    desc: '👼 Стражник небес (700 HP, занимает сразу 3 места!): пока движется — сам не наносит урона от столкновений и просто отлетает. Каждые 10 с замирает на 1.5 с в непробиваемом щите и стреляет лучом во все стороны, снося всем соперникам ровно по 150 HP!'
+  },
+
+  // ==================== 16 НОВЫХ БОЙЦОВ ИЗ «БОКСА БОЙЦОВ» (№58–73) ====================
+  // 5 НОВЫХ ОБЫЧНЫХ (ОЧЕНЬ СЛАБЫЕ, БЕЗ СПОСОБНОСТЕЙ):
+  {
+    id: 'paper_recruit',
+    num: 58,
+    name: 'Новобранец',
+    shape: 'circle',
+    baseColor: '#94a3b8',
+    hp: 55,
+    speed: 2.6,
+    damage: 5,
+    inFighterBox: true,
+    noActiveAbility: true,
+    cardSub: '55 HP • без способностей (5)',
+    desc: '📄 Бумажный Новобранец (55 HP): очень слабый боец без всяких способностей — просто катается и толкается корпусом на 5 урона!'
+  },
+  {
+    id: 'cardboard_pug',
+    num: 59,
+    name: 'Картонный Мопс',
+    shape: 'square',
+    baseColor: '#d6a87c',
+    hp: 60,
+    speed: 2.8,
+    damage: 6,
+    inFighterBox: true,
+    noActiveAbility: true,
+    cardSub: '60 HP • без способностей (6)',
+    desc: '🐶 Картонный Мопс (60 HP): очень слабый боец без способностей — бегает по рингу и бодается при столкновении на 6 урона!'
+  },
+  {
+    id: 'wooden_dummy',
+    num: 60,
+    name: 'Манекен',
+    shape: 'hexagon',
+    baseColor: '#b48252',
+    hp: 70,
+    speed: 2.3,
+    damage: 4,
+    inFighterBox: true,
+    noActiveAbility: true,
+    cardSub: '70 HP • без способностей (4)',
+    desc: '🪵 Деревянный Манекен (70 HP): учебная мишень без способностей — медленно отскакивает от стенок и наносит всего 4 урона при касании!'
+  },
+  {
+    id: 'origami_frog',
+    num: 61,
+    name: 'Оригами-Жаба',
+    shape: 'triangle',
+    baseColor: '#86efac',
+    hp: 50,
+    speed: 3.1,
+    damage: 5,
+    inFighterBox: true,
+    noActiveAbility: true,
+    cardSub: '50 HP • без способностей (5)',
+    desc: '🐸 Оригами-Жаба (50 HP): маленькая бумажная лягушка без способностей — прыгает от бортов и сносит 5 HP корпусом!'
+  },
+  {
+    id: 'tin_peasant',
+    num: 62,
+    name: 'Пехотинец',
+    shape: 'square',
+    baseColor: '#a1a1aa',
+    hp: 65,
+    speed: 2.5,
+    damage: 6,
+    inFighterBox: true,
+    noActiveAbility: true,
+    cardSub: '65 HP • без способностей (6)',
+    desc: '🪖 Бумажный Пехотинец (65 HP): очень слабый рядовой без навыков — просто идёт на таран и наносит 6 урона при ударе!'
+  },
+
+  // 5 НОВЫХ РЕДКИХ БОЙЦОВ ИЗ «БОКСА БОЙЦОВ»:
+  {
+    id: 'crossbow_scout',
+    num: 63,
+    name: 'Арбалетчик',
+    shape: 'triangle',
+    baseColor: '#15803d',
+    hp: 115,
+    speed: 3.3,
+    damage: 18,
+    inFighterBox: true,
+    cardSub: 'болт арбалета 18 + толчок',
+    desc: '🏹 Арбалетчик (115 HP): каждые 2.1 с выпускает тяжёлый болт из арбалета на 18 урона, слегка отбрасывающий врага!'
+  },
+  {
+    id: 'fencer_fox',
+    num: 64,
+    name: 'Лис-Дуэлянт',
+    shape: 'triangle',
+    baseColor: '#ea580c',
+    hp: 120,
+    speed: 3.7,
+    damage: 16,
+    inFighterBox: true,
+    cardSub: 'двойной укол рапирой',
+    desc: '🦊 Лис-Дуэлянт (120 HP): при каждом столкновении делает молниеносный двойной укол рапирой (×1.8 урона) и ускоряется!'
+  },
+  {
+    id: 'snow_thrower',
+    num: 65,
+    name: 'Снежкомёт',
+    shape: 'circle',
+    baseColor: '#60a5fa',
+    hp: 130,
+    speed: 3.0,
+    damage: 15,
+    inFighterBox: true,
+    cardSub: '2 снежка по 15 + холод',
+    desc: '⛄ Снежкомёт (130 HP): каждые 2.2 с запускает 2 морозных снежка подряд по 15 урона с замедлением!'
+  },
+  {
+    id: 'torch_bearer',
+    num: 66,
+    name: 'Факелоносец',
+    shape: 'square',
+    baseColor: '#d97706',
+    hp: 135,
+    speed: 3.1,
+    damage: 14,
+    inFighterBox: true,
+    cardSub: 'крутящийся факел + ожог',
+    desc: '🔥 Факелоносец (135 HP): вращает вокруг себя горящий факел на 14 урона и поджигает задетых врагов на 2.5 с!'
+  },
+  {
+    id: 'anchor_sailor',
+    num: 67,
+    name: 'Моряк с Якорем',
+    shape: 'hexagon',
+    baseColor: '#0369a1',
+    hp: 150,
+    speed: 2.7,
+    damage: 22,
+    inFighterBox: true,
+    cardSub: 'бросок якоря 22 + оглуш.',
+    desc: '⚓ Моряк с Якорем (150 HP): каждые 3.5 с швыряет тяжёлый якорь на 22 урона с кратким оглушением цели!'
+  },
+
+  // 6 НОВЫХ ЭПИЧЕСКИХ БОЙЦОВ ИЗ «БОКСА БОЙЦОВ»:
+  {
+    id: 'wind_ronin',
+    num: 68,
+    name: 'Ронин Ветра',
+    shape: 'triangle',
+    baseColor: '#0d9488',
+    hp: 165,
+    speed: 3.6,
+    damage: 28,
+    inFighterBox: true,
+    cardSub: 'сквозной клинок ветра 28',
+    desc: '🌪️ Ронин Ветра (165 HP): каждые 3.0 с взмахивает катаной и пускает сквозную воздушную волну на 28 урона!'
+  },
+  {
+    id: 'tesla_bot',
+    num: 69,
+    name: 'Тесла-Дрон',
+    shape: 'hexagon',
+    baseColor: '#0284c7',
+    hp: 160,
+    speed: 3.3,
+    damage: 24,
+    inFighterBox: true,
+    cardSub: 'кольцо тока 24 вокруг',
+    desc: '⚡ Тесла-Дрон (160 HP): каждые 3.0 с выпускает электрическое кольцо вокруг себя, нанося 24 урона всем врагам рядом!'
+  },
+  {
+    id: 'witch_brew',
+    num: 70,
+    name: 'Лесная Ведьма',
+    shape: 'circle',
+    baseColor: '#7e22ce',
+    hp: 155,
+    speed: 3.2,
+    damage: 26,
+    inFighterBox: true,
+    cardSub: '2 мыши по 26 + вампиризм',
+    desc: '🦇 Лесная Ведьма (155 HP): каждые 3.2 с выпускает 2 ночных мышей по 26 урона и исцеляется на +12 HP!'
+  },
+  {
+    id: 'magma_guard',
+    num: 71,
+    name: 'Лавовый Страж',
+    shape: 'square',
+    baseColor: '#b91c1c',
+    hp: 210,
+    speed: 2.8,
+    damage: 25,
+    inFighterBox: true,
+    cardSub: '210 HP / взрыв лавы 25',
+    desc: '🌋 Лавовый Страж (210 HP): каждые 3.8 с ударяет раскалённым щитом, вызывая взрыв магмы вокруг себя на 25 урона + поджог!'
+  },
+  {
+    id: 'crystal_sniper',
+    num: 72,
+    name: 'Кристалл-Стрелок',
+    shape: 'hexagon',
+    baseColor: '#ec4899',
+    hp: 145,
+    speed: 3.5,
+    damage: 32,
+    inFighterBox: true,
+    cardSub: '3 алмазных луча по 32',
+    desc: '💎 Кристалл-Стрелок (145 HP): каждые 2.8 с выпускает веером 3 острых кристалла, каждый наносит 32 урона!'
+  },
+  {
+    id: 'shadow_scythe',
+    num: 73,
+    name: 'Теневой Жнец',
+    shape: 'triangle',
+    baseColor: '#4c1d95',
+    hp: 175,
+    speed: 3.7,
+    damage: 30,
+    inFighterBox: true,
+    cardSub: 'прыжок за спину + серп 30',
+    desc: '🌑 Теневой Жнец (175 HP): каждые 3.6 с мгновенно прыгает сквозь тень к врагу и рубит серпом на 30 урона!'
   }
 ];
 
-// ==================== СИСТЕМА РЕДКОСТИ И ЯЩИКА БОЙЦОВ ====================
+// ==================== СИСТЕМА РЕДКОСТИ, КОНТЕЙНЕРА БОЙЦОВ И БОКСА БОЙЦОВ ====================
 // Шансы эпических, мифических и легендарных уменьшены в 2 раза (8%, 4%, 1.5%), а обычных и редких увеличены (53.5%, 33%)!
 const FIGHTER_RARITIES = [
   {
@@ -725,11 +960,14 @@ const FIGHTER_RARITIES = [
     color: '#64748b',
     bg: '#f1f5f9',
     border: '#475569',
-    tierChance: 53.5, // Увеличено с 45% до 53.5%
+    tierChance: 53.5,
+    boxTierChance: 58, // В Боксе бойцов (где только обычные, редкие и эпические)
     fighters: [
       'swordsman', 'archer', 'shield', 'spearman', 'soldier',
       'healer', 'alchemist', 'boomerang', 'worm', 'werewolf',
-      'lumberjack', 'slinger', 'blacksmith'
+      'lumberjack', 'slinger', 'blacksmith',
+      // 5 новых очень слабых обычных бойцов без способностей из «Бокса бойцов»:
+      'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant'
     ]
   },
   {
@@ -740,11 +978,14 @@ const FIGHTER_RARITIES = [
     color: '#16a34a',
     bg: '#dcfce7',
     border: '#15803d',
-    tierChance: 33, // Увеличено с 28% до 33%
+    tierChance: 33,
+    boxTierChance: 30,
     fighters: [
       'gunslinger', 'pyro', 'cryo', 'thunder', 'berserker',
       'engineer', 'summoner', 'graviton', 'hunter', 'boxer',
-      'musketeer', 'beekeeper', 'ice_golem'
+      'musketeer', 'beekeeper', 'ice_golem',
+      // 5 новых редких бойцов из «Бокса бойцов»:
+      'crossbow_scout', 'fencer_fox', 'snow_thrower', 'torch_bearer', 'anchor_sailor'
     ]
   },
   {
@@ -755,11 +996,14 @@ const FIGHTER_RARITIES = [
     color: '#9333ea',
     bg: '#f3e8ff',
     border: '#7e22ce',
-    tierChance: 8, // Уменьшено в 2 раза (с 16% до 8%)
+    tierChance: 8,
+    boxTierChance: 12,
     fighters: [
       'assassin', 'vampire', 'claws', 'giant', 'laser_bot',
       'teleporter', 'ninja', 'zombie', 'bibizyana',
-      'samurai', 'cactus', 'magician_hat'
+      'samurai', 'cactus', 'magician_hat',
+      // 6 новых эпических бойцов из «Бокса бойцов»:
+      'wind_ronin', 'tesla_bot', 'witch_brew', 'magma_guard', 'crystal_sniper', 'shadow_scythe'
     ]
   },
   {
@@ -770,7 +1014,8 @@ const FIGHTER_RARITIES = [
     color: '#e11d48',
     bg: '#ffe4e6',
     border: '#be123c',
-    tierChance: 4, // Уменьшено в 2 раза (с 8% до 4%)
+    tierChance: 4,
+    boxTierChance: 0,
     fighters: [
       'plasma_rex', 'robo_mech', 'bomber', 'fairy', 'card_master',
       'medusa', 'pavuk',
@@ -785,15 +1030,16 @@ const FIGHTER_RARITIES = [
     color: '#d97706',
     bg: '#fef3c7',
     border: '#b45309',
-    tierChance: 1.5, // Уменьшено в 2 раза (с 3% до 1.5%)
+    tierChance: 1.5,
+    boxTierChance: 0,
     fighters: [
       'superman', 'checkmate', 'death', 'doubler', 'musician',
-      'dragon', 'chronos', 'zeus'
+      'dragon', 'chronos', 'zeus', 'sky_guardian'
     ]
   }
 ];
 
-// Проставляем каждому бойцу его редкость, цвет редкости, шанс выпадения и наличие в ящике (все кроме Мечника!)
+// Проставляем каждому бойцу его редкость, цвет редкости, шанс выпадения в Контейнере (55 бойцов) или Боксе бойцов (16 новых бойцов)
 (function assignFighterRarities() {
   for (const fc of FIGHTER_CLASSES) {
     let foundTier = FIGHTER_RARITIES[0];
@@ -806,17 +1052,30 @@ const FIGHTER_RARITIES = [
     fc.rarity = foundTier.id;
     fc.rarityOrder = foundTier.order;
     fc.rarityName = foundTier.name;
-    fc.rarityBadge = foundTier.badge;
-    fc.rarityColor = foundTier.color;
+    fc.rarityBadge = fc.id === 'sky_guardian' ? 'Небесный (3 места)' : foundTier.badge;
+    fc.rarityColor = fc.id === 'sky_guardian' ? '#0284c7' : foundTier.color;
     fc.rarityBg = foundTier.bg;
-    fc.rarityBorder = foundTier.border;
+    fc.rarityBorder = fc.id === 'sky_guardian' ? '#0284c7' : foundTier.border;
     fc.tierChance = foundTier.tierChance;
-    // В ящике находятся ВСЕ персонажи, кроме Мечника (swordsman)!
-    fc.inCrate = fc.id !== 'swordsman';
-    const crateCountInTier = foundTier.fighters.filter(id => id !== 'swordsman').length || 1;
+    fc.boxTierChance = foundTier.boxTierChance || 0;
+
+    // В «Контейнере бойцов» находятся 55 основных бойцов (кроме Мечника, Стражника небес и 16 бойцов из Бокса бойцов)
+    fc.inFighterBox = Boolean(fc.inFighterBox);
+    fc.inCrate = !fc.inFighterBox && fc.id !== 'swordsman' && fc.id !== 'sky_guardian';
+
+    const crateCountInTier = foundTier.fighters.filter(id => {
+      const fObj = FIGHTER_CLASSES.find(x => x.id === id);
+      return id !== 'swordsman' && id !== 'sky_guardian' && !(fObj && fObj.inFighterBox);
+    }).length || 1;
+
+    const boxCountInTier = foundTier.fighters.filter(id => {
+      const fObj = FIGHTER_CLASSES.find(x => x.id === id);
+      return Boolean(fObj && fObj.inFighterBox);
+    }).length || 1;
+
     fc.dropChance = fc.inCrate
       ? Number((foundTier.tierChance / crateCountInTier).toFixed(2))
-      : 0;
+      : (fc.inFighterBox ? Number(((foundTier.boxTierChance || 0) / boxCountInTier).toFixed(2)) : 0);
   }
 })();
 
@@ -837,6 +1096,23 @@ function getFighterClass(id) {
 
 // Цвет заливки фигуры в зависимости от команды и класса
 function getUnitTeamColor(team, classId) {
+  if (classId === 'sky_guardian') return team === 'player' ? '#38bdf8' : '#0284c7';
+  if (classId === 'paper_recruit') return team === 'player' ? '#94a3b8' : '#64748b';
+  if (classId === 'cardboard_pug') return team === 'player' ? '#d6a87c' : '#b48252';
+  if (classId === 'wooden_dummy') return team === 'player' ? '#b48252' : '#854d0e';
+  if (classId === 'origami_frog') return team === 'player' ? '#4ade80' : '#16a34a';
+  if (classId === 'tin_peasant') return team === 'player' ? '#a1a1aa' : '#71717a';
+  if (classId === 'crossbow_scout') return team === 'player' ? '#22c55e' : '#15803d';
+  if (classId === 'fencer_fox') return team === 'player' ? '#fb923c' : '#ea580c';
+  if (classId === 'snow_thrower') return team === 'player' ? '#60a5fa' : '#2563eb';
+  if (classId === 'torch_bearer') return team === 'player' ? '#f59e0b' : '#d97706';
+  if (classId === 'anchor_sailor') return team === 'player' ? '#0284c7' : '#0369a1';
+  if (classId === 'wind_ronin') return team === 'player' ? '#14b8a6' : '#0f766e';
+  if (classId === 'tesla_bot') return team === 'player' ? '#38bdf8' : '#0284c7';
+  if (classId === 'witch_brew') return team === 'player' ? '#a855f7' : '#7e22ce';
+  if (classId === 'magma_guard') return team === 'player' ? '#ef4444' : '#b91c1c';
+  if (classId === 'crystal_sniper') return team === 'player' ? '#f472b6' : '#db2777';
+  if (classId === 'shadow_scythe') return team === 'player' ? '#6d28d9' : '#4c1d95';
   if (classId === 'lumberjack') return team === 'player' ? '#dc2626' : '#991b1b';
   if (classId === 'slinger') return team === 'player' ? '#ca8a04' : '#854d0e';
   if (classId === 'blacksmith') return team === 'player' ? '#475569' : '#334155';
@@ -2167,7 +2443,332 @@ function drawWeaponGraphic(ctx, abilityId, x, y, scale = 1, angle = -Math.PI / 4
       ctx.stroke();
       break;
     }
+
+    case 'sky_guardian': {
+      // Небесное солнечное ядро-скипетр Стражника небес (пускает лучи во все стороны)
+      ctx.rotate(-angle);
+      ctx.strokeStyle = '#facc15';
+      ctx.lineWidth = 2.2;
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(a) * 5, Math.sin(a) * 5);
+        ctx.lineTo(Math.cos(a) * 12, Math.sin(a) * 12);
+        ctx.stroke();
+      }
+      ctx.fillStyle = '#fde047';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    // ==================== 16 БОЙЦОВ ИЗ «БОКСА БОЙЦОВ» ====================
+    case 'paper_recruit': {
+      // Бумажная пилотка Новобранца (без способностей)
+      ctx.rotate(-angle);
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.moveTo(-9, 4);
+      ctx.lineTo(0, -6);
+      ctx.lineTo(9, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'cardboard_pug': {
+      // Маленькая косточка Картонного Мопса (без способностей)
+      ctx.fillStyle = '#fef3c7';
+      ctx.beginPath();
+      ctx.rect(-5, -2.5, 10, 5);
+      ctx.fill();
+      ctx.stroke();
+      for (const sx of [-5.5, 5.5]) {
+        for (const sy of [-2.5, 2.5]) {
+          ctx.beginPath();
+          ctx.arc(sx, sy, 2.4, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.stroke();
+        }
+      }
+      break;
+    }
+
+    case 'wooden_dummy': {
+      // Деревянная учебная дощечка Манекена (без способностей)
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      roundRectPath(ctx, -4, -9, 8, 18, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = '#dc2626';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+
+    case 'origami_frog': {
+      // Зелёный кувшинковый листок Оригами-Жабы (без способностей)
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.arc(0, 0, 6.5, 0.25, Math.PI * 2 - 0.25);
+      ctx.lineTo(0, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'tin_peasant': {
+      // Маленькая деревянная палочка Пехотинца (без способностей)
+      ctx.fillStyle = '#a16207';
+      ctx.beginPath();
+      roundRectPath(ctx, -2, -9, 4, 18, 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'crossbow_scout': {
+      // Деревянный арбалет со стальной дугой
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      roundRectPath(ctx, -8, -2.2, 16, 4.4, 1.5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.arc(4, 0, 9, -Math.PI * 0.48, Math.PI * 0.48);
+      ctx.stroke();
+      break;
+    }
+
+    case 'fencer_fox': {
+      // Изящная дуэльная рапира с золотой гардой
+      ctx.fillStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(0, -1.5);
+      ctx.lineTo(22, 0);
+      ctx.lineTo(0, 1.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(0, 0, 4.2, -Math.PI * 0.5, Math.PI * 0.5, true);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'snow_thrower': {
+      // Ледяная трубочка-снежкомёт со снежком
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      roundRectPath(ctx, -6, -4, 13, 8, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(10, 0, 4.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'torch_bearer': {
+      // Горящий факел
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      roundRectPath(ctx, -2.5, 0, 5, 13, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(0, -12);
+      ctx.quadraticCurveTo(7, -4, 0, 2);
+      ctx.quadraticCurveTo(-7, -4, 0, -12);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'anchor_sailor': {
+      // Тяжёлый морской якорь
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, -8);
+      ctx.lineTo(0, 7);
+      ctx.moveTo(-5, -4);
+      ctx.lineTo(5, -4);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(0, 2, 7.5, 0.25, Math.PI - 0.25);
+      ctx.stroke();
+      break;
+    }
+
+    case 'wind_ronin': {
+      // Изумрудная катана ветра
+      ctx.fillStyle = '#5eead4';
+      ctx.beginPath();
+      ctx.moveTo(0, -2.2);
+      ctx.lineTo(20, -1);
+      ctx.lineTo(23, 1.5);
+      ctx.lineTo(0, 2.2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'tesla_bot': {
+      // Катушка Теслы с голубым разрядом
+      ctx.rotate(-angle);
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      roundRectPath(ctx, -4, -6, 8, 12, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(0, -8, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'witch_brew': {
+      // Магический посох Лесной Ведьмы с фиолетовым кристаллом
+      ctx.rotate(-angle);
+      ctx.fillStyle = '#581c87';
+      ctx.beginPath();
+      roundRectPath(ctx, -2, -8, 4, 18, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#c084fc';
+      ctx.beginPath();
+      ctx.arc(0, -10, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'magma_guard': {
+      // Раскалённый лавовый щит
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      roundRectPath(ctx, -5, -12, 10, 24, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'crystal_sniper': {
+      // Розовый алмазный кристалл-призма
+      ctx.fillStyle = '#f472b6';
+      ctx.beginPath();
+      ctx.moveTo(-7, 0);
+      ctx.lineTo(0, -7);
+      ctx.lineTo(13, 0);
+      ctx.lineTo(0, 7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'shadow_scythe': {
+      // Фиолетовый серп Теневого Жнеца
+      ctx.fillStyle = '#a855f7';
+      ctx.beginPath();
+      ctx.arc(2, 0, 10, -Math.PI * 0.65, Math.PI * 0.45);
+      ctx.quadraticCurveTo(6, 0, 2, -6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
   }
+
+  ctx.restore();
+}
+
+// Отрисовка небесных ангельских крыльев, золотого нимба и символа солнца Стражника небес
+function drawSkyGuardianDetails(ctx, x, y, radius, timeSec = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  const flap = Math.sin(timeSec * 5) * 0.08;
+  // Величественные бело-золотые крылья по бокам
+  for (const side of [-1, 1]) {
+    ctx.save();
+    ctx.scale(side, 1);
+    ctx.rotate(flap);
+
+    ctx.fillStyle = '#ffffff';
+    ctx.strokeStyle = '#1c1a17';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(radius * 0.55, -radius * 0.25);
+    ctx.quadraticCurveTo(radius * 1.65, -radius * 1.05, radius * 1.85, -radius * 0.2);
+    ctx.quadraticCurveTo(radius * 1.55, radius * 0.35, radius * 1.25, radius * 0.45);
+    ctx.quadraticCurveTo(radius * 0.95, radius * 0.65, radius * 0.55, radius * 0.35);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+
+    // Золотистые перья внутри крыла
+    ctx.strokeStyle = '#eab308';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(radius * 0.75, -radius * 0.1);
+    ctx.lineTo(radius * 1.45, -radius * 0.35);
+    ctx.moveTo(radius * 0.75, radius * 0.12);
+    ctx.lineTo(radius * 1.35, radius * 0.12);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Сияющий золотой нимб над головой
+  ctx.strokeStyle = '#facc15';
+  ctx.lineWidth = 2.6;
+  ctx.beginPath();
+  ctx.ellipse(0, -radius * 1.22, radius * 0.68, radius * 0.22, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  // Небесная золотая звезда в центре груди
+  ctx.fillStyle = '#fef08a';
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const a = (i * Math.PI) / 4;
+    const r = i % 2 === 0 ? radius * 0.48 : radius * 0.22;
+    if (i === 0) ctx.moveTo(Math.cos(a) * r, Math.sin(a) * r);
+    else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
 
   ctx.restore();
 }
@@ -2476,6 +3077,9 @@ function renderFighterThumbnail(canvas, unitOrClass, team = 'player', showDualIc
     drawFighterBody(ctx, shape, cx, cy, r, color, '#1c1a17', 2.4);
   }
 
+  if (classId === 'sky_guardian' || abilityId === 'sky_guardian') {
+    drawSkyGuardianDetails(ctx, cx, cy, r, 0);
+  }
   if (classId === 'vampire' || abilityId === 'vampire') {
     drawVampireFangs(ctx, cx, cy, r, 0);
   }
@@ -2489,7 +3093,7 @@ function renderFighterThumbnail(canvas, unitOrClass, team = 'player', showDualIc
   const wx = cx + r * 1.35;
   const wy = cy + 1;
   let angle = -Math.PI / 4;
-  if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'zombie', 'werewolf', 'death', 'fairy', 'musician'].includes(abilityId)) angle = 0;
+  if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'zombie', 'werewolf', 'death', 'fairy', 'musician', 'sky_guardian'].includes(abilityId)) angle = 0;
   if (abilityId === 'spearman') angle = -Math.PI / 5;
 
   drawWeaponGraphic(ctx, abilityId, wx, wy, 0.85, angle, team);
