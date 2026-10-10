@@ -11,13 +11,206 @@
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-  <div class="paper-app">
+  <!-- ==================== 1. НАЧАЛЬНОЕ МЕНЮ (МАГАЗИН И ИГРАТЬ) ==================== -->
+  <div id="mainMenuScreen" class="screen-view active-screen">
+    <div class="paper-screen-card main-menu-card paper-card">
+      <div class="menu-top-coins">
+        <span class="coin-pill">🪙 Монеты: <strong id="menuCoinsVal">100</strong></span>
+      </div>
+
+      <div class="menu-hero-header">
+        <div class="menu-badge-tag">БУМАЖНАЯ БИТВА • 41 БОЕЦ</div>
+        <h1 class="menu-main-title">BATTLE ROYAL PAPER</h1>
+        <p class="menu-subtitle">Открывай бойцов по редкости из ящика, прокачивай здоровье и урон и проходи уровни!</p>
+      </div>
+
+      <div class="menu-showcase-row">
+        <div class="menu-starter-box paper-inner-card">
+          <canvas id="menuStarterCanvas" width="90" height="72"></canvas>
+          <div class="menu-starter-info">
+            <span class="starter-tag">СТАРТОВЫЙ БОЕЦ</span>
+            <strong>🗡️ МЕЧНИК</strong>
+            <small>Открыт сразу (не в ящике)</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- ДВЕ ГЛАВНЫЕ КНОПКИ В МЕНЮ: МАГАЗИН И ИГРАТЬ -->
+      <div class="menu-two-buttons">
+        <button id="menuShopBtn" class="big-menu-btn shop-menu-btn" type="button">
+          <span class="btn-emoji">📦</span>
+          <span class="btn-label">МАГАЗИН</span>
+          <small class="btn-sub">Ящик бойцов • 100 🪙</small>
+        </button>
+
+        <button id="menuPlayBtn" class="big-menu-btn play-menu-btn" type="button">
+          <span class="btn-emoji">⚔️</span>
+          <span class="btn-label">ИГРАТЬ</span>
+          <small class="btn-sub" id="menuPlaySub">Уровень 1 • В бой!</small>
+        </button>
+      </div>
+
+      <div class="menu-footer-row">
+        <button id="menuSandboxBtn" class="subtle-sandbox-btn" type="button">🛠️ Свободная расстановка (Песочница)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 2. МАГАЗИН (1 ЯЩИК И КАРТИНКА С РЕДКОСТЯМИ) ==================== -->
+  <div id="shopScreen" class="screen-view hidden">
+    <div class="paper-screen-card shop-screen-card paper-card">
+      <div class="screen-top-bar">
+        <button id="shopBackBtn" class="back-nav-btn" type="button">← В МЕНЮ</button>
+        <h2 class="screen-title">📦 МАГАЗИН</h2>
+        <div class="coin-pill">🪙 <strong id="shopCoinsVal">100</strong></div>
+      </div>
+
+      <!-- Витрина магазина: пока что только 1 ящик -->
+      <div id="shopShelfView" class="shop-shelf-view">
+        <p class="shop-hint">Нажмите на ящик, чтобы посмотреть шансы по редкости и открыть его:</p>
+        <button id="shopCrateItemBtn" class="crate-showcase-card paper-inner-card" type="button">
+          <div class="crate-art-box">
+            <div class="crate-icon-big">📦</div>
+            <span class="crate-sparkles">✨ 40 БОЙЦОВ ВНУТРИ ✨</span>
+          </div>
+          <h3 class="crate-title">ЯЩИК БОЙЦОВ</h3>
+          <p class="crate-desc">Содержит всех персонажей по редкости, кроме стартового Мечника!</p>
+          <div class="crate-price-badge">НАЖМИТЕ, ЧТОБЫ ОТКРЫТЬ • 100 🪙</div>
+        </button>
+      </div>
+
+      <!-- Картинка ящика (открывается при нажатии на ящик): по центру кнопка Открыть за 100 монет, снизу редкости и персонажи -->
+      <div id="cratePictureView" class="crate-picture-view hidden">
+        <div class="crate-picture-center paper-inner-card">
+          <div class="crate-center-header">
+            <button id="crateClosePictureBtn" class="mini-back-link" type="button">← Назад к витрине</button>
+            <span class="crate-center-title">📦 ЯЩИК С БОЙЦАМИ (ВСЕ КРОМЕ МЕЧНИКА)</span>
+          </div>
+
+          <div class="crate-center-visual">
+            <div class="crate-box-illustration" id="crateBoxIllustration">📦</div>
+            <!-- Результат выпадения бойца -->
+            <div id="crateUnboxedResult" class="crate-unboxed-result hidden">
+              <div class="unboxed-header">🎉 ВАМ ВЫПАЛ БОЕЦ!</div>
+              <canvas id="unboxedFighterCanvas" width="96" height="72"></canvas>
+              <div id="unboxedFighterName" class="unboxed-name">НИНДЗЯ</div>
+              <div id="unboxedFighterRarity" class="unboxed-rarity-badge">Эпическая</div>
+            </div>
+          </div>
+
+          <!-- По центру кнопка ОТКРЫТЬ ЗА 100 МОНЕТ -->
+          <button id="openCrate100Btn" class="open-crate-center-btn" type="button">
+            🔓 ОТКРЫТЬ ЗА 100 МОНЕТ 🪙
+          </button>
+          <div id="crateOpenStatusMsg" class="crate-status-msg">Чем выше редкость, тем меньше шанс выпадения!</div>
+        </div>
+
+        <!-- Снизу: редкость персонажей и сами персонажи в ящике -->
+        <div class="crate-rarities-bottom">
+          <div class="crate-rarities-title">ШАНСЫ ВЫПАДЕНИЯ ПО РЕДКОСТИ (40 БОЙЦОВ В ЯЩИКЕ):</div>
+          <div id="crateRaritiesList" class="crate-rarities-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 3. ЛОКАЦИЯ УРОВНЯ И ЯЧЕЕК ПЕРСОНАЖЕЙ (ПОСЛЕ НАЖАТИЯ «ИГРАТЬ») ==================== -->
+  <div id="campaignHubScreen" class="screen-view hidden">
+    <div class="paper-screen-card hub-screen-card paper-card">
+      <div class="screen-top-bar">
+        <button id="hubBackToMenuBtn" class="back-nav-btn" type="button">← В МЕНЮ</button>
+        <button id="hubGoShopQuickBtn" class="back-nav-btn shop-quick-btn" type="button">📦 МАГАЗИН</button>
+        <div class="coin-pill">🪙 <strong id="hubCoinsVal">100</strong></div>
+      </div>
+
+      <!-- СВЕРХУ: ЦИФРА И НАДПИСЬ УРОВЕНЬ + ЧУТЬ НИЖЕ КНОПКА ИГРАТЬ + КНОПКА ПРОКАЧАТЬ -->
+      <div class="hub-top-stage paper-inner-card">
+        <div class="hub-level-badge">
+          <span class="hub-level-num" id="hubLevelNumber">1</span>
+          <span class="hub-level-word">УРОВЕНЬ</span>
+        </div>
+        <div class="hub-enemy-preview" id="hubEnemyPreviewText">
+          На 1 уровне вас ждёт соперник: <strong>🐒 Бибизяна</strong> • Награда за победу: <strong>+40 🪙</strong>
+        </div>
+
+        <!-- Чуть ниже кнопка ИГРАТЬ (нужно сначала выбрать персонажа из ячеек) -->
+        <div class="hub-action-buttons">
+          <button id="hubPlayLevelBtn" class="hub-play-btn" type="button">
+            ⚔️ ИГРАТЬ
+          </button>
+          <!-- Кнопка ПРОКАЧАТЬ появляется, когда нажали на своего персонажа в ячейке -->
+          <button id="hubUpgradeCharBtn" class="hub-upgrade-btn hidden" type="button">
+            ⬆️ ПРОКАЧАТЬ ВЫБРАННОГО БОЙЦА
+          </button>
+        </div>
+        <div id="hubSelectionHint" class="hub-selection-hint">
+          👇 Нажмите на открытого персонажа в ячейке снизу, чтобы выбрать его для боя или прокачать!
+        </div>
+      </div>
+
+      <!-- СНИЗУ: СЕТКА С ЯЧЕЙКАМИ (МЕСТА ДЛЯ ВАШИХ ПЕРСОНАЖЕЙ ПО РЕДКОСТИ) -->
+      <div class="hub-cells-section">
+        <div class="hub-cells-header">
+          <span>ЯЧЕЙКИ ВАШИХ ПЕРСОНАЖЕЙ ПО РЕДКОСТИ</span>
+          <span id="hubUnlockedCountLabel">Открыто: 1 / 41</span>
+        </div>
+        <div id="hubRarityCellsGrid" class="hub-rarity-cells-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 4. ЛОКАЦИЯ ПРОКАЧКИ ПЕРСОНАЖА (ЗА 15 МОНЕТ: +5 ХП ИЛИ +2 УРОНА) ==================== -->
+  <div id="upgradeScreen" class="screen-view hidden">
+    <div class="paper-screen-card upgrade-screen-card paper-card">
+      <div class="screen-top-bar">
+        <button id="upgradeBackBtn" class="back-nav-btn" type="button">← К ЯЧЕЙКАМ</button>
+        <h2 class="screen-title">⬆️ ПРОКАЧКА БОЙЦА</h2>
+        <div class="coin-pill">🪙 <strong id="upgradeCoinsVal">100</strong></div>
+      </div>
+
+      <div class="upgrade-fighter-showcase paper-inner-card">
+        <canvas id="upgradeFighterCanvas" width="110" height="88"></canvas>
+        <div class="upgrade-fighter-meta">
+          <span id="upgradeFighterRarityBadge" class="upg-rarity-pill">Обычная</span>
+          <h3 id="upgradeFighterName">МЕЧНИК</h3>
+          <p id="upgradeFighterDesc">🗡️ Крутящийся меч</p>
+        </div>
+      </div>
+
+      <!-- Надписи ЗДОРОВЬЕ и УРОН, а над ними ЧИСЛО здоровья и урона выбранного бойца -->
+      <div class="upgrade-stats-boxes">
+        <div class="upgrade-stat-card paper-inner-card">
+          <div class="upgrade-stat-big-number" id="upgradeStatHpNum">100</div>
+          <div class="upgrade-stat-label">ЗДОРОВЬЕ</div>
+          <button id="upgradeHp15Btn" class="upgrade-buy-btn hp-buy-btn" type="button">
+            ПРОКАЧАТЬ (+5 ЗДОРОВЬЯ) • 15 🪙
+          </button>
+        </div>
+
+        <div class="upgrade-stat-card paper-inner-card">
+          <div class="upgrade-stat-big-number" id="upgradeStatDmgNum">10</div>
+          <div class="upgrade-stat-label">УРОН</div>
+          <button id="upgradeDmg15Btn" class="upgrade-buy-btn dmg-buy-btn" type="button">
+            ПРОКАЧАТЬ (+2 УРОНА) • 15 🪙
+          </button>
+        </div>
+      </div>
+
+      <div id="upgradeStatusFeedback" class="upgrade-feedback-msg">
+        Каждая прокачка стоит 15 монет и навсегда усиливает этого бойца (+5 к здоровью или +2 к урону)!
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 5. ЭКРАН АРЕНЫ (АРЕНА В 2 РАЗА МЕНЬШЕ!) ==================== -->
+  <div class="paper-app hidden" id="arenaAppContainer">
     <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
     <header class="top-bar">
-      <!-- Блок уровня и прогресса -->
+      <!-- Блок уровня и возврата к ячейкам -->
       <div class="level-box paper-card">
+        <button id="backToHubFromArenaBtn" class="secondary-top-btn" title="Вернуться к ячейкам персонажей">← К ЯЧЕЙКАМ</button>
         <button id="prevLevelBtn" class="mini-nav-btn" title="Предыдущий уровень">◀</button>
-        <span class="level-title">УРОВЕНЬ <span id="levelNum">5</span></span>
+        <span class="level-title">УРОВЕНЬ <span id="levelNum">1</span></span>
         <div id="levelNodes" class="level-nodes" title="Нажмите на этап, чтобы перейти к уровню"></div>
         <div class="skull-icon" id="bossSkull" title="Уровень-босс (10)">💀</div>
         <button id="nextLevelBtn" class="mini-nav-btn" title="Следующий уровень">▶</button>
@@ -34,22 +227,17 @@
         <button id="soundToggleBtn" class="secondary-top-btn" title="Звуковые эффекты">🔊</button>
       </div>
 
-      <!-- Правый индикатор усиления ботов -->
-      <div class="bots-scaling-box paper-card" id="botScalingCard" title="Нажмите, чтобы перегенерировать отряд ботов под текущий уровень">
-        <div class="bars-icon">
-          <span class="bar b1"></span>
-          <span class="bar b2"></span>
-          <span class="bar b3"></span>
-          <span class="bar-arrow">↗</span>
-        </div>
+      <!-- Правый индикатор монет и усиления ботов -->
+      <div class="bots-scaling-box paper-card" id="botScalingCard" title="Баланс монет и сложность уровня">
+        <div class="coin-pill arena-coin-pill">🪙 <strong id="arenaCoinsVal">100</strong></div>
         <div class="scaling-text-wrap">
-          <span class="scaling-main">БОТЫ СТАНОВЯТСЯ СИЛЬНЕЕ</span>
-          <span class="scaling-sub" id="scalingSubtext">Бонус уровня: +40% к статам • 🎲 Обновить</span>
+          <span class="scaling-main" id="arenaEnemyHeader">НАГРАДА ЗА ПОБЕДУ: +40 🪙</span>
+          <span class="scaling-sub" id="scalingSubtext">Уровень 1 • Соперник: Бибизяна</span>
         </div>
       </div>
     </header>
 
-    <!-- СРЕДНЯЯ ЧАСТЬ: КОМАНДА ИГРОКА | РИНГ | КОМАНДА БОТОВ -->
+    <!-- СРЕДНЯЯ ЧАСТЬ: КОМАНДА ИГРОКА | РИНГ (В 2 РАЗА МЕНЬШЕ) | КОМАНДА БОТОВ -->
     <main class="middle-area">
       <!-- ЛЕВАЯ ПАНЕЛЬ: ВАША КОМАНДА -->
       <aside class="team-panel player-panel paper-card">
@@ -129,20 +317,20 @@
         </div>
       </aside>
 
-      <!-- ЦЕНТРАЛЬНЫЙ РИНГ (АРЕНА) -->
+      <!-- ЦЕНТРАЛЬНЫЙ РИНГ (АРЕНА В 2 РАЗА МЕНЬШЕ: 380x225 вместо 760x450) -->
       <section class="arena-section">
-        <div class="arena-frame" id="arenaFrame">
-          <!-- Декоративные угловые крепления ринга, как на референсе -->
+        <div class="arena-frame compact-arena-frame" id="arenaFrame">
+          <!-- Декоративные угловые крепления ринга -->
           <div class="corner-post tl"></div>
           <div class="corner-post tr"></div>
           <div class="corner-post bl"></div>
           <div class="corner-post br"></div>
 
-          <canvas id="arenaCanvas" width="760" height="450"></canvas>
+          <canvas id="arenaCanvas" width="380" height="225"></canvas>
 
           <!-- Подсказка внизу ринга -->
           <div class="arena-hint" id="arenaHint">
-            💡 Перетаскивайте бойцов пальцем или мышкой • Нажмите на бойца для настройки статов
+            💡 Арена уменьшена в 2 раза! Победите врагов и получите +40 монет 🪙
           </div>
 
           <!-- Оверлей победы / поражения -->
@@ -152,8 +340,8 @@
               <h2 id="overlayTitle">ПОБЕДА!</h2>
               <p id="overlaySubtitle">Ваша команда сокрушила ботов на ринге!</p>
               <div class="overlay-buttons">
-                <button id="replayLevelBtn" class="action-btn">↺ ПОВТОРИТЬ БОЙ</button>
-                <button id="nextStageBtn" class="action-btn primary-green-btn">СЛЕДУЮЩИЙ УРОВЕНЬ ➔</button>
+                <button id="replayLevelBtn" class="action-btn">↺ ПОВТОРИТЬ</button>
+                <button id="nextStageBtn" class="action-btn primary-green-btn">К ЯЧЕЙКАМ ➔</button>
               </div>
             </div>
           </div>
@@ -169,7 +357,7 @@
           🔴 Боты <span class="mob-tab-count" id="mobBotCount">4</span>
         </button>
         <button type="button" class="mobile-tab-btn" data-mobile-tab="roster" id="mobTabRoster">
-          ⚔️ Все бойцы <span class="mob-tab-count">37</span>
+          ⚔️ Все бойцы <span class="mob-tab-count">41</span>
         </button>
       </nav>
 
@@ -252,10 +440,10 @@
       </aside>
     </main>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ: ВЫБОР БОЙЦОВ (37 КЛАССОВ) -->
+    <!-- НИЖНЯЯ ПАНЕЛЬ: ВЫБОР БОЙЦОВ (41 КЛАСС) -->
     <footer class="roster-panel paper-card" id="rosterPanel">
       <div class="roster-header">
-        <h2>ВЫБОР БОЙЦОВ (37)</h2>
+        <h2>ВЫБОР БОЙЦОВ (41)</h2>
         <div class="roster-controls-hint">
           <span class="roster-hint-text">Нажмите «+Игрок» / «+Бот» на карточке или дважды нажмите по бойцу</span>
           <div class="target-team-switch">

@@ -644,18 +644,21 @@ button:active {
   font-weight: 900;
 }
 
-/* ==================== ЦЕНТРАЛЬНЫЙ РИНГ ==================== */
+/* ==================== ЦЕНТРАЛЬНЫЙ РИНГ (В 2 РАЗА МЕНЬШЕ) ==================== */
 .arena-section {
   display: flex;
-  align-items: stretch;
+  align-items: center;
   justify-content: center;
   min-width: 0;
+  padding: 6px;
 }
 
 .arena-frame {
   position: relative;
   width: 100%;
-  height: 100%;
+  max-width: 440px;
+  max-height: 260px;
+  aspect-ratio: 380 / 225;
   background: #f8f4ea;
   border: 4px solid var(--ink);
   border-radius: 6px;
@@ -664,6 +667,7 @@ button:active {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  margin: auto;
 }
 
 /* Деревянные/картонные столбики по углам ринга как на референсе */
@@ -832,13 +836,13 @@ button:active {
   background: var(--green-ready);
 }
 
-/* Сетка 13×3 = 39 ячеек: все 37 персонажей видны одновременно без полосы прокрутки */
+/* Сетка 14×3 = 42 ячейки: все 41 персонаж видны одновременно без полосы прокрутки */
 .roster-grid {
   padding: 4px 6px;
   display: grid;
-  grid-template-columns: repeat(13, minmax(0, 1fr));
+  grid-template-columns: repeat(14, minmax(0, 1fr));
   grid-template-rows: repeat(3, 48px);
-  gap: 4px;
+  gap: 3.5px;
   overflow: hidden;
 }
 
@@ -1421,13 +1425,13 @@ button,
     font-size: 10px;
   }
 
-  /* На планшетах (641px–960px): 10 колонок × 4 ряда = 40 ячеек (все 37 бойцов без скролла) */
+  /* На планшетах (641px–960px): 11 колонок × 4 ряда = 44 ячейки (все 41 боец без скролла) */
   .roster-grid {
     flex: 1 1 0;
     min-height: 0;
     padding: 3px;
     display: grid;
-    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-columns: repeat(11, minmax(0, 1fr));
     grid-template-rows: repeat(4, minmax(0, 1fr));
     gap: 2.5px;
     overflow: hidden;
@@ -1481,7 +1485,7 @@ button,
 
 /* ==================== СМАРТФОНЫ В ПОРТРЕТНОЙ ОРИЕНТАЦИИ (<= 640px) ==================== */
 @media (max-width: 640px) {
-  /* 6 колонок × 7 рядов = 42 ячейки: все 37 персонажей на 1 экране без скролла! */
+  /* 6 колонок × 7 рядов = 42 ячейки: все 41 персонаж на 1 экране без скролла! */
   .roster-grid {
     grid-template-columns: repeat(6, minmax(0, 1fr));
     grid-template-rows: repeat(7, minmax(0, 1fr));
@@ -1538,11 +1542,869 @@ button,
     max-height: 34dvh;
   }
 
-  /* В горизонтальном режиме: 13 колонок × 3 ряда = 39 ячеек без скролла */
+  /* В горизонтальном режиме: 14 колонок × 3 ряда = 42 ячейки без скролла */
   .roster-grid {
-    grid-template-columns: repeat(13, minmax(0, 1fr));
+    grid-template-columns: repeat(14, minmax(0, 1fr));
     grid-template-rows: repeat(3, minmax(0, 1fr));
   }
 }
+
+/* ==================== ЭКРАНЫ МЕНЮ, МАГАЗИНА, ЯЧЕЕК УРОВНЯ И ПРОКАЧКИ ==================== */
+.screen-view {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 14px;
+  overflow: hidden;
+}
+
+.paper-screen-card {
+  width: 100%;
+  max-width: 1120px;
+  max-height: 96vh;
+  max-height: 96dvh;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.screen-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.screen-title {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  text-align: center;
+}
+
+.back-nav-btn {
+  padding: 6px 14px;
+  border: 2.5px solid var(--ink);
+  border-radius: 9px;
+  background: #f9f5eb;
+  font-weight: 900;
+  font-size: 14px;
+  box-shadow: 0 2.5px 0 var(--ink);
+}
+
+.back-nav-btn:hover {
+  background: #ece5d5;
+}
+
+.shop-quick-btn {
+  background: #fef3c7;
+}
+
+.coin-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  background: #fef9c3;
+  border: 2.5px solid var(--ink);
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 900;
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.arena-coin-pill {
+  padding: 3px 9px;
+  font-size: 13px;
+}
+
+/* 1. НАЧАЛЬНОЕ МЕНЮ */
+.main-menu-card {
+  max-width: 680px;
+  align-items: center;
+  text-align: center;
+  padding: 20px 24px;
+  gap: 14px;
+}
+
+.menu-top-coins {
+  width: 100%;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.menu-badge-tag {
+  display: inline-block;
+  padding: 3px 12px;
+  background: #dbeafe;
+  border: 2px solid var(--ink);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.menu-main-title {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 38px;
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: 1px;
+}
+
+.menu-subtitle {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  max-width: 520px;
+  margin-top: 4px;
+}
+
+.menu-showcase-row {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.menu-starter-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #fffdf7;
+}
+
+.menu-starter-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  text-align: left;
+}
+
+.starter-tag {
+  font-size: 10px;
+  font-weight: 900;
+  background: #e2e8f0;
+  border: 1.5px solid var(--ink);
+  border-radius: 5px;
+  padding: 1px 6px;
+}
+
+.menu-two-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.big-menu-btn {
+  padding: 16px 14px;
+  border: 3px solid var(--ink);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  box-shadow: 0 5px 0 var(--ink);
+  transition: transform 0.08s ease, filter 0.1s ease;
+}
+
+.big-menu-btn:hover {
+  filter: brightness(1.03);
+  transform: translateY(-2px);
+}
+
+.big-menu-btn:active {
+  transform: translateY(3px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.shop-menu-btn {
+  background: #fde047;
+}
+
+.play-menu-btn {
+  background: var(--green-ready);
+}
+
+.btn-emoji {
+  font-size: 32px;
+  line-height: 1;
+}
+
+.btn-label {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+}
+
+.btn-sub {
+  font-size: 12px;
+  font-weight: 900;
+  color: #2f2b26;
+}
+
+.menu-footer-row {
+  margin-top: 2px;
+}
+
+.subtle-sandbox-btn {
+  padding: 5px 12px;
+  border: 1.8px dashed var(--ink);
+  border-radius: 8px;
+  background: transparent;
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.subtle-sandbox-btn:hover {
+  background: #f3efe4;
+  color: var(--ink);
+}
+
+/* 2. МАГАЗИН И КАРТИНКА ЯЩИКА */
+.shop-shelf-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 16px;
+}
+
+.shop-hint {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.crate-showcase-card {
+  width: 100%;
+  max-width: 380px;
+  padding: 22px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  background: #fffbeb;
+  border: 3px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 0 6px 0 var(--ink);
+  cursor: pointer;
+  transition: transform 0.1s ease;
+}
+
+.crate-showcase-card:hover {
+  transform: translateY(-3px);
+  background: #fef3c7;
+}
+
+.crate-art-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.crate-icon-big {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.crate-sparkles {
+  font-size: 11px;
+  font-weight: 900;
+  background: #fde047;
+  border: 1.5px solid var(--ink);
+  border-radius: 999px;
+  padding: 2px 10px;
+}
+
+.crate-title {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.crate-desc {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.crate-price-badge {
+  margin-top: 4px;
+  padding: 7px 16px;
+  background: var(--green-ready);
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: 0 2.5px 0 var(--ink);
+}
+
+/* Картинка ящика: по центру кнопка Открыть за 100 монет, снизу редкости и персонажи */
+.crate-picture-view {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.crate-picture-center {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #fffdf7;
+  flex-shrink: 0;
+}
+
+.crate-center-header {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.mini-back-link {
+  padding: 3px 9px;
+  border: 1.8px solid var(--ink);
+  border-radius: 7px;
+  background: #f3efe4;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.crate-center-title {
+  font-size: 13px;
+  font-weight: 900;
+  color: var(--ink-soft);
+}
+
+.crate-center-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  min-height: 82px;
+}
+
+.crate-box-illustration {
+  font-size: 54px;
+  line-height: 1;
+  transition: transform 0.2s ease;
+}
+
+.crate-box-illustration.crate-shake {
+  animation: crateShakeAnim 0.45s ease;
+}
+
+@keyframes crateShakeAnim {
+  0%, 100% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-12deg) scale(1.12); }
+  50% { transform: rotate(12deg) scale(1.16); }
+  75% { transform: rotate(-8deg) scale(1.1); }
+}
+
+.crate-unboxed-result {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: #fef9c3;
+  border: 2.5px solid var(--ink);
+  border-radius: 12px;
+  animation: popIn 0.25s ease;
+}
+
+.unboxed-header {
+  font-size: 11px;
+  font-weight: 900;
+  color: #b45309;
+}
+
+.unboxed-name {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+}
+
+.unboxed-rarity-badge {
+  padding: 2px 8px;
+  border: 1.8px solid var(--ink);
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #fff;
+}
+
+.open-crate-center-btn {
+  padding: 10px 26px;
+  background: var(--green-ready);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 20px;
+  font-weight: 900;
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.open-crate-center-btn:disabled {
+  background: #d6d1c4;
+  color: #6e685f;
+  cursor: not-allowed;
+}
+
+.crate-status-msg {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+/* Снизу: редкость персонажей и сами персонажи */
+.crate-rarities-bottom {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.crate-rarities-title {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--ink);
+  flex-shrink: 0;
+}
+
+.crate-rarities-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-right: 4px;
+}
+
+.rarity-tier-block {
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 5px 8px;
+  background: #fffdf8;
+}
+
+.rarity-tier-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.rarity-tier-pill {
+  padding: 1px 8px;
+  border-radius: 999px;
+  border: 1.5px solid var(--ink);
+  color: #fff;
+  font-size: 11px;
+}
+
+.rarity-fighters-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+  gap: 4px;
+}
+
+.crate-fighter-mini {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 3px 4px;
+  border: 1.5px solid var(--ink);
+  border-radius: 7px;
+  background: #fcfaf4;
+  position: relative;
+}
+
+.crate-fighter-mini.unlocked-in-crate {
+  background: #dcfce7;
+}
+
+.crate-fighter-mini canvas {
+  width: 48px;
+  height: 28px;
+}
+
+.cfm-name {
+  font-size: 9.5px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.cfm-chance {
+  font-size: 8.5px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+/* 3. ЛОКАЦИЯ УРОВНЯ И ЯЧЕЕК ПЕРСОНАЖЕЙ */
+.hub-top-stage {
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #fffdf7;
+  flex-shrink: 0;
+}
+
+.hub-level-badge {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 4px 18px;
+  background: #fde047;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.hub-level-num {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 32px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.hub-level-word {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 24px;
+  font-weight: 900;
+}
+
+.hub-enemy-preview {
+  font-size: 13.5px;
+  font-weight: 800;
+  color: var(--ink);
+  text-align: center;
+}
+
+.hub-action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hub-play-btn {
+  padding: 8px 28px;
+  background: var(--green-ready);
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.hub-play-btn:disabled {
+  background: #d6d1c4;
+  color: #6e685f;
+  cursor: not-allowed;
+}
+
+.hub-upgrade-btn {
+  padding: 8px 18px;
+  background: #38bdf8;
+  border: 3px solid var(--ink);
+  border-radius: 12px;
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.hub-selection-hint {
+  font-size: 12px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.hub-cells-section {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
+.hub-cells-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 12.5px;
+  font-weight: 900;
+  padding: 0 4px;
+  flex-shrink: 0;
+}
+
+.hub-rarity-cells-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(14, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  gap: 4px;
+  overflow: hidden;
+}
+
+.hub-cell-card {
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  padding: 2px 3px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  background: #fcfaf4;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  min-width: 0;
+  min-height: 0;
+}
+
+.hub-cell-card.locked-cell {
+  background: #e5e0d5;
+  opacity: 0.68;
+  cursor: default;
+}
+
+.hub-cell-card.selected-hub-cell {
+  background: #fef08a;
+  border-width: 2.5px;
+  box-shadow: inset 0 0 0 1.5px var(--ink), 0 2px 0 var(--ink);
+}
+
+.hcc-rarity-strip {
+  width: 100%;
+  font-size: 8px;
+  font-weight: 900;
+  color: #fff;
+  text-align: center;
+  border-radius: 4px;
+  padding: 0 2px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hcc-canvas {
+  width: 50px;
+  height: 26px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.hcc-lock {
+  font-size: 15px;
+  line-height: 1;
+  margin: auto 0;
+}
+
+.hcc-name {
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.hcc-stats {
+  font-size: 8px;
+  font-weight: 900;
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+/* 4. ЭКРАН ПРОКАЧКИ БОЙЦА (ЗДОРОВЬЕ И УРОН ЗА 15 МОНЕТ) */
+.upgrade-screen-card {
+  max-width: 680px;
+  gap: 14px;
+}
+
+.upgrade-fighter-showcase {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 18px;
+  background: #fffdf7;
+}
+
+.upgrade-fighter-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.upg-rarity-pill {
+  padding: 2px 10px;
+  border: 1.8px solid var(--ink);
+  border-radius: 999px;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.upgrade-fighter-meta h3 {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 26px;
+  font-weight: 900;
+}
+
+.upgrade-fighter-meta p {
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.upgrade-stats-boxes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.upgrade-stat-card {
+  padding: 16px 14px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: #fffdf8;
+  text-align: center;
+}
+
+/* Над надписью ЗДОРОВЬЕ / УРОН — крупное число! */
+.upgrade-stat-big-number {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 44px;
+  font-weight: 900;
+  line-height: 1;
+  color: var(--ink);
+}
+
+.upgrade-stat-label {
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: 0.8px;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.upgrade-buy-btn {
+  width: 100%;
+  padding: 10px 12px;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 900;
+  box-shadow: 0 3px 0 var(--ink);
+}
+
+.hp-buy-btn {
+  background: #86efac;
+}
+
+.dmg-buy-btn {
+  background: #fca5a5;
+}
+
+.upgrade-buy-btn:disabled {
+  background: #d6d1c4;
+  color: #6e685f;
+  cursor: not-allowed;
+}
+
+.upgrade-feedback-msg {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+/* В режиме прохождения уровней скрываем лишние панели редактора, оставляя аккуратную арену (в 2 раза меньше!) */
+body[data-campaign-mode="true"] .player-panel,
+body[data-campaign-mode="true"] .bot-panel,
+body[data-campaign-mode="true"] .roster-panel,
+body[data-campaign-mode="true"] .mobile-tabs-bar {
+  display: none !important;
+}
+
+body[data-campaign-mode="true"] .middle-area {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+@media (max-width: 960px) {
+  .hub-rarity-cells-grid {
+    grid-template-columns: repeat(11, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .menu-main-title {
+    font-size: 26px;
+  }
+  .menu-two-buttons {
+    grid-template-columns: 1fr;
+  }
+  .hub-rarity-cells-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: repeat(7, minmax(0, 1fr));
+  }
+  .hcc-stats {
+    display: none;
+  }
+  .upgrade-stats-boxes {
+    grid-template-columns: 1fr;
+  }
+}
+
 
 

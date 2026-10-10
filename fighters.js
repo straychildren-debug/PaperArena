@@ -470,8 +470,155 @@ const FIGHTER_CLASSES = [
     damage: 1,
     cardSub: 'урон 1→2→4→8…',
     desc: '📈 500 HP и скорость 7.0! Сначала бьёт на 1, затем 2, 4, 8, 16… (урон ×2 после каждого удара)!'
+  },
+
+  // ==================== 4 НОВЫХ БОЙЦА (№38 – №41) ====================
+  {
+    id: 'musician',
+    num: 38,
+    name: 'Музыкант',
+    shape: 'circle',
+    baseColor: '#d97706',
+    hp: 200,
+    speed: 3.3,
+    damage: 55,
+    cardSub: '3 ноты ×55',
+    desc: '🪕 200 HP • Играет на балалайке и выпускает 3 ноты веером, каждая из которых сносит по 55 HP!'
+  },
+  {
+    id: 'pavuk',
+    num: 39,
+    name: 'Павук',
+    shape: 'circle',
+    baseColor: '#312e81',
+    hp: 210,
+    speed: 3.4,
+    damage: 80,
+    cardSub: 'паутина / рывок 80',
+    desc: '🕷️ С лапками: раз в 5 с стреляет паутиной (25% шанс кокона на 3.5 с) и раз в 10 с делает рывок на 80 HP!'
+  },
+  {
+    id: 'bibizyana',
+    num: 40,
+    name: 'Бибизяна',
+    shape: 'circle',
+    baseColor: '#92400e',
+    hp: 220,
+    speed: 3.5,
+    damage: 50,
+    cardSub: 'удар 50 / банан 45',
+    desc: '🐒 Обезьяна: при задевании соперника сносит 50 HP • каждые 7 с кидает 1 банан, наносящий 45 HP!'
+  },
+  {
+    id: 'medusa',
+    num: 41,
+    name: 'Медуза',
+    shape: 'circle',
+    baseColor: '#06b6d4',
+    hp: 250,
+    speed: 3.3,
+    damage: 10,
+    cardSub: 'электро-след 10/0.5с',
+    desc: '🪼 250 HP • Бьётся о стенки без урона от удара, но оставляет электрический след: 10 HP каждые 0.5 с на 5 с!'
   }
 ];
+
+// ==================== СИСТЕМА РЕДКОСТИ И ЯЩИКА БОЙЦОВ ====================
+const FIGHTER_RARITIES = [
+  {
+    id: 'common',
+    order: 1,
+    name: 'Обычная',
+    badge: 'Обычный',
+    color: '#64748b',
+    bg: '#f1f5f9',
+    border: '#475569',
+    tierChance: 45, // 45% шанс выпадения редкости из ящика
+    fighters: ['swordsman', 'archer', 'shield', 'spearman', 'soldier', 'healer', 'alchemist', 'boomerang', 'worm', 'werewolf']
+  },
+  {
+    id: 'rare',
+    order: 2,
+    name: 'Редкая',
+    badge: 'Редкий',
+    color: '#16a34a',
+    bg: '#dcfce7',
+    border: '#15803d',
+    tierChance: 28, // 28% шанс выпадения редкости из ящика
+    fighters: ['gunslinger', 'pyro', 'cryo', 'thunder', 'berserker', 'engineer', 'summoner', 'graviton', 'hunter', 'boxer']
+  },
+  {
+    id: 'epic',
+    order: 3,
+    name: 'Эпическая',
+    badge: 'Эпический',
+    color: '#9333ea',
+    bg: '#f3e8ff',
+    border: '#7e22ce',
+    tierChance: 16, // 16% шанс выпадения редкости из ящика
+    fighters: ['assassin', 'vampire', 'claws', 'giant', 'laser_bot', 'teleporter', 'ninja', 'zombie', 'bibizyana']
+  },
+  {
+    id: 'mythic',
+    order: 4,
+    name: 'Мифическая',
+    badge: 'Мифический',
+    color: '#e11d48',
+    bg: '#ffe4e6',
+    border: '#be123c',
+    tierChance: 8, // 8% шанс выпадения редкости из ящика
+    fighters: ['plasma_rex', 'robo_mech', 'bomber', 'fairy', 'card_master', 'medusa', 'pavuk']
+  },
+  {
+    id: 'legendary',
+    order: 5,
+    name: 'Легендарная',
+    badge: 'Легендарный',
+    color: '#d97706',
+    bg: '#fef3c7',
+    border: '#b45309',
+    tierChance: 3, // 3% шанс выпадения редкости из ящика
+    fighters: ['superman', 'checkmate', 'death', 'doubler', 'musician']
+  }
+];
+
+// Проставляем каждому бойцу его редкость, цвет редкости, шанс выпадения и наличие в ящике (все кроме Мечника!)
+(function assignFighterRarities() {
+  for (const fc of FIGHTER_CLASSES) {
+    let foundTier = FIGHTER_RARITIES[0];
+    for (const tier of FIGHTER_RARITIES) {
+      if (tier.fighters.includes(fc.id)) {
+        foundTier = tier;
+        break;
+      }
+    }
+    fc.rarity = foundTier.id;
+    fc.rarityOrder = foundTier.order;
+    fc.rarityName = foundTier.name;
+    fc.rarityBadge = foundTier.badge;
+    fc.rarityColor = foundTier.color;
+    fc.rarityBg = foundTier.bg;
+    fc.rarityBorder = foundTier.border;
+    fc.tierChance = foundTier.tierChance;
+    // В ящике находятся ВСЕ персонажи, кроме Мечника (swordsman)!
+    fc.inCrate = fc.id !== 'swordsman';
+    const crateCountInTier = foundTier.fighters.filter(id => id !== 'swordsman').length || 1;
+    fc.dropChance = fc.inCrate
+      ? Number((foundTier.tierChance / crateCountInTier).toFixed(2))
+      : 0;
+  }
+})();
+
+function getRarityInfo(rarityId) {
+  return FIGHTER_RARITIES.find(r => r.id === rarityId) || FIGHTER_RARITIES[0];
+}
+
+function getFightersSortedByRarity() {
+  return [...FIGHTER_CLASSES].sort((a, b) => {
+    if (a.rarityOrder !== b.rarityOrder) return a.rarityOrder - b.rarityOrder;
+    return a.num - b.num;
+  });
+}
 
 function getFighterClass(id) {
   return FIGHTER_CLASSES.find(c => c.id === id) || FIGHTER_CLASSES[0];
@@ -479,6 +626,11 @@ function getFighterClass(id) {
 
 // Цвет заливки фигуры в зависимости от команды и класса
 function getUnitTeamColor(team, classId) {
+  if (classId === 'musician') return team === 'player' ? '#d97706' : '#b45309';
+  if (classId === 'pavuk') return team === 'player' ? '#3730a3' : '#4c1d95';
+  if (classId === 'bibizyana') return team === 'player' ? '#92400e' : '#78350f';
+  if (classId === 'medusa') return team === 'player' ? '#06b6d4' : '#0891b2';
+
   if (classId === 'bomber') return team === 'player' ? '#ea580c' : '#dc2626';
   if (classId === 'checkmate') return team === 'player' ? '#334155' : '#1e293b';
   if (classId === 'death') return team === 'player' ? '#1e293b' : '#0f172a';
@@ -1416,8 +1568,281 @@ function drawWeaponGraphic(ctx, abilityId, x, y, scale = 1, angle = -Math.PI / 4
       ctx.fillText('×2', 0, 0.5);
       break;
     }
+
+    // ==================== ОРУЖИЕ 4 НОВЫХ БОЙЦОВ (№38 – №41) ====================
+    case 'musician': {
+      // Треугольная деревянная балалайка с грифом и струнами
+      ctx.fillStyle = '#f59e0b';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 2.1;
+      // Треугольный корпус балалайки
+      ctx.beginPath();
+      ctx.moveTo(8, 0);
+      ctx.lineTo(-9, -11);
+      ctx.lineTo(-9, 11);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Гриф балалайки
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(6, -2.2, 16, 4.4);
+      ctx.strokeRect(6, -2.2, 16, 4.4);
+
+      // Резонаторное отверстие (розетка)
+      ctx.fillStyle = '#451a03';
+      ctx.beginPath();
+      ctx.arc(-2.5, 0, 2.8, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Струны
+      ctx.strokeStyle = '#fef3c7';
+      ctx.lineWidth = 1.1;
+      ctx.beginPath();
+      ctx.moveTo(-6, -1);
+      ctx.lineTo(20, -1);
+      ctx.moveTo(-6, 1);
+      ctx.lineTo(20, 1);
+      ctx.stroke();
+      break;
+    }
+
+    case 'pavuk': {
+      // Значок паутины Павука
+      ctx.rotate(-angle);
+      drawSpiderWebGraphic(ctx, 0, 0, 11, '#ffffff', '#1c1a17');
+      break;
+    }
+
+    case 'bibizyana': {
+      // Спелый жёлтый банан Бибизяны
+      ctx.rotate(-angle);
+      drawBananaGraphic(ctx, 0, 0, 1.05, -0.2);
+      break;
+    }
+
+    case 'medusa': {
+      // Электрические щупальца Медузы с искрами молний
+      ctx.rotate(-angle);
+      ctx.strokeStyle = '#06b6d4';
+      ctx.lineWidth = 2.3;
+      for (const dy of [-5, 0, 5]) {
+        ctx.beginPath();
+        ctx.moveTo(-8, dy);
+        ctx.quadraticCurveTo(-2, dy - 3.5, 3, dy);
+        ctx.quadraticCurveTo(8, dy + 3.5, 13, dy);
+        ctx.stroke();
+      }
+      // Искры электричества
+      ctx.fillStyle = '#facc15';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(2, -9);
+      ctx.lineTo(-2, -1);
+      ctx.lineTo(2, -1);
+      ctx.lineTo(-1, 8);
+      ctx.lineTo(6, 0);
+      ctx.lineTo(2, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
   }
 
+  ctx.restore();
+}
+
+// Отрисовка ноты для снарядов Музыканта
+function drawMusicNoteGraphic(ctx, x, y, scale = 1, color = '#a855f7') {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+  ctx.fillStyle = color;
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 1.8;
+
+  // Головка ноты
+  ctx.beginPath();
+  ctx.ellipse(-2, 4, 4.8, 3.6, -0.35, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Штиль и флажок ноты
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.moveTo(2, 3);
+  ctx.lineTo(2, -7);
+  ctx.quadraticCurveTo(8, -5, 7, 0);
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Отрисовка паутины (иконка и летящий снаряд Павука)
+function drawSpiderWebGraphic(ctx, x, y, radius = 11, fill = 'rgba(255,255,255,0.75)', stroke = '#1c1a17') {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.strokeStyle = stroke;
+  ctx.fillStyle = fill;
+  ctx.lineWidth = 1.6;
+
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const a = (i * Math.PI) / 4;
+    const px = Math.cos(a) * radius;
+    const py = Math.sin(a) * radius;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Внутреннее кольцо и лучи паутины
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.52, 0, Math.PI * 2);
+  for (let i = 0; i < 8; i++) {
+    const a = (i * Math.PI) / 4;
+    ctx.moveTo(0, 0);
+    ctx.lineTo(Math.cos(a) * radius, Math.sin(a) * radius);
+  }
+  ctx.stroke();
+  ctx.restore();
+}
+
+// Отрисовка маленьких паучьих лапок, торчащих из тела Павука, и его глаз
+function drawSpiderLegs(ctx, x, y, radius, aimAngle = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(aimAngle);
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 2.3;
+  ctx.lineCap = 'round';
+  ctx.lineJoin = 'round';
+
+  // По 4 маленьких сгибающихся лапки с каждой стороны туловища
+  const legAngles = [-0.85, -0.35, 0.25, 0.78];
+  for (const side of [-1, 1]) {
+    for (let i = 0; i < legAngles.length; i++) {
+      const baseA = side * (Math.PI * 0.5) + legAngles[i] * 0.55;
+      const sx = Math.cos(baseA) * (radius * 0.92);
+      const sy = Math.sin(baseA) * (radius * 0.92);
+      const kx = Math.cos(baseA + side * 0.22) * (radius + 6.5);
+      const ky = Math.sin(baseA + side * 0.22) * (radius + 6.5);
+      const ex = Math.cos(baseA - side * 0.18) * (radius + 10.5);
+      const ey = Math.sin(baseA - side * 0.18) * (radius + 10.5);
+
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      ctx.lineTo(kx, ky);
+      ctx.lineTo(ex, ey);
+      ctx.stroke();
+    }
+  }
+
+  // Паучьи красные глазки спереди
+  ctx.fillStyle = '#ef4444';
+  for (const dy of [-4.5, -1.6, 1.6, 4.5]) {
+    ctx.beginPath();
+    ctx.arc(radius * 0.48, dy, Math.abs(dy) < 2 ? 2.1 : 1.5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+// Отрисовка банана (оружие и снаряд Бибизяны)
+function drawBananaGraphic(ctx, x, y, scale = 1, rot = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  ctx.scale(scale, scale);
+
+  ctx.fillStyle = '#fde047';
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+
+  ctx.beginPath();
+  ctx.moveTo(-8, -9);
+  ctx.quadraticCurveTo(9, -5, 9, 9);
+  ctx.quadraticCurveTo(2, 11, -3, 7);
+  ctx.quadraticCurveTo(2, -1, -8, -9);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Коричневый хвостик банана
+  ctx.fillStyle = '#78350f';
+  ctx.beginPath();
+  ctx.arc(-8, -9, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// Отрисовка обезьяньих ушек и мордочки Бибизяны
+function drawMonkeyDetails(ctx, x, y, radius, aimAngle = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(aimAngle);
+
+  // Круглые обезьяньи ушки по бокам
+  for (const side of [-1, 1]) {
+    const ey = side * (radius * 0.92);
+    ctx.fillStyle = '#92400e';
+    ctx.strokeStyle = '#1c1a17';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.arc(-radius * 0.1, ey, radius * 0.34, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#fde68a';
+    ctx.beginPath();
+    ctx.arc(-radius * 0.1, ey, radius * 0.17, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Светлая мордочка и глазки спереди
+  ctx.fillStyle = '#fde68a';
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 1.6;
+  ctx.beginPath();
+  ctx.ellipse(radius * 0.32, 0, radius * 0.42, radius * 0.55, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.fillStyle = '#1c1a17';
+  ctx.beginPath();
+  ctx.arc(radius * 0.25, -radius * 0.24, 2, 0, Math.PI * 2);
+  ctx.arc(radius * 0.25, radius * 0.24, 2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+
+// Отрисовка щупалец и электро-ореола Медузы на корпусе
+function drawMedusaDetails(ctx, x, y, radius, aimAngle = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(aimAngle);
+
+  // Волнистые щупальца медузы позади купола
+  ctx.strokeStyle = '#22d3ee';
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = 'round';
+  for (const dy of [-radius * 0.52, -radius * 0.18, radius * 0.18, radius * 0.52]) {
+    ctx.beginPath();
+    ctx.moveTo(-radius * 0.75, dy);
+    ctx.quadraticCurveTo(-radius * 1.25, dy + 3.5, -radius * 1.65, dy - 2);
+    ctx.stroke();
+  }
+
+  // Светящиеся пятнышки на куполе медузы
+  ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
+  ctx.beginPath();
+  ctx.arc(radius * 0.22, -radius * 0.3, radius * 0.22, 0, Math.PI * 2);
+  ctx.arc(-radius * 0.15, radius * 0.28, radius * 0.16, 0, Math.PI * 2);
+  ctx.fill();
   ctx.restore();
 }
 
@@ -1519,6 +1944,13 @@ function renderFighterThumbnail(canvas, unitOrClass, team = 'player', showDualIc
     return;
   }
 
+  if (classId === 'pavuk' || abilityId === 'pavuk') {
+    drawSpiderLegs(ctx, cx, cy, r, 0);
+  }
+  if (classId === 'medusa' || abilityId === 'medusa') {
+    drawMedusaDetails(ctx, cx, cy, r, 0);
+  }
+
   // Специальная раскраска в чёрно-белую шахматную клетку для «Шах и Мат»
   if (classId === 'checkmate' || abilityId === 'checkmate') {
     drawChessboardBody(ctx, shape, cx, cy, r, '#1c1a17', 2.4, false);
@@ -1532,11 +1964,14 @@ function renderFighterThumbnail(canvas, unitOrClass, team = 'player', showDualIc
   if (classId === 'werewolf' || abilityId === 'werewolf') {
     drawWerewolfDetails(ctx, cx, cy, r, 0);
   }
+  if (classId === 'bibizyana' || abilityId === 'bibizyana') {
+    drawMonkeyDetails(ctx, cx, cy, r, 0);
+  }
 
   const wx = cx + r * 1.35;
   const wy = cy + 1;
   let angle = -Math.PI / 4;
-  if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'zombie', 'werewolf', 'death', 'fairy'].includes(abilityId)) angle = 0;
+  if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'zombie', 'werewolf', 'death', 'fairy', 'musician'].includes(abilityId)) angle = 0;
   if (abilityId === 'spearman') angle = -Math.PI / 5;
 
   drawWeaponGraphic(ctx, abilityId, wx, wy, 0.85, angle, team);

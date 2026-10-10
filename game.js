@@ -3,7 +3,7 @@
 const CircledNumbers = [
   '①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯',
   '⑰','⑱','⑲','⑳','㉑','㉒','㉓','㉔','㉕','㉖','㉗','㉘','㉙','㉚','㉛',
-  '㉜','㉝','㉞','㉟','㊱','㊲'
+  '㉜','㉝','㉞','㉟','㊱','㊲','㊳','㊴','㊵','㊶','㊷','㊸','㊹','㊺'
 ];
 
 class BattleRoyalPaperGame {
@@ -11,9 +11,18 @@ class BattleRoyalPaperGame {
     this.canvas = document.getElementById('arenaCanvas');
     this.ctx = this.canvas.getContext('2d');
 
-    this.level = 5;
+    this.level = 1;
     this.maxUnlockedLevel = 10;
-    this.completedLevels = new Set([1, 2, 3, 4]);
+    this.completedLevels = new Set();
+
+    // ==================== ПРОГРЕССИЯ: МОНЕТЫ, УРОВЕНЬ, ОТКРЫТЫЕ БОЙЦЫ И ПРОКАЧКА ====================
+    this.coins = 100; // Стартовые 100 монет (хватает на 1 ящик или 6 прокачек; +40 монет за каждый уровень!)
+    this.campaignLevel = 1; // Начинаем с 1 уровня
+    this.unlockedFighters = new Set(['swordsman']); // Изначально открыт только Мечник (в ящике все кроме Мечника)
+    this.selectedCampaignFighterId = null; // Выбранный персонаж в ячейке
+    this.fighterUpgrades = {}; // { [classId]: { hp: 0, damage: 0 } }
+    this.isCampaignBattle = true;
+    this.currentScreen = 'menu'; // 'menu' | 'shop' | 'hub' | 'upgrade' | 'arena'
 
     this.state = 'prep'; // 'prep' | 'battle' | 'paused' | 'ended'
     this.simSpeed = 1;
@@ -54,12 +63,14 @@ class BattleRoyalPaperGame {
     this.lastFrameTime = performance.now();
 
     this.initRosterUI();
+    this.initProgressionScreensUI();
     this.initEventListeners();
     this.setMobileTab('player');
     this.resizeCanvas();
     this.loadReferenceDefaultTeams();
     this.renderLevelBar();
     this.refreshAllUI();
+    this.showScreen('menu');
     window.sfx.playMusic('prep');
 
     requestAnimationFrame((t) => this.loop(t));
@@ -69,30 +80,38 @@ class BattleRoyalPaperGame {
     return 'u_' + (this.uidCounter++);
   }
 
+  // Возвращает характеристики бойца с учётом купленных прокачек (+5 HP / +2 урона за 15 монет)
+  getUpgradedFighterStats(classId) {
+    const cls = getFighterClass(classId);
+    const upg = this.fighterUpgrades[classId] || { hp: 0, damage: 0 };
+    return {
+      hp: cls.hp + upg.hp,
+      damage: cls.damage + upg.damage,
+      speed: cls.speed
+    };
+  }
+
   resizeCanvas() {
     const frame = document.getElementById('arenaFrame');
     if (!frame) return;
-    const displayWidth = frame.clientWidth;
-    const displayHeight = frame.clientHeight;
-    if (displayWidth < 40 || displayHeight < 40) return;
+    const displayWidth = frame.clientWidth || 380;
+    const displayHeight = frame.clientHeight || 225;
 
-    // На узких мобильных экранах сохраняем пропорциональное логическое разрешение арены (минимум 580px в ширину),
-    // чтобы бойцы не сплющивались, круги оставались идеально круглыми, а на ринге было просторно
-    const scale = Math.max(1, 580 / displayWidth, 300 / displayHeight);
-    const w = Math.round(displayWidth * scale);
-    const h = Math.round(displayHeight * scale);
+    // Арена сделана В 2 РАЗА МЕНЬШЕ (логическое разрешение 380×225 вместо 760×450)!
+    const w = 380;
+    const h = 225;
 
     if (this.canvas.width !== w || this.canvas.height !== h) {
-      const oldW = this.canvas.width || 760;
-      const oldH = this.canvas.height || 450;
+      const oldW = this.canvas.width || 380;
+      const oldH = this.canvas.height || 225;
       this.canvas.width = w;
       this.canvas.height = h;
 
       const sx = w / oldW;
       const sy = h / oldH;
       for (const bp of [...this.playerBlueprints, ...this.botBlueprints]) {
-        bp.x = Math.max(45, Math.min(w - 45, bp.x * sx));
-        bp.y = Math.max(45, Math.min(h - 45, bp.y * sy));
+        bp.x = Math.max(24, Math.min(w - 24, bp.x * sx));
+        bp.y = Math.max(24, Math.min(h - 24, bp.y * sy));
       }
       if (this.state === 'prep') {
         this.syncUnitsFromBlueprints();
@@ -101,21 +120,15 @@ class BattleRoyalPaperGame {
   }
 
   loadReferenceDefaultTeams() {
-    const w = this.canvas.width;
-    const h = this.canvas.height;
+    const w = this.canvas.width || 380;
+    const h = this.canvas.height || 225;
 
     this.playerBlueprints = [
-      this.createBlueprint('swordsman', 'player', w * 0.23, h * 0.19, { hp: 100, speed: 3, damage: 10 }),
-      this.createBlueprint('archer',    'player', w * 0.14, h * 0.40, { hp: 85,  speed: 3, damage: 12 }),
-      this.createBlueprint('shield',    'player', w * 0.25, h * 0.60, { hp: 140, speed: 2.5, damage: 5 }),
-      this.createBlueprint('gunslinger','player', w * 0.19, h * 0.82, { hp: 90,  speed: 3, damage: 15 })
+      this.createBlueprint('swordsman', 'player', w * 0.23, h * 0.50, { hp: 100, speed: 3, damage: 10 })
     ];
 
     this.botBlueprints = [
-      this.createBlueprint('pyro',      'bot', w * 0.72, h * 0.18, { hp: 100, speed: 3, damage: 10 }),
-      this.createBlueprint('spearman',  'bot', w * 0.81, h * 0.41, { hp: 115, speed: 3.2, damage: 12 }),
-      this.createBlueprint('thunder',   'bot', w * 0.75, h * 0.62, { hp: 100, speed: 3.5, damage: 11 }),
-      this.createBlueprint('engineer',  'bot', w * 0.76, h * 0.83, { hp: 110, speed: 2.6, damage: 8 })
+      this.createBlueprint('bibizyana', 'bot', w * 0.76, h * 0.50, { hp: 75, speed: 3.1, damage: 10 })
     ];
 
     this.selectedPlayerUnitId = this.playerBlueprints[0].id;
@@ -125,14 +138,14 @@ class BattleRoyalPaperGame {
 
   createBlueprint(classId, team, x, y, customStats = null) {
     const cls = getFighterClass(classId);
-    const w = this.canvas.width || 760;
-    const h = this.canvas.height || 450;
+    const w = this.canvas.width || 380;
+    const h = this.canvas.height || 225;
 
     if (x == null || y == null) {
-      const minX = team === 'player' ? 60 : w * 0.56;
-      const maxX = team === 'player' ? w * 0.44 : w - 60;
+      const minX = team === 'player' ? 30 : w * 0.56;
+      const maxX = team === 'player' ? w * 0.44 : w - 30;
       x = minX + Math.random() * (maxX - minX);
-      y = 65 + Math.random() * (h - 130);
+      y = 32 + Math.random() * (h - 64);
     }
 
     return {
@@ -150,53 +163,48 @@ class BattleRoyalPaperGame {
     };
   }
 
-  generateBotTeamForLevel(lvl) {
-    const w = this.canvas.width;
-    const h = this.canvas.height;
-
-    const statMult = 1 + (lvl - 1) * 0.12;
-    const count = Math.min(8, Math.max(2, Math.floor(1 + lvl * 0.65)));
-
-    const botPool = FIGHTER_CLASSES.map(c => c.id);
-    const newBots = [];
-
-    if (lvl === 5 && this.botBlueprints.length === 0) {
-      const preset = ['pyro', 'spearman', 'thunder', 'engineer'];
-      preset.forEach((cid, idx) => {
-        const cls = getFighterClass(cid);
-        const py = h * (0.18 + idx * 0.21);
-        const px = w * (idx % 2 === 0 ? 0.73 : 0.81);
-        newBots.push(
-          this.createBlueprint(cid, 'bot', px, py, {
-            hp: Math.round((cls.hp * statMult) / 5) * 5,
-            speed: Number((cls.speed + (lvl - 1) * 0.1).toFixed(1)),
-            damage: Math.round(cls.damage * statMult)
-          })
-        );
-      });
-    } else {
-      for (let i = 0; i < count; i++) {
-        const cid = botPool[(lvl * 4 + i * 5 + Math.floor(Math.random() * 3)) % botPool.length];
-        const cls = getFighterClass(cid);
-        const row = i % 4;
-        const col = Math.floor(i / 4);
-        const px = w * (0.64 + col * 0.16 + (Math.random() * 0.05 - 0.025));
-        const py = h * (0.18 + row * 0.21);
-        const isBoss = (lvl % 5 === 0 && i === 0);
-
-        const bp = this.createBlueprint(cid, 'bot', px, py, {
-          hp: Math.round((cls.hp * statMult * (isBoss ? 1.45 : 1)) / 5) * 5,
-          speed: Number(Math.min(8, cls.speed + (lvl - 1) * 0.12).toFixed(1)),
-          damage: Math.round(cls.damage * statMult * (isBoss ? 1.25 : 1))
-        });
-
-        if (lvl >= 3 && Math.random() < 0.25) {
-          const randAb = FIGHTER_CLASSES[Math.floor(Math.random() * FIGHTER_CLASSES.length)];
-          bp.abilityId = randAb.id;
-        }
-        newBots.push(bp);
-      }
+  // Описание врагов для текущего уровня кампании
+  getCampaignEnemiesForLevel(lvl) {
+    // На 1 уровне вас ждёт соперник Бибизяна!
+    if (lvl === 1) {
+      return [
+        { classId: 'bibizyana', hp: 75, speed: 3.0, damage: 10 }
+      ];
     }
+    // С каждым уровнем враги становятся сильнее и увеличивается их количество!
+    const enemyCount = Math.min(6, 1 + Math.floor(lvl / 2));
+    const statScale = 0.65 + lvl * 0.18;
+    const orderedByRarity = getFightersSortedByRarity();
+    // Чем выше уровень, тем более редкие и опасные бойцы попадаются против вас
+    const maxPoolIdx = Math.min(orderedByRarity.length - 1, 6 + lvl * 4);
+    const enemies = [];
+    for (let i = 0; i < enemyCount; i++) {
+      const pickIdx = (lvl * 3 + i * 5) % (maxPoolIdx + 1);
+      const cls = orderedByRarity[pickIdx] || getFighterClass('bibizyana');
+      enemies.push({
+        classId: cls.id,
+        hp: Math.max(45, Math.round((cls.hp * statScale) / 5) * 5),
+        speed: Number(Math.min(6.5, cls.speed * (0.92 + lvl * 0.03)).toFixed(1)),
+        damage: Math.max(6, Math.round(cls.damage * statScale))
+      });
+    }
+    return enemies;
+  }
+
+  generateBotTeamForLevel(lvl) {
+    const w = this.canvas.width || 380;
+    const h = this.canvas.height || 225;
+
+    const enemies = this.getCampaignEnemiesForLevel(lvl);
+    const newBots = enemies.map((eCfg, idx) => {
+      const py = h * ((idx + 1) / (enemies.length + 1));
+      const px = w * (idx % 2 === 0 ? 0.74 : 0.82);
+      return this.createBlueprint(eCfg.classId, 'bot', px, py, {
+        hp: eCfg.hp,
+        speed: eCfg.speed,
+        damage: eCfg.damage
+      });
+    });
 
     this.botBlueprints = newBots;
     this.selectedBotUnitId = this.botBlueprints[0]?.id || null;
@@ -231,8 +239,9 @@ class BattleRoyalPaperGame {
       ? (Math.random() * 0.9 - 0.45)
       : (Math.PI + (Math.random() * 0.9 - 0.45));
 
-    const speedPx = (bp.speed || 3) * 44;
-    const baseRadius = isMinion ? 11 : 21;
+    const speedPx = (bp.speed || 3) * 34;
+    // Поскольку арена в 2 раза меньше (380x225), делаем радиус бойцов аккуратным под компактный ринг
+    const baseRadius = isMinion ? 8 : 15;
     const abilityId = bp.abilityId || bp.classId;
 
     // Для Червя (гусеницы) создаём цепочку из 7 сегментов хвоста!
@@ -256,6 +265,10 @@ class BattleRoyalPaperGame {
     if (abilityId === 'checkmate') initialCd = 1.6;     // Каждые 4 секунды пускает 4 пешки (крестом или наискосок)
     if (abilityId === 'fairy') initialCd = 1.5;         // Каждые 3.5 секунды кастует заклинание из 7 возможных
     if (abilityId === 'card_master') initialCd = 1.2;   // Каждые 2.5 секунды кидает 3 карты по 30 урона
+    if (abilityId === 'musician') initialCd = 1.3;      // Музыкант выпускает 3 ноты по 55 урона
+    if (abilityId === 'pavuk') initialCd = 1.8;         // Павук каждые 5 с стреляет паутиной
+    if (abilityId === 'bibizyana') initialCd = 2.2;     // Бибизяна каждые 7 с кидает 1 банан на 45 урона
+    if (abilityId === 'medusa') initialCd = 0.15;       // Медуза оставляет за собой электрический след
 
     return {
       id: bp.id || this.nextUid(),
@@ -282,7 +295,7 @@ class BattleRoyalPaperGame {
       orbitDir: bp.team === 'player' ? 1 : -1,
       aimAngle: bp.team === 'player' ? 0 : Math.PI,
       cooldown: initialCd,
-      // Специальные таймеры Супермена, Титана, Ниндзя, Боксёра, Оборотня, Смерти и Шах-и-Мата
+      // Специальные таймеры способностей
       superLaserTimer: 2.5,   // первый залп лазеров пораньше, затем каждые 10 секунд
       superBoostCooldown: 5.0,// каждые 5 секунд ускоряется на 2 секунды с ×2 уроном
       superFlightTimer: 0,    // длительность полёта 2 секунды
@@ -293,6 +306,14 @@ class BattleRoyalPaperGame {
       werewolfTimer: 40.0,    // Оборотень каждые 40 секунд меняет команду через дым (если не 1 на 1)
       smokeTimer: 0,          // анимация дымовой завесы при смене команды Оборотня
       chessDiagToggle: false, // чередование/выбор выстрела по прямой или наискосок у Шах и Мат
+      pavukDashTimer: 10.0,   // Павук каждые 10 секунд делает резкий рывок на соперника (80 HP)
+      pavukDashingTimer: 0,   // длительность активного рывка Павука
+      cocoonTimer: 0,         // кокон от паутины Павука (3.5 с)
+      medusaTrailTimer: 0.12, // таймер генерации электрического следа Медузы
+      shockTimer: 0,          // длительность поражения током от следа Медузы (5 с)
+      shockTick: 0,           // интервал урона током (каждые 0.5 с по 10 HP)
+      shockDmg: 10,
+      shockAttacker: null,
       thrustTimer: 0,
       hitImmunityMap: {},
       // Статус-эффекты
@@ -369,6 +390,478 @@ class BattleRoyalPaperGame {
     document.querySelectorAll('.fighter-card').forEach(el => {
       el.classList.toggle('selected-class', el.dataset.classId === classId);
     });
+  }
+
+  // ==================== ЭКРАНЫ МЕНЮ, МАГАЗИНА, ЯЧЕЕК ПО РЕДКОСТИ И ПРОКАЧКИ ====================
+  initProgressionScreensUI() {
+    // Отрисовываем стартового Мечника в главном меню
+    const starterCnv = document.getElementById('menuStarterCanvas');
+    if (starterCnv) {
+      renderFighterThumbnail(starterCnv, getFighterClass('swordsman'), 'player', true);
+    }
+
+    // 1. Кнопки Начального меню: МАГАЗИН и ИГРАТЬ
+    document.getElementById('menuShopBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.openShopScreen();
+    });
+
+    document.getElementById('menuPlayBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.openCampaignHubScreen();
+    });
+
+    document.getElementById('menuSandboxBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.isCampaignBattle = false;
+      document.body.dataset.campaignMode = 'false';
+      this.showScreen('arena');
+      this.stopBattleToPrep();
+    });
+
+    // 2. Кнопки Магазина и Ящика
+    document.getElementById('shopBackBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.showScreen('menu');
+    });
+
+    document.getElementById('shopCrateItemBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      document.getElementById('shopShelfView')?.classList.add('hidden');
+      document.getElementById('cratePictureView')?.classList.remove('hidden');
+      document.getElementById('crateUnboxedResult')?.classList.add('hidden');
+      this.renderCrateRaritiesAndFighters();
+      this.updateAllCoinsUI();
+    });
+
+    document.getElementById('crateClosePictureBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      document.getElementById('cratePictureView')?.classList.add('hidden');
+      document.getElementById('shopShelfView')?.classList.remove('hidden');
+    });
+
+    document.getElementById('openCrate100Btn')?.addEventListener('click', () => {
+      this.openCrateFor100Coins();
+    });
+
+    // 3. Кнопки Локации Уровня и Ячеек персонажей
+    document.getElementById('hubBackToMenuBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.showScreen('menu');
+    });
+
+    document.getElementById('hubGoShopQuickBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.openShopScreen();
+    });
+
+    document.getElementById('hubPlayLevelBtn')?.addEventListener('click', () => {
+      this.startCampaignBattleFromHub();
+    });
+
+    document.getElementById('hubUpgradeCharBtn')?.addEventListener('click', () => {
+      if (!this.selectedCampaignFighterId) return;
+      window.sfx.click();
+      this.openUpgradeScreen(this.selectedCampaignFighterId);
+    });
+
+    // 4. Кнопки Локации Прокачки Бойца (за 15 монет: +5 к здоровью или +2 к урону)
+    document.getElementById('upgradeBackBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.openCampaignHubScreen();
+    });
+
+    document.getElementById('upgradeHp15Btn')?.addEventListener('click', () => {
+      this.buyStatUpgrade('hp');
+    });
+
+    document.getElementById('upgradeDmg15Btn')?.addEventListener('click', () => {
+      this.buyStatUpgrade('damage');
+    });
+
+    // 5. Кнопка возврата к ячейкам с арены
+    document.getElementById('backToHubFromArenaBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.openCampaignHubScreen();
+    });
+
+    this.updateAllCoinsUI();
+  }
+
+  showScreen(screenName) {
+    this.currentScreen = screenName;
+    const screens = {
+      menu: document.getElementById('mainMenuScreen'),
+      shop: document.getElementById('shopScreen'),
+      hub: document.getElementById('campaignHubScreen'),
+      upgrade: document.getElementById('upgradeScreen'),
+      arena: document.getElementById('arenaAppContainer')
+    };
+    for (const [key, el] of Object.entries(screens)) {
+      if (!el) continue;
+      el.classList.toggle('hidden', key !== screenName);
+    }
+    this.updateAllCoinsUI();
+    if (screenName === 'arena') {
+      requestAnimationFrame(() => this.resizeCanvas());
+    }
+  }
+
+  updateAllCoinsUI() {
+    for (const id of ['menuCoinsVal', 'shopCoinsVal', 'hubCoinsVal', 'upgradeCoinsVal', 'arenaCoinsVal']) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = this.coins;
+    }
+    const playSub = document.getElementById('menuPlaySub');
+    if (playSub) {
+      playSub.textContent = `${this.campaignLevel} уровень • В бой!`;
+    }
+    const openBtn = document.getElementById('openCrate100Btn');
+    const statusMsg = document.getElementById('crateOpenStatusMsg');
+    if (openBtn) {
+      openBtn.disabled = this.coins < 100;
+      openBtn.textContent = this.coins >= 100
+        ? '🔓 ОТКРЫТЬ ЗА 100 МОНЕТ 🪙'
+        : `🔒 НУЖНО 100 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+    }
+    if (statusMsg && this.coins < 100) {
+      statusMsg.textContent = `Побеждайте на уровнях (+40 🪙 за победу), чтобы накопить 100 монет на ящик!`;
+    }
+  }
+
+  openShopScreen() {
+    document.getElementById('shopShelfView')?.classList.remove('hidden');
+    document.getElementById('cratePictureView')?.classList.add('hidden');
+    this.renderCrateRaritiesAndFighters();
+    this.showScreen('shop');
+  }
+
+  // Отрисовка нижней части картинки ящика: редкости и все 40 персонажей (кроме Мечника) с шансами выпадения
+  renderCrateRaritiesAndFighters() {
+    const listEl = document.getElementById('crateRaritiesList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    for (const tier of FIGHTER_RARITIES) {
+      const crateFighters = FIGHTER_CLASSES.filter(fc => fc.rarity === tier.id && fc.inCrate);
+      const block = document.createElement('div');
+      block.className = 'rarity-tier-block';
+      block.style.borderColor = tier.border;
+      block.style.background = tier.bg;
+
+      const perFighterChance = crateFighters[0]?.dropChance || 0;
+      block.innerHTML = `
+        <div class="rarity-tier-header">
+          <span class="rarity-tier-pill" style="background:${tier.color}">${tier.name} редкость</span>
+          <span>Шанс редкости: <strong>${tier.tierChance}%</strong> (по ${perFighterChance}% на бойца)</span>
+        </div>
+        <div class="rarity-fighters-row"></div>
+      `;
+
+      const row = block.querySelector('.rarity-fighters-row');
+      for (const fc of crateFighters) {
+        const isUnlocked = this.unlockedFighters.has(fc.id);
+        const item = document.createElement('div');
+        item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
+        item.innerHTML = `
+          <canvas width="64" height="36"></canvas>
+          <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${fc.name}</span>
+          <span class="cfm-chance">${fc.dropChance}%</span>
+        `;
+        const cnv = item.querySelector('canvas');
+        renderFighterThumbnail(cnv, fc, 'player', false);
+        row.appendChild(item);
+      }
+
+      listEl.appendChild(block);
+    }
+  }
+
+  // Открытие ящика за 100 монет с учётом редкости (чем выше редкость — тем меньше шанс!)
+  openCrateFor100Coins() {
+    if (this.coins < 100) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 100;
+    window.sfx.victory();
+
+    const boxIll = document.getElementById('crateBoxIllustration');
+    if (boxIll) {
+      boxIll.classList.remove('crate-shake');
+      void boxIll.offsetWidth;
+      boxIll.classList.add('crate-shake');
+    }
+
+    // Выбираем редкость по весам (45% Обычная, 28% Редкая, 16% Эпическая, 8% Мифическая, 3% Легендарная)
+    const roll = Math.random() * 100;
+    let cumulative = 0;
+    let chosenTier = FIGHTER_RARITIES[0];
+    for (const tier of FIGHTER_RARITIES) {
+      cumulative += tier.tierChance;
+      if (roll <= cumulative) {
+        chosenTier = tier;
+        break;
+      }
+    }
+
+    // Все персонажи в ящике (кроме Мечника!)
+    let pool = FIGHTER_CLASSES.filter(fc => fc.inCrate && fc.rarity === chosenTier.id);
+    const lockedInTier = pool.filter(fc => !this.unlockedFighters.has(fc.id));
+    if (lockedInTier.length > 0) {
+      pool = lockedInTier;
+    } else {
+      // Если в этой редкости уже все открыты, ищем неоткрытых в других редкостях
+      const anyLocked = FIGHTER_CLASSES.filter(fc => fc.inCrate && !this.unlockedFighters.has(fc.id));
+      if (anyLocked.length > 0) pool = anyLocked;
+    }
+
+    const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
+    const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
+    this.unlockedFighters.add(droppedFighter.id);
+    this.selectedCampaignFighterId = droppedFighter.id;
+
+    // Если этот боец уже был открыт (когда собраны все), даём ему бонус прокачки!
+    if (wasAlreadyUnlocked) {
+      if (!this.fighterUpgrades[droppedFighter.id]) {
+        this.fighterUpgrades[droppedFighter.id] = { hp: 0, damage: 0 };
+      }
+      this.fighterUpgrades[droppedFighter.id].hp += 5;
+      this.fighterUpgrades[droppedFighter.id].damage += 2;
+    }
+
+    // Показываем выпавшего бойца по центру
+    const resBox = document.getElementById('crateUnboxedResult');
+    const cnv = document.getElementById('unboxedFighterCanvas');
+    const nameEl = document.getElementById('unboxedFighterName');
+    const rarEl = document.getElementById('unboxedFighterRarity');
+    const msgEl = document.getElementById('crateOpenStatusMsg');
+
+    if (resBox && cnv && nameEl && rarEl) {
+      resBox.classList.remove('hidden');
+      renderFighterThumbnail(cnv, droppedFighter, 'player', true);
+      nameEl.textContent = droppedFighter.name.toUpperCase();
+      rarEl.textContent = `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
+      rarEl.style.background = droppedFighter.rarityColor;
+    }
+    if (msgEl) {
+      msgEl.textContent = wasAlreadyUnlocked
+        ? `Боец «${droppedFighter.name}» усилен (+5 к здоровью и +2 к урону)!`
+        : `Новый боец «${droppedFighter.name}» добавлен в вашу ячейку по редкости!`;
+    }
+
+    this.renderCrateRaritiesAndFighters();
+    this.updateAllCoinsUI();
+  }
+
+  // Открытие локации с уровнем, кнопкой ИГРАТЬ и сеткой ячеек по редкости
+  openCampaignHubScreen() {
+    this.renderCampaignHub();
+    this.showScreen('hub');
+  }
+
+  renderCampaignHub() {
+    const lvlNumEl = document.getElementById('hubLevelNumber');
+    if (lvlNumEl) lvlNumEl.textContent = this.campaignLevel;
+
+    const enemies = this.getCampaignEnemiesForLevel(this.campaignLevel);
+    const enemyNames = enemies.map(e => getFighterClass(e.classId).name).join(', ');
+    const previewEl = document.getElementById('hubEnemyPreviewText');
+    if (previewEl) {
+      previewEl.innerHTML =
+        `На <strong>${this.campaignLevel} уровне</strong> вас ждёт (${enemies.length} шт.): <strong>${enemyNames}</strong> • Награда за победу: <strong>+40 🪙</strong>`;
+    }
+
+    const unlockedCountEl = document.getElementById('hubUnlockedCountLabel');
+    if (unlockedCountEl) {
+      unlockedCountEl.textContent = `Открыто в ячейках: ${this.unlockedFighters.size} / ${FIGHTER_CLASSES.length}`;
+    }
+
+    const playBtn = document.getElementById('hubPlayLevelBtn');
+    const upgBtn = document.getElementById('hubUpgradeCharBtn');
+    const hintEl = document.getElementById('hubSelectionHint');
+
+    if (this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId)) {
+      const selCls = getFighterClass(this.selectedCampaignFighterId);
+      const st = this.getUpgradedFighterStats(selCls.id);
+      if (playBtn) {
+        playBtn.disabled = false;
+        playBtn.textContent = `⚔️ ИГРАТЬ (${selCls.name.toUpperCase()})`;
+      }
+      if (upgBtn) {
+        upgBtn.classList.remove('hidden');
+        upgBtn.textContent = `⬆️ ПРОКАЧАТЬ (${selCls.name.toUpperCase()})`;
+      }
+      if (hintEl) {
+        hintEl.textContent = `Выбран боец: ${selCls.name} (${selCls.rarityName} редкость • ❤️ ${st.hp} HP • ⚔️ ${st.damage} урона). Нажмите «Играть» или «Прокачать»!`;
+      }
+    } else {
+      if (playBtn) {
+        playBtn.disabled = true;
+        playBtn.textContent = '⚔️ ИГРАТЬ (ВЫБЕРИТЕ ПЕРСОНАЖА В ЯЧЕЙКЕ)';
+      }
+      if (upgBtn) {
+        upgBtn.classList.add('hidden');
+      }
+      if (hintEl) {
+        hintEl.textContent = '👇 Сначала выберите персонажа, который находится у вас в ячейках снизу!';
+      }
+    }
+
+    // Отрисовываем сетку с ячейками по редкости (все 41 место)
+    const grid = document.getElementById('hubRarityCellsGrid');
+    if (!grid) return;
+    grid.innerHTML = '';
+
+    const sortedFighters = getFightersSortedByRarity();
+    for (const fc of sortedFighters) {
+      const isUnlocked = this.unlockedFighters.has(fc.id);
+      const isSelected = this.selectedCampaignFighterId === fc.id;
+      const cell = document.createElement('div');
+      cell.className =
+        'hub-cell-card' +
+        (isUnlocked ? '' : ' locked-cell') +
+        (isSelected ? ' selected-hub-cell' : '');
+      cell.style.borderColor = fc.rarityBorder;
+
+      if (isUnlocked) {
+        const st = this.getUpgradedFighterStats(fc.id);
+        cell.innerHTML = `
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <canvas class="hcc-canvas" width="60" height="32"></canvas>
+          <div class="hcc-name">${fc.name}</div>
+          <div class="hcc-stats">❤️${st.hp} ⚔️${st.damage}</div>
+        `;
+        const cnv = cell.querySelector('canvas');
+        renderFighterThumbnail(cnv, fc, 'player', false);
+
+        cell.addEventListener('click', () => {
+          window.sfx.click();
+          this.selectedCampaignFighterId = fc.id;
+          this.renderCampaignHub();
+        });
+      } else {
+        cell.innerHTML = `
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <div class="hcc-lock">🔒</div>
+          <div class="hcc-name">В ящике</div>
+          <div class="hcc-stats">${fc.dropChance}%</div>
+        `;
+      }
+
+      grid.appendChild(cell);
+    }
+
+    this.updateAllCoinsUI();
+  }
+
+  // Открытие локации прокачки выбранного бойца
+  openUpgradeScreen(classId) {
+    this.selectedCampaignFighterId = classId;
+    this.renderUpgradeScreen();
+    this.showScreen('upgrade');
+  }
+
+  renderUpgradeScreen() {
+    const cid = this.selectedCampaignFighterId || 'swordsman';
+    const cls = getFighterClass(cid);
+    const st = this.getUpgradedFighterStats(cid);
+
+    const cnv = document.getElementById('upgradeFighterCanvas');
+    if (cnv) renderFighterThumbnail(cnv, cls, 'player', true);
+
+    const rarBadge = document.getElementById('upgradeFighterRarityBadge');
+    if (rarBadge) {
+      rarBadge.textContent = `${cls.rarityName} редкость`;
+      rarBadge.style.background = cls.rarityColor;
+    }
+
+    const nameEl = document.getElementById('upgradeFighterName');
+    if (nameEl) nameEl.textContent = cls.name.toUpperCase();
+
+    const descEl = document.getElementById('upgradeFighterDesc');
+    if (descEl) descEl.textContent = cls.desc;
+
+    // Надписи ЗДОРОВЬЕ и УРОН, а над ними ЧИСЛО здоровья и урона выбранного бойца!
+    const hpNumEl = document.getElementById('upgradeStatHpNum');
+    const dmgNumEl = document.getElementById('upgradeStatDmgNum');
+    if (hpNumEl) hpNumEl.textContent = st.hp;
+    if (dmgNumEl) dmgNumEl.textContent = st.damage;
+
+    const canAfford = this.coins >= 15;
+    const hpBtn = document.getElementById('upgradeHp15Btn');
+    const dmgBtn = document.getElementById('upgradeDmg15Btn');
+    if (hpBtn) hpBtn.disabled = !canAfford;
+    if (dmgBtn) dmgBtn.disabled = !canAfford;
+
+    this.updateAllCoinsUI();
+  }
+
+  // Прокачка за 15 монет: добавляет +5 к здоровью или +2 к урону
+  buyStatUpgrade(statType) {
+    if (this.coins < 15 || !this.selectedCampaignFighterId) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 15;
+    window.sfx.heal();
+
+    const cid = this.selectedCampaignFighterId;
+    if (!this.fighterUpgrades[cid]) {
+      this.fighterUpgrades[cid] = { hp: 0, damage: 0 };
+    }
+
+    const msgEl = document.getElementById('upgradeStatusFeedback');
+    if (statType === 'hp') {
+      this.fighterUpgrades[cid].hp += 5;
+      if (msgEl) msgEl.textContent = `✅ Здоровье бойца увеличено на +5 за 15 монет!`;
+    } else {
+      this.fighterUpgrades[cid].damage += 2;
+      if (msgEl) msgEl.textContent = `✅ Урон бойца увеличен на +2 за 15 монет!`;
+    }
+
+    this.renderUpgradeScreen();
+  }
+
+  // Переход из локации с ячейками на арену (в 2 раза меньше) и запуск боя уровня!
+  startCampaignBattleFromHub() {
+    if (!this.selectedCampaignFighterId || !this.unlockedFighters.has(this.selectedCampaignFighterId)) {
+      window.sfx.defeat();
+      return;
+    }
+
+    window.sfx.click();
+    this.isCampaignBattle = true;
+    this.level = this.campaignLevel;
+    document.body.dataset.campaignMode = 'true';
+
+    this.showScreen('arena');
+    this.resizeCanvas();
+
+    const w = this.canvas.width || 380;
+    const h = this.canvas.height || 225;
+
+    // Ставим выбранного из ячейки бойца игрока с его прокачанными здоровьем и уроном
+    const cid = this.selectedCampaignFighterId;
+    const st = this.getUpgradedFighterStats(cid);
+    this.playerBlueprints = [
+      this.createBlueprint(cid, 'player', w * 0.22, h * 0.50, {
+        hp: st.hp,
+        speed: st.speed,
+        damage: st.damage
+      })
+    ];
+    this.selectedPlayerUnitId = this.playerBlueprints[0].id;
+
+    // Генерируем соперников уровня (на 1 уровне — Бибизяна, дальше сильнее и больше!)
+    this.generateBotTeamForLevel(this.campaignLevel);
+    this.renderLevelBar();
+    this.refreshAllUI();
+
+    // Сразу запускаем бой на арене!
+    this.startBattle();
   }
 
   setMobileTab(tabName) {
@@ -566,11 +1059,19 @@ class BattleRoyalPaperGame {
 
     document.getElementById('replayLevelBtn').addEventListener('click', () => {
       window.sfx.click();
-      this.stopBattleToPrep();
+      if (this.isCampaignBattle) {
+        this.startCampaignBattleFromHub();
+      } else {
+        this.stopBattleToPrep();
+      }
     });
     document.getElementById('nextStageBtn').addEventListener('click', () => {
       window.sfx.click();
-      this.setLevel(this.level + 1);
+      if (this.isCampaignBattle) {
+        this.openCampaignHubScreen();
+      } else {
+        this.setLevel(this.level + 1);
+      }
     });
 
     // Управление мышью на ринге
@@ -887,18 +1388,46 @@ class BattleRoyalPaperGame {
 
     if (winnerTeam === 'player') {
       window.sfx.victory();
-      this.completedLevels.add(this.level);
-      this.renderLevelBar();
-      icon.textContent = '🏆';
-      title.textContent = `УРОВЕНЬ ${this.level} ПРОЙДЕН!`;
-      sub.textContent = 'Ваши бумажные бойцы одержали чистую победу на ринге!';
-      nextBtn.classList.remove('hidden');
+      if (this.isCampaignBattle) {
+        const finishedLvl = this.campaignLevel;
+        this.completedLevels.add(finishedLvl);
+        this.coins += 40;
+        this.campaignLevel += 1;
+        this.level = this.campaignLevel;
+        this.updateAllCoinsUI();
+        this.renderLevelBar();
+        icon.textContent = '🪙';
+        title.textContent = `УРОВЕНЬ ${finishedLvl} ПРОЙДЕН! +40 МОНЕТ!`;
+        sub.textContent = `Начислено +40 монет (всего: ${this.coins} 🪙)! Переход к Уровню ${this.campaignLevel}...`;
+        nextBtn.textContent = `К ЯЧЕЙКАМ (${this.campaignLevel} УРОВЕНЬ) ➔`;
+        nextBtn.classList.remove('hidden');
+        if (this.campaignReturnTimer) clearTimeout(this.campaignReturnTimer);
+        this.campaignReturnTimer = setTimeout(() => {
+          if (this.state === 'ended' && this.isCampaignBattle) {
+            this.openCampaignHubScreen();
+          }
+        }, 1500);
+      } else {
+        this.completedLevels.add(this.level);
+        this.renderLevelBar();
+        icon.textContent = '🏆';
+        title.textContent = `УРОВЕНЬ ${this.level} ПРОЙДЕН!`;
+        sub.textContent = 'Ваши бумажные бойцы одержали чистую победу на ринге!';
+        nextBtn.textContent = 'СЛЕД. УРОВЕНЬ ➔';
+        nextBtn.classList.remove('hidden');
+      }
     } else {
       window.sfx.defeat();
       icon.textContent = '💀';
-      title.textContent = 'ПОБЕДА БОТОВ!';
-      sub.textContent = 'Добавьте больше бойцов, поменяйте способности или увеличьте статы!';
-      nextBtn.classList.add('hidden');
+      title.textContent = 'ПОБЕДА ВРАГОВ!';
+      if (this.isCampaignBattle) {
+        sub.textContent = 'Попробуйте ещё раз или прокачайте персонажа в ячейках!';
+        nextBtn.textContent = 'К ЯЧЕЙКАМ И ПРОКАЧКЕ ➔';
+        nextBtn.classList.remove('hidden');
+      } else {
+        sub.textContent = 'Добавьте больше бойцов, поменяйте способности или увеличьте статы!';
+        nextBtn.classList.add('hidden');
+      }
     }
   }
 
@@ -1074,7 +1603,23 @@ class BattleRoyalPaperGame {
       z.life -= dt;
       z.tick -= dt;
 
-      if (z.type === 'graviton') {
+      if (z.type === 'medusa_trail') {
+        // Электрический след Медузы: если соперник наступил — вешает электрический разряд на 5 секунд (по 10 ХП каждые 0.5 сек)!
+        for (const u of this.units) {
+          if (u.team === z.team || u.hp <= 0) continue;
+          if (Math.hypot(u.x - z.x, u.y - z.y) <= z.radius + u.radius * 0.75) {
+            const wasShocked = u.shockTimer > 0;
+            u.shockTimer = 5.0;
+            u.shockDmg = z.damage || 10;
+            u.shockAttacker = z.owner || null;
+            if (!wasShocked) {
+              u.shockTick = 0.5;
+              window.sfx.lightning();
+              this.addFloatingText(u.x, u.y - u.radius - 18, '⚡ ТОК МЕДУЗЫ (5С)!', '#0891b2');
+            }
+          }
+        }
+      } else if (z.type === 'graviton') {
         for (const u of this.units) {
           if (u.team === z.team || u.hp <= 0) continue;
           const dx = z.x - u.x;
@@ -1087,7 +1632,7 @@ class BattleRoyalPaperGame {
         }
       }
 
-      if (z.tick <= 0) {
+      if (z.tick <= 0 && z.type !== 'medusa_trail') {
         z.tick = 0.45;
         for (const u of this.units) {
           if (u.team === z.team || u.hp <= 0) continue;
@@ -1172,6 +1717,8 @@ class BattleRoyalPaperGame {
       if (u.scytheSwingTimer > 0) u.scytheSwingTimer -= dt;
       if (u.dizzyTimer > 0) u.dizzyTimer -= dt;
       if (u.smokeTimer > 0) u.smokeTimer -= dt;
+      if (u.cocoonTimer > 0) u.cocoonTimer -= dt;
+      if (u.pavukDashingTimer > 0) u.pavukDashingTimer -= dt;
 
       // ОБОРОТЕНЬ: каждые 40 секунд меняет команду через дым, НО если остался 1 на 1 — способность не действует!
       if ((u.classId === 'werewolf' || u.abilityId === 'werewolf') && !u.isMinion) {
@@ -1222,6 +1769,17 @@ class BattleRoyalPaperGame {
         }
       }
 
+      // Электрический шок от следа Медузы: каждые 0.5 сек в течение 5 сек наносит по 10 ХП!
+      if (u.shockTimer > 0) {
+        u.shockTimer -= dt;
+        u.shockTick -= dt;
+        if (u.shockTick <= 0) {
+          u.shockTick += 0.5;
+          this.applyDamage(u, u.shockDmg || 10, u.shockAttacker || null, '#0891b2');
+          this.spawnConfetti(u.x, u.y - 4, '#22d3ee', 3);
+        }
+      }
+
       for (const k of Object.keys(u.hitImmunityMap)) {
         u.hitImmunityMap[k] -= dt;
         if (u.hitImmunityMap[k] <= 0) delete u.hitImmunityMap[k];
@@ -1239,8 +1797,8 @@ class BattleRoyalPaperGame {
         rageMult = 1 + missingRatio * 1.15;
       }
 
-      // Ускорение Супермена во время 2-секундного супер-полёта
-      const superSpeedMult = u.superFlightTimer > 0 ? 2.15 : 1.0;
+      // Ускорение Супермена во время 2-секундного супер-полёта и Павука во время резкого рывка
+      const superSpeedMult = u.superFlightTimer > 0 ? 2.15 : (u.pavukDashingTimer > 0 ? 2.65 : 1.0);
       const slowMult = u.slowTimer > 0 ? 0.5 : 1.0;
       const finalSpeedMult = slowMult * rageMult * superSpeedMult * (u.isMinion ? 1.0 : endgameSpeedMult);
       const targetSpeed = u.baseSpeed * 44 * finalSpeedMult;
@@ -1254,12 +1812,13 @@ class BattleRoyalPaperGame {
         const newAng = curAng + angDiff * Math.min(1, dt * 5.5);
         u.vx = Math.cos(newAng) * targetSpeed;
         u.vy = Math.sin(newAng) * targetSpeed;
-      } else if (u.superFlightTimer > 0 && enemy) {
-        // Во время 2-секундного полёта Супермен тоже подруливает в сторону врагов
+      } else if ((u.superFlightTimer > 0 || u.pavukDashingTimer > 0) && enemy) {
+        // Во время 2-секундного полёта Супермен и во время рывка Павук наводятся на врага
         const desiredAng = Math.atan2(enemy.y - u.y, enemy.x - u.x);
         const curAng = Math.atan2(u.vy, u.vx);
         const angDiff = this.normalizeAngle(desiredAng - curAng);
-        const newAng = curAng + angDiff * Math.min(1, dt * 3.5);
+        const turnSpeed = u.pavukDashingTimer > 0 ? 7.5 : 3.5;
+        const newAng = curAng + angDiff * Math.min(1, dt * turnSpeed);
         u.vx = Math.cos(newAng) * targetSpeed;
         u.vy = Math.sin(newAng) * targetSpeed;
       } else {
@@ -1545,8 +2104,46 @@ class BattleRoyalPaperGame {
       return;
     }
 
+    // МЕДУЗА: просто бьётся о стенки (без урона при столкновении), а за ней идёт электрический след!
+    if (u.abilityId === 'medusa' || u.classId === 'medusa') {
+      u.weaponAngle = Math.atan2(u.vy, u.vx);
+      u.medusaTrailTimer = (u.medusaTrailTimer || 0) - dt;
+      if (u.medusaTrailTimer <= 0) {
+        u.medusaTrailTimer = 0.18;
+        const moveAng = Math.atan2(u.vy, u.vx);
+        this.zones.push({
+          type: 'medusa_trail',
+          team: u.team,
+          owner: u,
+          x: u.x - Math.cos(moveAng) * (u.radius * 0.65),
+          y: u.y - Math.sin(moveAng) * (u.radius * 0.65),
+          radius: 17,
+          damage: u.damage || 10, // Каждые 0.5 сек по 10 ХП в течение 5 сек!
+          life: 3.6,
+          tick: 0.5
+        });
+      }
+      return;
+    }
+
+    // ПАВУК: каждые 10 секунд делает резкий рывок на соперника (сносит 80 ХП при задевании)!
+    if (u.abilityId === 'pavuk' || u.classId === 'pavuk') {
+      u.pavukDashTimer = (u.pavukDashTimer !== undefined ? u.pavukDashTimer : 10.0) - dt;
+      if (u.pavukDashTimer <= 0 && enemy) {
+        u.pavukDashTimer = 10.0;
+        u.pavukDashingTimer = 0.65;
+        const dashAng = Math.atan2(enemy.y - u.y, enemy.x - u.x);
+        u.aimAngle = dashAng;
+        u.vx = Math.cos(dashAng) * 350;
+        u.vy = Math.sin(dashAng) * 350;
+        window.sfx.shieldBash();
+        this.spawnConfetti(u.x, u.y, '#cbd5e1', 8);
+        this.addFloatingText(u.x, u.y - u.radius - 18, '🕷️ РЫВОК ПАВУКА (-80)!', '#1e293b');
+      }
+    }
+
     // Бойцы со снарядами ориентируют оружие по курсу к цели
-    if (['ninja', 'bomber', 'checkmate', 'fairy', 'card_master'].includes(u.abilityId)) {
+    if (['ninja', 'bomber', 'checkmate', 'fairy', 'card_master', 'musician', 'pavuk', 'bibizyana'].includes(u.abilityId)) {
       u.weaponAngle = u.aimAngle;
     }
 
@@ -1555,6 +2152,85 @@ class BattleRoyalPaperGame {
     if (u.cooldown > 0) return;
 
     switch (u.abilityId) {
+      case 'musician': {
+        // МУЗЫКАНТ С БАЛАЛАЙКОЙ: выпускает 3 ноты, каждая из которых наносит по 55 ХП!
+        if (!enemy) break;
+        u.cooldown = 2.8;
+        window.sfx.heal();
+        const baseAng = u.aimAngle;
+        const spreads = [-0.22, 0, 0.22];
+        const noteColors = ['#ef4444', '#f59e0b', '#3b82f6'];
+        for (let nIdx = 0; nIdx < 3; nIdx++) {
+          const ang = baseAng + spreads[nIdx];
+          this.projectiles.push({
+            type: 'music_note',
+            team: u.team,
+            owner: u,
+            noteColor: noteColors[nIdx],
+            x: u.x + Math.cos(ang) * (u.radius + 10),
+            y: u.y + Math.sin(ang) * (u.radius + 10),
+            vx: Math.cos(ang) * 380,
+            vy: Math.sin(ang) * 380,
+            radius: 7,
+            damage: u.damage, // 55 ХП каждая нота!
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🪕 3 НОТЫ (ПО 55)!', '#d97706');
+        break;
+      }
+
+      case 'pavuk': {
+        // ПАВУК: каждые 5 секунд стреляет паутиной, которая с шансом 25% окутывает соперника в кокон на 3.5 секунды!
+        if (!enemy) break;
+        u.cooldown = 5.0;
+        window.sfx.shootArrow();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'spider_web',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 10),
+          y: u.y + Math.sin(ang) * (u.radius + 10),
+          vx: Math.cos(ang) * 350,
+          vy: Math.sin(ang) * 350,
+          spin: 0,
+          cocoonChance: 0.25,
+          radius: 9,
+          damage: 15,
+          piercing: false,
+          hitSet: new Set()
+        });
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🕸️ ПАУТИНА (25% КОКОН)!', '#475569');
+        break;
+      }
+
+      case 'bibizyana': {
+        // БИБИЗЯНА: каждые 7 секунд кидает 1 банан, который при попадании сносит 45 ХП (или пропорционально прокачке)!
+        if (!enemy) break;
+        u.cooldown = 7.0;
+        window.sfx.shootArrow();
+        const ang = u.aimAngle;
+        const bananaDmg = u.damage === 50 ? 45 : Math.max(8, Math.round(u.damage * 0.9));
+        this.projectiles.push({
+          type: 'banana',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 10),
+          y: u.y + Math.sin(ang) * (u.radius + 10),
+          vx: Math.cos(ang) * 350,
+          vy: Math.sin(ang) * 350,
+          spin: 0,
+          radius: 8,
+          damage: bananaDmg, // Банан сносит 45 ХП!
+          piercing: false,
+          hitSet: new Set()
+        });
+        this.addFloatingText(u.x, u.y - u.radius - 16, `🍌 БАНАН (-${bananaDmg} ХП)!`, '#ca8a04');
+        break;
+      }
+
       case 'bomber': {
         // ПОДРЫВНИК: кидает бомбу во врагов (взрыв -60 HP всем в радиусе взрыва), новая бомба появляется ровно через 8 секунд!
         if (!enemy) break;
@@ -2412,6 +3088,36 @@ class BattleRoyalPaperGame {
       return;
     }
 
+    // 9.1. МЕДУЗА: при столкновении НЕ НАНОСИТ УРОНА (бьёт только электрическим следом)!
+    if (attacker.abilityId === 'medusa' || attacker.classId === 'medusa') {
+      return;
+    }
+
+    // 9.2. ПАВУК: во время резкого рывка (раз в 10 с) сносит 80 ХП при задевании соперника!
+    if (attacker.abilityId === 'pavuk' || attacker.classId === 'pavuk') {
+      attacker.hitImmunityMap[target.id] = 0.42;
+      if (attacker.pavukDashingTimer > 0) {
+        attacker.pavukDashingTimer = 0;
+        const dashDmg = attacker.damage || 80;
+        window.sfx.shieldBash();
+        this.applyDamage(target, dashDmg, attacker, '#0f172a');
+        this.addFloatingText(target.x, target.y - 24, `🕷️ РЫВОК ПАВУКА -${dashDmg}!`, '#1e293b');
+      } else {
+        window.sfx.hit();
+        this.applyDamage(target, 20, attacker, '#334155');
+      }
+      return;
+    }
+
+    // 9.3. БИБИЗЯНА: при задевании соперника сносит ему 50 ХП!
+    if (attacker.abilityId === 'bibizyana' || attacker.classId === 'bibizyana') {
+      attacker.hitImmunityMap[target.id] = 0.42;
+      window.sfx.hit();
+      this.applyDamage(target, attacker.damage, attacker, '#854d0e');
+      this.addFloatingText(target.x, target.y - 22, `🐒 БИБИЗЯНА -${attacker.damage}!`, '#a16207');
+      return;
+    }
+
     // 10. Робо-Мех, Зомби, Оборотень, Червь, Сферы Призывателя, Ассасин в ближнем бою
     if (
       attacker.isMinion ||
@@ -2539,6 +3245,10 @@ class BattleRoyalPaperGame {
         p.spin = (p.spin || 0) + dt * 22;
       } else if (p.type === 'bomb_grenade') {
         p.spin = (p.spin || 0) + dt * 10;
+      } else if (p.type === 'banana') {
+        p.spin = (p.spin || 0) + dt * 14;
+      } else if (p.type === 'spider_web') {
+        p.spin = (p.spin || 0) + dt * 8;
       }
 
       if (p.type === 'boomerang') {
@@ -2621,7 +3331,17 @@ class BattleRoyalPaperGame {
           window.sfx.hit();
           this.applyDamage(u, p.damage, p.owner || null);
 
-          if (p.type === 'shuriken') {
+          if (p.type === 'spider_web') {
+            // Паутина Павука: с шансом 25% окутывает соперника в кокон на 3.5 секунды!
+            if (u.hp > 0 && Math.random() < (p.cocoonChance || 0.25)) {
+              u.cocoonTimer = 3.5;
+              u.stunTimer = Math.max(u.stunTimer, 3.5);
+              u.vx = 0;
+              u.vy = 0;
+              this.spawnConfetti(u.x, u.y, '#ffffff', 12);
+              this.addFloatingText(u.x, u.y - u.radius - 22, '🕸️ В КОКОНЕ НА 3.5С!', '#334155');
+            }
+          } else if (p.type === 'shuriken') {
             // Сюрикен Ниндзя отталкивает соперника в противоположную сторону!
             const pushAng = Math.atan2(p.vy, p.vx);
             const kb = p.knockback || 340;
@@ -2825,7 +3545,27 @@ class BattleRoyalPaperGame {
       ctx.save();
       ctx.beginPath();
       ctx.arc(z.x, z.y, z.radius, 0, Math.PI * 2);
-      if (z.type === 'bomb_blast') {
+      if (z.type === 'medusa_trail') {
+        const alpha = Math.min(0.45, Math.max(0.12, z.life * 0.14));
+        ctx.fillStyle = `rgba(34, 211, 238, ${alpha})`;
+        ctx.strokeStyle = '#0891b2';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([4, 3]);
+        ctx.fill();
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // Маленькая электрическая искра внутри следа Медузы
+        ctx.strokeStyle = '#facc15';
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.moveTo(z.x - 5, z.y - 3);
+        ctx.lineTo(z.x + 1, z.y - 1);
+        ctx.lineTo(z.x - 2, z.y + 3);
+        ctx.lineTo(z.x + 5, z.y + 2);
+        ctx.stroke();
+        ctx.restore();
+        continue;
+      } else if (z.type === 'bomb_blast') {
         ctx.fillStyle = 'rgba(239, 68, 68, 0.36)';
         ctx.strokeStyle = '#dc2626';
         ctx.lineWidth = 3.5;
@@ -2962,6 +3702,8 @@ class BattleRoyalPaperGame {
       case 'ninja':
       case 'bomber':
       case 'fairy':
+      case 'pavuk':
+      case 'bibizyana':
       case 'laser_bot': {
         const dir = isPlayer ? 1 : -1;
         const startX = u.x + dir * 28;
@@ -2990,8 +3732,9 @@ class BattleRoyalPaperGame {
         break;
       }
 
-      case 'card_master': {
-        // 3 веерные линии полёта карт
+      case 'card_master':
+      case 'musician': {
+        // 3 веерные линии полёта карт / музыкальных нот
         const baseAng = isPlayer ? 0 : Math.PI;
         ctx.setLineDash([4, 4]);
         for (const sp of [-0.20, 0, 0.20]) {
@@ -2999,6 +3742,20 @@ class BattleRoyalPaperGame {
           ctx.beginPath();
           ctx.moveTo(u.x + Math.cos(ang) * 24, u.y + Math.sin(ang) * 24);
           ctx.lineTo(u.x + Math.cos(ang) * 76, u.y + Math.sin(ang) * 76);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+        break;
+      }
+
+      case 'medusa': {
+        // Пунктирный электрический след позади Медузы
+        const dir = isPlayer ? -1 : 1;
+        ctx.strokeStyle = '#06b6d4';
+        ctx.setLineDash([4, 3]);
+        for (let step = 1; step <= 3; step++) {
+          ctx.beginPath();
+          ctx.arc(u.x + dir * step * 18, u.y, 11 - step * 1.5, 0, Math.PI * 2);
           ctx.stroke();
         }
         ctx.setLineDash([]);
@@ -3151,6 +3908,20 @@ class BattleRoyalPaperGame {
       ctx.restore();
     }
 
+    // Маленькие паучьи лапки Павука, торчащие из тела
+    if (u.classId === 'pavuk' || u.abilityId === 'pavuk') {
+      drawSpiderLegs(ctx, u.x, u.y, u.radius);
+      if (u.pavukDashingTimer > 0) {
+        ctx.save();
+        ctx.strokeStyle = '#ef4444';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(u.x, u.y, u.radius + 6, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.restore();
+      }
+    }
+
     // Дымовая завеса Оборотня при смене команды (через дым каждые 40 с)
     if (u.smokeTimer > 0) {
       ctx.save();
@@ -3273,6 +4044,18 @@ class BattleRoyalPaperGame {
       drawWerewolfDetails(ctx, u.x, u.y, u.radius, clawAng);
     }
 
+    // Мордочка и ушки Бибизяны
+    if (u.classId === 'bibizyana' || u.abilityId === 'bibizyana') {
+      const monkeyAng = this.state === 'prep' ? (u.team === 'player' ? 0 : Math.PI) : u.aimAngle;
+      drawMonkeyDetails(ctx, u.x, u.y, u.radius, monkeyAng);
+    }
+
+    // Щупальца и электрические разряды Медузы
+    if (u.classId === 'medusa' || u.abilityId === 'medusa') {
+      const medusaAng = this.state === 'prep' ? (u.team === 'player' ? 0 : Math.PI) : Math.atan2(u.vy, u.vx);
+      drawMedusaDetails(ctx, u.x, u.y, u.radius, medusaAng);
+    }
+
     // Усики и глазки Червя (гусеницы)
     if (u.classId === 'worm' || u.abilityId === 'worm') {
       const headAng = this.state === 'prep' ? (u.team === 'player' ? 0 : Math.PI) : Math.atan2(u.vy, u.vx);
@@ -3290,6 +4073,51 @@ class BattleRoyalPaperGame {
     // Отрисовка оружия вокруг бойца
     if (!u.isMinion) {
       this.drawUnitWeaponOnArena(ctx, u, timeSec);
+    }
+
+    // Паутинный КОКОН Павука (если соперник окутан на 3.5 секунды)
+    if (u.cocoonTimer > 0) {
+      ctx.save();
+      ctx.fillStyle = 'rgba(248, 250, 252, 0.78)';
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath();
+      ctx.ellipse(u.x, u.y, u.radius * 1.15, u.radius * 1.28, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+
+      // Перекрещивающиеся нити кокона
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.6;
+      for (const dy of [-u.radius * 0.55, 0, u.radius * 0.55]) {
+        ctx.beginPath();
+        ctx.moveTo(u.x - u.radius * 0.95, u.y + dy - 3);
+        ctx.lineTo(u.x + u.radius * 0.95, u.y + dy + 3);
+        ctx.moveTo(u.x - u.radius * 0.95, u.y + dy + 3);
+        ctx.lineTo(u.x + u.radius * 0.95, u.y + dy - 3);
+        ctx.stroke();
+      }
+      ctx.restore();
+    }
+
+    // Электрические разряды на бойце, наступившем на след Медузы (5 секунд по 10 ХП каждые 0.5 с)
+    if (u.shockTimer > 0) {
+      ctx.save();
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2.2;
+      for (let b = 0; b < 3; b++) {
+        const bang = timeSec * 10 + (b * Math.PI * 2) / 3;
+        const sx = u.x + Math.cos(bang) * (u.radius * 0.5);
+        const sy = u.y + Math.sin(bang) * (u.radius * 0.5);
+        const ex = u.x + Math.cos(bang + 0.6) * (u.radius + 5);
+        const ey = u.y + Math.sin(bang + 0.6) * (u.radius + 5);
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo((sx + ex) / 2 + 3, (sy + ey) / 2 - 3);
+        ctx.lineTo(ex, ey);
+        ctx.stroke();
+      }
+      ctx.restore();
     }
 
     // Мультяшная анимация контузии (нимб со звёздочками, кружащий над головой 2.5 с после апперкота Боксёра)
@@ -3332,8 +4160,8 @@ class BattleRoyalPaperGame {
   drawUnitWeaponOnArena(ctx, u, timeSec = 0) {
     const isPlayer = u.team === 'player';
 
-    if (u.abilityId === 'worm' || u.abilityId === 'vampire' || u.abilityId === 'werewolf') {
-      // У Червя уже отрисован хвост, у Вампира — 2 белых клыка, а у Оборотня — маленькие белые когти прямо на теле
+    if (u.abilityId === 'worm' || u.abilityId === 'vampire' || u.abilityId === 'werewolf' || u.abilityId === 'medusa') {
+      // У Червя уже отрисован хвост, у Вампира — 2 белых клыка, у Оборотня — когти на теле, у Медузы — щупальца и электрический след
       return;
     }
 
@@ -3417,7 +4245,7 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'robo_mech', 'zombie', 'fairy', 'card_master', 'checkmate', 'doubler'].includes(u.abilityId)) {
+    if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'robo_mech', 'zombie', 'fairy', 'card_master', 'checkmate', 'doubler', 'musician', 'pavuk', 'bibizyana'].includes(u.abilityId)) {
       const ang = this.state === 'prep' ? (isPlayer ? 0 : Math.PI) : u.aimAngle;
       const dist = u.radius + 7;
       drawWeaponGraphic(ctx, u.abilityId, u.x + Math.cos(ang) * dist, u.y + Math.sin(ang) * dist, 0.95, ang, u.team);
@@ -3483,7 +4311,17 @@ class BattleRoyalPaperGame {
     ctx.translate(p.x, p.y);
     const ang = Math.atan2(p.vy, p.vx);
 
-    if (p.type === 'bomb_grenade') {
+    if (p.type === 'music_note') {
+      // Музыкальная нота Музыканта с балалайкой (55 ХП)
+      drawMusicNoteGraphic(ctx, 0, 0, 0.95, p.noteColor || '#ef4444');
+    } else if (p.type === 'spider_web') {
+      // Летящая паутина Павука (25% шанс окутать в кокон на 3.5 с)
+      ctx.rotate(p.spin || 0);
+      drawSpiderWebGraphic(ctx, 0, 0, 9.5);
+    } else if (p.type === 'banana') {
+      // Летящий банан Бибизяны (45 ХП)
+      drawBananaGraphic(ctx, 0, 0, 0.95, p.spin || 0);
+    } else if (p.type === 'bomb_grenade') {
       // Летящая бомба Подрывника с горящим фитилём
       drawWeaponGraphic(ctx, 'bomber', 0, 0, 0.92, p.spin || 0, p.team);
     } else if (p.type === 'chess_pawn') {
