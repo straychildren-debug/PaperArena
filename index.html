@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <meta name="theme-color" content="#dfd9ce" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <title>Battle Royal Paper — Бумажная Арена</title>
+  <link href="assets/fonts/fonts.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="paper-app">
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ -->
+    <header class="top-bar">
+      <!-- Блок уровня и прогресса -->
+      <div class="level-box paper-card">
+        <button id="prevLevelBtn" class="mini-nav-btn" title="Предыдущий уровень">◀</button>
+        <span class="level-title">УРОВЕНЬ <span id="levelNum">5</span></span>
+        <div id="levelNodes" class="level-nodes" title="Нажмите на этап, чтобы перейти к уровню"></div>
+        <div class="skull-icon" id="bossSkull" title="Уровень-босс (10)">💀</div>
+        <button id="nextLevelBtn" class="mini-nav-btn" title="Следующий уровень">▶</button>
+      </div>
+
+      <!-- Центральная кнопка СТАРТ -->
+      <div class="start-zone">
+        <button id="startBtn" class="start-btn">
+          <span class="start-swords">⚔️</span>
+          <span id="startBtnText">СТАРТ</span>
+        </button>
+        <button id="resetArenaBtn" class="secondary-top-btn hidden" title="Вернуться к расстановке">↺ СБРОС</button>
+        <button id="speedToggleBtn" class="secondary-top-btn" title="Скорость боя">1x</button>
+        <button id="soundToggleBtn" class="secondary-top-btn" title="Звуковые эффекты">🔊</button>
+      </div>
+
+      <!-- Правый индикатор усиления ботов -->
+      <div class="bots-scaling-box paper-card" id="botScalingCard" title="Нажмите, чтобы перегенерировать отряд ботов под текущий уровень">
+        <div class="bars-icon">
+          <span class="bar b1"></span>
+          <span class="bar b2"></span>
+          <span class="bar b3"></span>
+          <span class="bar-arrow">↗</span>
+        </div>
+        <div class="scaling-text-wrap">
+          <span class="scaling-main">БОТЫ СТАНОВЯТСЯ СИЛЬНЕЕ</span>
+          <span class="scaling-sub" id="scalingSubtext">Бонус уровня: +40% к статам • 🎲 Обновить</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- СРЕДНЯЯ ЧАСТЬ: КОМАНДА ИГРОКА | РИНГ | КОМАНДА БОТОВ -->
+    <main class="middle-area">
+      <!-- ЛЕВАЯ ПАНЕЛЬ: ВАША КОМАНДА -->
+      <aside class="team-panel player-panel paper-card">
+        <div class="panel-header player-header">
+          <h2>ВАША КОМАНДА</h2>
+          <button id="playerReadyBtn" class="ready-btn is-ready">
+            <span class="check-icon">✓</span> ГОТОВО
+          </button>
+        </div>
+
+        <!-- Слоты бойцов команды игрока -->
+        <div class="team-slots-wrap">
+          <div id="playerTeamSlots" class="team-slots"></div>
+        </div>
+
+        <!-- Кнопки добавления / дублирования / удаления -->
+        <div class="team-actions-row">
+          <button id="addPlayerUnitBtn" class="action-btn add-btn" title="Добавить выбранного внизу бойца в вашу команду">
+            + ДОБАВИТЬ
+          </button>
+          <button id="dupPlayerUnitBtn" class="action-btn icon-btn" title="Дублировать выбранного бойца">
+            ⧉
+          </button>
+          <button id="delPlayerUnitBtn" class="action-btn icon-btn danger-btn" title="Удалить выбранного бойца со сцены">
+            ✕
+          </button>
+        </div>
+
+        <!-- Инспектор выбранного бойца игрока -->
+        <div class="unit-inspector paper-inner-card" id="playerInspector">
+          <div class="inspector-top">
+            <div class="inspector-preview-wrap">
+              <canvas id="playerPreviewCanvas" width="96" height="84"></canvas>
+            </div>
+            <div class="inspector-info">
+              <div class="inspector-title-row">
+                <h3 id="playerUnitName">МЕЧНИК</h3>
+                <button id="dupPlayerInspectorBtn" class="mini-icon-btn" title="Клонировать этого бойца">⧉</button>
+              </div>
+              <div class="inspector-ability-badge" id="playerUnitAbilityDesc">
+                🗡️ Крутящийся меч • 10 урона
+              </div>
+              <button id="randomPlayerAbilityBtn" class="random-ability-btn player-rand-btn" title="Выдать этому бойцу случайное оружие/способность">
+                <span>🔀</span> СЛУЧАЙНАЯ СПОСОБНОСТЬ
+              </button>
+            </div>
+          </div>
+
+          <div class="inspector-divider"></div>
+
+          <div class="stats-editor">
+            <div class="stat-row">
+              <span class="stat-label">Здоровье</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-team="player" data-stat="hp" data-dir="-1">−</button>
+                <span class="stat-value" id="playerStatHp">100</span>
+                <button class="stat-btn" data-team="player" data-stat="hp" data-dir="1">+</button>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Скорость</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-team="player" data-stat="speed" data-dir="-1">−</button>
+                <span class="stat-value" id="playerStatSpeed">3</span>
+                <button class="stat-btn" data-team="player" data-stat="speed" data-dir="1">+</button>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label" id="playerDmgLabel">Урон</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-team="player" data-stat="damage" data-dir="-1">−</button>
+                <span class="stat-value" id="playerStatDamage">10</span>
+                <button class="stat-btn" data-team="player" data-stat="damage" data-dir="1">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- ЦЕНТРАЛЬНЫЙ РИНГ (АРЕНА) -->
+      <section class="arena-section">
+        <div class="arena-frame" id="arenaFrame">
+          <!-- Декоративные угловые крепления ринга, как на референсе -->
+          <div class="corner-post tl"></div>
+          <div class="corner-post tr"></div>
+          <div class="corner-post bl"></div>
+          <div class="corner-post br"></div>
+
+          <canvas id="arenaCanvas" width="760" height="450"></canvas>
+
+          <!-- Подсказка внизу ринга -->
+          <div class="arena-hint" id="arenaHint">
+            💡 Перетаскивайте бойцов пальцем или мышкой • Нажмите на бойца для настройки статов
+          </div>
+
+          <!-- Оверлей победы / поражения -->
+          <div id="battleResultOverlay" class="battle-overlay hidden">
+            <div class="overlay-card paper-card">
+              <div class="overlay-badge" id="overlayIcon">🏆</div>
+              <h2 id="overlayTitle">ПОБЕДА!</h2>
+              <p id="overlaySubtitle">Ваша команда сокрушила ботов на ринге!</p>
+              <div class="overlay-buttons">
+                <button id="replayLevelBtn" class="action-btn">↺ ПОВТОРИТЬ БОЙ</button>
+                <button id="nextStageBtn" class="action-btn primary-green-btn">СЛЕДУЮЩИЙ УРОВЕНЬ ➔</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- МОБИЛЬНЫЙ ПЕРЕКЛЮЧАТЕЛЬ ВКЛАДОК (ВИДЕН НА СМАРТФОНАХ И ПЛАНШЕТАХ) -->
+      <nav class="mobile-tabs-bar" id="mobileTabsBar" aria-label="Переключение панелей на телефоне">
+        <button type="button" class="mobile-tab-btn active-mobile-tab" data-mobile-tab="player" id="mobTabPlayer">
+          🔵 Ваша команда <span class="mob-tab-count" id="mobPlayerCount">4</span>
+        </button>
+        <button type="button" class="mobile-tab-btn" data-mobile-tab="bot" id="mobTabBot">
+          🔴 Боты <span class="mob-tab-count" id="mobBotCount">4</span>
+        </button>
+        <button type="button" class="mobile-tab-btn" data-mobile-tab="roster" id="mobTabRoster">
+          ⚔️ Все бойцы <span class="mob-tab-count">37</span>
+        </button>
+      </nav>
+
+      <!-- ПРАВАЯ ПАНЕЛЬ: КОМАНДА БОТОВ -->
+      <aside class="team-panel bot-panel paper-card">
+        <div class="panel-header bot-header">
+          <h2>КОМАНДА БОТОВ</h2>
+          <button id="botReadyBtn" class="ready-btn is-ready">
+            <span class="check-icon">✓</span> ГОТОВО
+          </button>
+        </div>
+
+        <!-- Слоты бойцов команды ботов -->
+        <div class="team-slots-wrap">
+          <div id="botTeamSlots" class="team-slots"></div>
+        </div>
+
+        <!-- Кнопки добавления / дублирования / удаления ботов -->
+        <div class="team-actions-row">
+          <button id="addBotUnitBtn" class="action-btn add-btn" title="Добавить выбранного внизу бойца в команду ботов">
+            + ДОБАВИТЬ
+          </button>
+          <button id="dupBotUnitBtn" class="action-btn icon-btn" title="Дублировать выбранного бота">
+            ⧉
+          </button>
+          <button id="delBotUnitBtn" class="action-btn icon-btn danger-btn" title="Удалить выбранного бота">
+            ✕
+          </button>
+        </div>
+
+        <!-- Инспектор выбранного бота -->
+        <div class="unit-inspector paper-inner-card" id="botInspector">
+          <div class="inspector-top">
+            <div class="inspector-preview-wrap">
+              <canvas id="botPreviewCanvas" width="96" height="84"></canvas>
+            </div>
+            <div class="inspector-info">
+              <div class="inspector-title-row">
+                <h3 id="botUnitName">ПИРОМАНТ</h3>
+                <button id="dupBotInspectorBtn" class="mini-icon-btn" title="Клонировать этого бота">⧉</button>
+              </div>
+              <div class="inspector-ability-badge" id="botUnitAbilityDesc">
+                🔥 Огненный шар и поджог
+              </div>
+              <button id="randomBotAbilityBtn" class="random-ability-btn" title="Выдать этому боту случайную способность">
+                <span>🔀</span> СЛУЧАЙНАЯ СПОСОБНОСТЬ
+              </button>
+            </div>
+          </div>
+
+          <div class="inspector-divider"></div>
+
+          <div class="stats-editor">
+            <div class="stat-row">
+              <span class="stat-label">Здоровье</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-team="bot" data-stat="hp" data-dir="-1">−</button>
+                <span class="stat-value" id="botStatHp">100</span>
+                <button class="stat-btn" data-team="bot" data-stat="hp" data-dir="1">+</button>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label">Скорость</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-team="bot" data-stat="speed" data-dir="-1">−</button>
+                <span class="stat-value" id="botStatSpeed">3</span>
+                <button class="stat-btn" data-team="bot" data-stat="speed" data-dir="1">+</button>
+              </div>
+            </div>
+            <div class="stat-row">
+              <span class="stat-label" id="botDmgLabel">Урон</span>
+              <div class="stat-controls">
+                <button class="stat-btn" data-team="bot" data-stat="damage" data-dir="-1">−</button>
+                <span class="stat-value" id="botStatDamage">10</span>
+                <button class="stat-btn" data-team="bot" data-stat="damage" data-dir="1">+</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </main>
+
+    <!-- НИЖНЯЯ ПАНЕЛЬ: ВЫБОР БОЙЦОВ (37 КЛАССОВ) -->
+    <footer class="roster-panel paper-card" id="rosterPanel">
+      <div class="roster-header">
+        <h2>ВЫБОР БОЙЦОВ (37)</h2>
+        <div class="roster-controls-hint">
+          <span class="roster-hint-text">Нажмите «+Игрок» / «+Бот» на карточке или дважды нажмите по бойцу</span>
+          <div class="target-team-switch">
+            <span class="target-switch-label">Двойное нажатие:</span>
+            <button id="targetPlayerBtn" class="target-pill active-target">🔵 Ваша команда</button>
+            <button id="targetBotBtn" class="target-pill">🔴 Команда ботов</button>
+          </div>
+        </div>
+      </div>
+      <div id="rosterGrid" class="roster-grid"></div>
+    </footer>
+  </div>
+
+  <script src="audio.js"></script>
+  <script src="fighters.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>

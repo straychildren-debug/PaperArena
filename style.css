@@ -1,0 +1,1548 @@
+:root {
+  --paper-bg: #f6f1e6;
+  --paper-card: #fcfaf4;
+  --paper-inner: #f5f1e6;
+  --ink: #1c1a17;
+  --ink-soft: #4a453e;
+  --player-header: #cce3f6;
+  --player-blue: #4692e8;
+  --bot-header: #f8cfc6;
+  --bot-red: #ef5b50;
+  --green-ready: #9be564;
+  --green-ready-dark: #7ec845;
+  --amber-pause: #ffd166;
+  --border-w: 2.5px;
+  --shadow-sketch: 2px 3px 0px rgba(28, 26, 23, 0.18);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  background-color: var(--paper-bg);
+  background-image:
+    radial-gradient(rgba(28, 26, 23, 0.04) 1px, transparent 0),
+    radial-gradient(rgba(160, 140, 110, 0.05) 1px, transparent 0);
+  background-size: 22px 22px;
+  background-position: 0 0, 11px 11px;
+  color: var(--ink);
+  font-family: 'Nunito', 'Pangolin', 'Comic Sans MS', sans-serif;
+  overflow: hidden;
+}
+
+.paper-app {
+  max-width: 1620px;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  max-height: 100vh;
+  max-height: 100dvh;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 6px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.paper-card {
+  background: var(--paper-card);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sketch);
+}
+
+.paper-inner-card {
+  background: var(--paper-card);
+  border: var(--border-w) solid var(--ink);
+  border-radius: 10px;
+}
+
+button {
+  font-family: inherit;
+  color: var(--ink);
+  cursor: pointer;
+  transition: transform 0.08s ease, background-color 0.12s ease, box-shadow 0.12s ease;
+}
+
+button:active {
+  transform: translateY(1.5px) scale(0.98);
+}
+
+.hidden {
+  display: none !important;
+}
+
+.startup-error {
+  position: fixed;
+  z-index: 1000;
+  inset: 16px 16px auto;
+  padding: 16px;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  background: var(--paper-card);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+/* ==================== ВЕРХНЯЯ ПАНЕЛЬ ==================== */
+.top-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 100%;
+}
+
+.level-box {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 10px;
+  background: #faf7ef;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.mini-nav-btn {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.mini-nav-btn:hover {
+  background: var(--player-header);
+}
+
+.level-title {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.level-nodes {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+
+.lvl-node-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.lvl-node {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: #b8b5ae;
+  cursor: pointer;
+  transition: transform 0.12s ease, background-color 0.15s ease;
+}
+
+.lvl-node:hover {
+  transform: scale(1.25);
+}
+
+.lvl-node.completed {
+  background: var(--player-blue);
+}
+
+.lvl-node.current {
+  background: #58a6ff;
+  box-shadow: 0 0 0 3px rgba(70, 146, 232, 0.35);
+  transform: scale(1.18);
+}
+
+.lvl-connector {
+  width: 5px;
+  height: 2.5px;
+  background: var(--ink);
+}
+
+.skull-icon {
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,0.2));
+  transition: transform 0.15s ease;
+  flex-shrink: 0;
+}
+
+.skull-icon:hover {
+  transform: scale(1.2) rotate(-8deg);
+}
+
+/* Центральная кнопка СТАРТ */
+.start-zone {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.start-btn {
+  min-width: 180px;
+  padding: 5px 22px;
+  background: var(--green-ready);
+  border: 2.5px solid var(--ink);
+  border-radius: 11px;
+  box-shadow: 0 3px 0 var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: 1px;
+}
+
+.start-btn:hover {
+  background: #8ee052;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 0 var(--ink);
+}
+
+.start-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.start-btn.not-ready {
+  background: #e3decb;
+  opacity: 0.85;
+}
+
+.start-btn.is-fighting {
+  background: var(--amber-pause);
+}
+
+.start-swords {
+  font-size: 20px;
+}
+
+.secondary-top-btn {
+  height: 38px;
+  padding: 0 11px;
+  background: var(--paper-card);
+  border: 2px solid var(--ink);
+  border-radius: 9px;
+  box-shadow: 0 2px 0 var(--ink);
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.secondary-top-btn:hover {
+  background: #eee8d8;
+}
+
+/* Правый блок: Боты становятся сильнее */
+.bots-scaling-box {
+  justify-self: end;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 11px;
+  border-radius: 10px;
+  background: #faf7ef;
+  cursor: pointer;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.bots-scaling-box:hover {
+  background: #f8ece8;
+}
+
+.bars-icon {
+  display: flex;
+  align-items: flex-end;
+  gap: 2.5px;
+  height: 22px;
+  position: relative;
+  padding-right: 2px;
+  flex-shrink: 0;
+}
+
+.bars-icon .bar {
+  width: 4.5px;
+  background: var(--bot-red);
+  border: 1.5px solid var(--ink);
+  border-radius: 2px;
+}
+
+.bars-icon .b1 { height: 8px; }
+.bars-icon .b2 { height: 14px; }
+.bars-icon .b3 { height: 20px; }
+
+.bars-icon .bar-arrow {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--bot-red);
+  line-height: 1;
+  margin-left: -1px;
+}
+
+.scaling-text-wrap {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.scaling-main {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.scaling-sub {
+  font-size: 10.5px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==================== СРЕДНЯЯ ЧАСТЬ ==================== */
+.middle-area {
+  flex: 1 1 0;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 280px 1fr 280px;
+  gap: 8px;
+  align-items: stretch;
+}
+
+.team-panel {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 7px;
+  overflow: hidden;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+}
+
+.player-header {
+  background: var(--player-header);
+}
+
+.bot-header {
+  background: var(--bot-header);
+}
+
+.panel-header h2 {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 18px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+}
+
+.ready-btn {
+  padding: 4px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
+  background: #e2dfd7;
+  font-weight: 900;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.ready-btn.is-ready {
+  background: var(--green-ready);
+}
+
+/* Слоты команды */
+.team-slots-wrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 2px;
+}
+
+.team-slots-wrap::-webkit-scrollbar {
+  height: 5px;
+}
+
+.team-slots-wrap::-webkit-scrollbar-thumb {
+  background: #b8b2a6;
+  border-radius: 4px;
+}
+
+.team-slots {
+  display: flex;
+  gap: 6px;
+  min-height: 58px;
+}
+
+.slot-card {
+  width: 62px;
+  height: 56px;
+  flex-shrink: 0;
+  background: #fffdf8;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s ease, background-color 0.12s ease;
+}
+
+.slot-card:hover {
+  background: #f3efe4;
+}
+
+.slot-card.selected {
+  background: #fff6d6;
+  border-width: 2.5px;
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+
+.slot-card canvas {
+  width: 54px;
+  height: 48px;
+  pointer-events: none;
+}
+
+.slot-count-badge {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--ink-soft);
+}
+
+/* Кнопки + ДОБАВИТЬ и иконки */
+.team-actions-row {
+  display: flex;
+  gap: 6px;
+}
+
+.action-btn {
+  height: 34px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: #f9f6ed;
+  font-weight: 900;
+  font-size: 14px;
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.action-btn:hover {
+  background: #ece6d6;
+}
+
+.add-btn {
+  flex: 1;
+  letter-spacing: 0.4px;
+}
+
+.icon-btn {
+  width: 38px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.danger-btn:hover {
+  background: #ffd6d1;
+  color: #a61c1c;
+}
+
+/* Инспектор бойца */
+.unit-inspector {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 10px;
+  justify-content: space-between;
+  min-height: 0;
+}
+
+.inspector-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inspector-preview-wrap {
+  width: 92px;
+  height: 80px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f7f3e8;
+  border: 2px dashed rgba(28, 26, 23, 0.25);
+  border-radius: 8px;
+}
+
+.inspector-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inspector-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.inspector-title-row h3 {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 19px;
+  font-weight: 900;
+  text-transform: uppercase;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.mini-icon-btn {
+  width: 26px;
+  height: 26px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: #fff;
+  font-weight: 900;
+  font-size: 13px;
+  flex-shrink: 0;
+}
+
+.mini-icon-btn:hover {
+  background: #ece6d6;
+}
+
+.inspector-ability-badge {
+  font-size: 12.5px;
+  font-weight: 800;
+  color: #2f2b26;
+  line-height: 1.2;
+}
+
+.random-ability-btn {
+  margin-top: 2px;
+  padding: 4px 7px;
+  border: 2px solid var(--ink);
+  border-radius: 7px;
+  background: #fff9e6;
+  font-size: 10.5px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.random-ability-btn:hover {
+  background: #ffefb8;
+}
+
+.inspector-divider {
+  height: 2px;
+  background: var(--ink);
+  margin: 5px 0;
+  opacity: 0.85;
+}
+
+/* Редактор статов */
+.stats-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.stat-label {
+  color: var(--ink);
+}
+
+.stat-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.stat-btn {
+  width: 28px;
+  height: 26px;
+  border: 2px solid var(--ink);
+  border-radius: 6px;
+  background: #f7f4eb;
+  font-size: 17px;
+  font-weight: 900;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stat-btn:hover {
+  background: #e5decb;
+}
+
+.stat-value {
+  min-width: 44px;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+/* ==================== ЦЕНТРАЛЬНЫЙ РИНГ ==================== */
+.arena-section {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  min-width: 0;
+}
+
+.arena-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #f8f4ea;
+  border: 4px solid var(--ink);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 3px #e2dac9, var(--shadow-sketch);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* Деревянные/картонные столбики по углам ринга как на референсе */
+.corner-post {
+  position: absolute;
+  width: 18px;
+  height: 22px;
+  background: #9c8669;
+  border: 2.5px solid var(--ink);
+  border-radius: 3px;
+  z-index: 5;
+  box-shadow: 1px 2px 0 rgba(0,0,0,0.25);
+}
+
+.corner-post.tl { top: -3px; left: -3px; }
+.corner-post.tr { top: -3px; right: -3px; }
+.corner-post.bl { bottom: -3px; left: -3px; }
+.corner-post.br { bottom: -3px; right: -3px; }
+
+#arenaCanvas {
+  width: 100%;
+  height: 100%;
+  display: block;
+  cursor: grab;
+}
+
+#arenaCanvas:active {
+  cursor: grabbing;
+}
+
+.arena-hint {
+  position: absolute;
+  bottom: 7px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(252, 250, 244, 0.9);
+  border: 1.5px solid var(--ink);
+  border-radius: 20px;
+  padding: 2px 12px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Оверлей окончания боя */
+.battle-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(28, 26, 23, 0.38);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+}
+
+.overlay-card {
+  padding: 20px 28px;
+  text-align: center;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  animation: popIn 0.22s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+}
+
+@keyframes popIn {
+  from { transform: scale(0.8); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.overlay-badge {
+  font-size: 44px;
+  line-height: 1;
+}
+
+.overlay-card h2 {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.overlay-card p {
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--ink-soft);
+  margin-bottom: 6px;
+}
+
+.overlay-buttons {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.overlay-buttons .action-btn {
+  flex: 1;
+  padding: 0 12px;
+  height: 38px;
+}
+
+.primary-green-btn {
+  background: var(--green-ready);
+}
+
+.primary-green-btn:hover {
+  background: #88dc4d;
+}
+
+/* ==================== НИЖНЯЯ ПАНЕЛЬ: ВЫБОР БОЙЦОВ (БЕЗ СЛАЙДЕРА — ВСЕ 37 СРАЗУ) ==================== */
+.roster-panel {
+  flex-shrink: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.roster-header {
+  background: var(--player-header);
+  border-bottom: 2px solid var(--ink);
+  padding: 2px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.roster-header h2 {
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 15px;
+  font-weight: 900;
+  letter-spacing: 0.4px;
+  white-space: nowrap;
+}
+
+.roster-controls-hint {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11.5px;
+  font-weight: 800;
+  color: var(--ink-soft);
+}
+
+.target-team-switch {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.target-pill {
+  padding: 1px 8px;
+  border: 1.8px solid var(--ink);
+  border-radius: 12px;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.target-pill.active-target {
+  background: var(--green-ready);
+}
+
+/* Сетка 13×3 = 39 ячеек: все 37 персонажей видны одновременно без полосы прокрутки */
+.roster-grid {
+  padding: 4px 6px;
+  display: grid;
+  grid-template-columns: repeat(13, minmax(0, 1fr));
+  grid-template-rows: repeat(3, 48px);
+  gap: 4px;
+  overflow: hidden;
+}
+
+.fighter-card {
+  background: #fcfaf4;
+  border: 1.8px solid var(--ink);
+  border-radius: 7px;
+  padding: 2px 4px;
+  position: relative;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  transition: transform 0.08s ease, background-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+.fighter-card:hover {
+  background: #fff9e5;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.fighter-card.selected-class {
+  background: #fff2c2;
+  border-width: 2px;
+  box-shadow: inset 0 0 0 1.2px var(--ink), 0 1.5px 0 var(--ink);
+}
+
+.fc-top {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  z-index: 2;
+  min-width: 0;
+}
+
+.fc-num {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background: #fff;
+  font-size: 9px;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fc-name {
+  font-size: 10.5px;
+  font-weight: 900;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+}
+
+.fc-body {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 28px;
+  min-width: 0;
+}
+
+.fc-canvas {
+  width: 58px;
+  height: 28px;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.fc-sub {
+  font-size: 8.5px;
+  font-weight: 900;
+  color: var(--ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.fc-quick-add {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  display: none;
+  gap: 2px;
+  z-index: 4;
+}
+
+.fighter-card:hover .fc-quick-add,
+.fighter-card.selected-class .fc-quick-add {
+  display: flex;
+}
+
+.fighter-card:hover .fc-sub,
+.fighter-card.selected-class .fc-sub {
+  opacity: 0.1;
+}
+
+.fc-qbtn {
+  padding: 1px 4px;
+  font-size: 9px;
+  font-weight: 900;
+  border: 1.4px solid var(--ink);
+  border-radius: 4px;
+  line-height: 1.1;
+}
+
+.fc-qbtn.qp {
+  background: var(--player-header);
+}
+
+.fc-qbtn.qb {
+  background: var(--bot-header);
+}
+
+.fc-qbtn:hover {
+  filter: brightness(0.95);
+  transform: scale(1.05);
+}
+
+/* По умолчанию на ПК мобильная панель вкладок скрыта */
+.mobile-tabs-bar {
+  display: none;
+}
+
+/* Оптимизация тапа для сенсорных экранов */
+button,
+.fighter-card,
+.slot-card,
+.lvl-node,
+.bots-scaling-box {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ==================== СРЕДНИЕ ЭКРАНЫ НОУТБУКОВ (<= 1280px) ==================== */
+@media (max-width: 1280px) {
+  .level-nodes {
+    display: none;
+  }
+  .middle-area {
+    grid-template-columns: 250px 1fr 250px;
+  }
+}
+
+/* ==================== МОБИЛЬНАЯ И ПЛАНШЕТНАЯ АДАПТАЦИЯ БЕЗ СЛАЙДЕРОВ (<= 960px) ==================== */
+@media (max-width: 960px) {
+  html, body {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    overflow: hidden;
+  }
+
+  .paper-app {
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    padding: 4px 6px;
+    padding-bottom: max(4px, env(safe-area-inset-bottom));
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  /* 1. ВЕРХНЕЕ МЕНЮ: помещается в 1 компактную строчку на любом экране */
+  .top-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    height: 36px;
+    min-height: 36px;
+    width: 100%;
+  }
+
+  .level-box {
+    padding: 2px 6px;
+    gap: 4px;
+    height: 34px;
+    border-radius: 8px;
+    flex: 0 0 auto;
+  }
+
+  .level-nodes {
+    display: none !important;
+  }
+
+  .mini-nav-btn {
+    width: 22px;
+    height: 22px;
+    font-size: 10px;
+  }
+
+  .level-title {
+    font-size: 13px;
+  }
+
+  .skull-icon {
+    font-size: 15px;
+  }
+
+  .start-zone {
+    flex: 1 1 auto;
+    justify-content: center;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .start-btn {
+    min-width: 0;
+    flex: 1 1 auto;
+    max-width: 140px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 15px;
+    gap: 4px;
+    border-radius: 8px;
+    box-shadow: 0 2px 0 var(--ink);
+  }
+
+  .start-swords {
+    font-size: 14px;
+  }
+
+  .secondary-top-btn {
+    height: 34px;
+    padding: 0 7px;
+    font-size: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 0 var(--ink);
+    flex-shrink: 0;
+  }
+
+  .bots-scaling-box {
+    flex: 0 1 auto;
+    height: 34px;
+    padding: 2px 6px;
+    gap: 4px;
+    border-radius: 8px;
+  }
+
+  .bars-icon {
+    height: 18px;
+    gap: 2px;
+  }
+
+  .bars-icon .b1 { height: 6px; }
+  .bars-icon .b2 { height: 11px; }
+  .bars-icon .b3 { height: 16px; }
+
+  .scaling-main {
+    display: none;
+  }
+
+  .scaling-sub {
+    font-size: 10px;
+    font-weight: 900;
+    color: var(--ink);
+    max-width: 95px;
+  }
+
+  /* 2. СРЕДНЯЯ ЧАСТЬ: Арена + Вкладки + Компактный инспектор команды */
+  .middle-area {
+    flex: 1 1 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    overflow: hidden;
+  }
+
+  .arena-section {
+    order: 1;
+    flex: 1 1 0;
+    min-height: 130px;
+    width: 100%;
+  }
+
+  #arenaCanvas {
+    touch-action: none;
+  }
+
+  .arena-hint {
+    font-size: 9.5px;
+    padding: 1px 8px;
+    bottom: 4px;
+    max-width: 94%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Мобильные вкладки прямо под ареной */
+  .mobile-tabs-bar {
+    order: 2;
+    flex: 0 0 26px;
+    height: 26px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4px;
+    width: 100%;
+  }
+
+  .mobile-tab-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 0 4px;
+    font-size: 11px;
+    font-weight: 900;
+    color: var(--ink);
+    background: var(--paper-card);
+    border: 2px solid var(--ink);
+    border-radius: 7px;
+    box-shadow: 0 1.5px 0 var(--ink);
+  }
+
+  .mobile-tab-btn.active-mobile-tab[data-mobile-tab="player"] {
+    background: var(--player-header);
+  }
+
+  .mobile-tab-btn.active-mobile-tab[data-mobile-tab="bot"] {
+    background: var(--bot-header);
+  }
+
+  .mobile-tab-btn.active-mobile-tab[data-mobile-tab="roster"] {
+    background: #ffe066;
+  }
+
+  .mob-tab-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 999px;
+    background: #fff;
+    border: 1.5px solid var(--ink);
+    font-size: 9.5px;
+    font-weight: 900;
+  }
+
+  /* Компактная панель выбранной команды (без вертикального скролла) */
+  .player-panel,
+  .bot-panel {
+    order: 3;
+    flex: 0 0 auto;
+    width: 100%;
+    padding: 4px 6px;
+    gap: 3px;
+    border-radius: 9px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto;
+    align-items: center;
+  }
+
+  .panel-header {
+    display: none;
+  }
+
+  .team-slots-wrap {
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    padding-bottom: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+  }
+
+  .team-slots-wrap::-webkit-scrollbar {
+    display: none;
+  }
+
+  .team-slots {
+    min-height: 30px;
+    gap: 3px;
+  }
+
+  .slot-card {
+    width: 36px;
+    height: 30px;
+    border-radius: 6px;
+    border-width: 1.5px;
+  }
+
+  .slot-card canvas {
+    width: 32px;
+    height: 26px;
+  }
+
+  .slot-count-badge {
+    font-size: 8px;
+    top: 1px;
+    left: 2px;
+  }
+
+  .team-actions-row {
+    grid-column: 2 / 3;
+    grid-row: 1 / 2;
+    gap: 3px;
+  }
+
+  .action-btn {
+    height: 28px;
+    font-size: 11px;
+    padding: 0 7px;
+    border-radius: 6px;
+    box-shadow: 0 1.5px 0 var(--ink);
+  }
+
+  .icon-btn {
+    width: 28px;
+    font-size: 13px;
+    padding: 0;
+  }
+
+  /* Ультра-компактный инспектор в одну строку */
+  .unit-inspector {
+    grid-column: 1 / -1;
+    grid-row: 2 / 3;
+    padding: 3px 6px;
+    border-radius: 7px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+
+  .inspector-top {
+    flex: 1 1 auto;
+    min-width: 0;
+    gap: 5px;
+  }
+
+  .inspector-preview-wrap {
+    width: 40px;
+    height: 34px;
+    border-radius: 5px;
+  }
+
+  .inspector-preview-wrap canvas {
+    width: 38px;
+    height: 32px;
+  }
+
+  .inspector-info {
+    gap: 1px;
+  }
+
+  .inspector-title-row h3 {
+    font-size: 12px;
+  }
+
+  .mini-icon-btn {
+    display: none;
+  }
+
+  .inspector-ability-badge {
+    font-size: 9.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .random-ability-btn {
+    margin-top: 1px;
+    padding: 1px 5px;
+    font-size: 9px;
+    border-radius: 5px;
+    box-shadow: 0 1px 0 var(--ink);
+    width: fit-content;
+  }
+
+  .inspector-divider {
+    display: none;
+  }
+
+  .stats-editor {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .stat-row {
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    font-size: 9.5px;
+  }
+
+  .stat-controls {
+    gap: 2px;
+  }
+
+  .stat-btn {
+    width: 20px;
+    height: 20px;
+    font-size: 13px;
+    border-width: 1.5px;
+    border-radius: 4px;
+  }
+
+  .stat-value {
+    min-width: 24px;
+    font-size: 11.5px;
+  }
+
+  body[data-mobile-tab="player"] .bot-panel {
+    display: none;
+  }
+
+  body[data-mobile-tab="bot"] .player-panel {
+    display: none;
+  }
+
+  body[data-mobile-tab="roster"] .player-panel,
+  body[data-mobile-tab="roster"] .bot-panel {
+    display: none;
+  }
+
+  /* 3. МЕНЮ С ПЕРСОНАЖАМИ: все 37 персонажей умещаются на экране БЕЗ слайдера */
+  .roster-panel {
+    flex: 0 0 38vh;
+    flex: 0 0 38dvh;
+    height: 38vh;
+    height: 38dvh;
+    max-height: 38vh;
+    max-height: 38dvh;
+    padding: 0;
+    border-radius: 9px;
+    overflow: hidden;
+  }
+
+  body[data-mobile-tab="roster"] .roster-panel {
+    flex: 0 0 49vh;
+    flex: 0 0 49dvh;
+    height: 49vh;
+    height: 49dvh;
+    max-height: 49vh;
+    max-height: 49dvh;
+  }
+
+  .roster-header {
+    padding: 2px 6px;
+    height: 24px;
+    gap: 4px;
+  }
+
+  .roster-header h2 {
+    font-size: 12px;
+  }
+
+  .roster-hint-text {
+    display: none;
+  }
+
+  .target-switch-label {
+    display: none;
+  }
+
+  .target-pill {
+    padding: 1px 6px;
+    font-size: 10px;
+  }
+
+  /* На планшетах (641px–960px): 10 колонок × 4 ряда = 40 ячеек (все 37 бойцов без скролла) */
+  .roster-grid {
+    flex: 1 1 0;
+    min-height: 0;
+    padding: 3px;
+    display: grid;
+    grid-template-columns: repeat(10, minmax(0, 1fr));
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    gap: 2.5px;
+    overflow: hidden;
+  }
+
+  .fighter-card {
+    padding: 1px 2px;
+    border-radius: 5px;
+    border-width: 1.5px;
+  }
+
+  .fc-num {
+    width: 12px;
+    height: 12px;
+    font-size: 7.5px;
+    border-width: 1px;
+  }
+
+  .fc-name {
+    font-size: 8.5px;
+  }
+
+  .fc-body {
+    height: 62%;
+    justify-content: center;
+  }
+
+  .fc-canvas {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .fc-sub {
+    display: none;
+  }
+
+  .fc-quick-add {
+    bottom: 1px;
+    right: 1px;
+    gap: 1px;
+  }
+
+  .fc-qbtn {
+    padding: 0px 3px;
+    font-size: 7.5px;
+    border-width: 1px;
+    border-radius: 3px;
+  }
+}
+
+/* ==================== СМАРТФОНЫ В ПОРТРЕТНОЙ ОРИЕНТАЦИИ (<= 640px) ==================== */
+@media (max-width: 640px) {
+  /* 6 колонок × 7 рядов = 42 ячейки: все 37 персонажей на 1 экране без скролла! */
+  .roster-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: repeat(7, minmax(0, 1fr));
+    gap: 2px;
+    padding: 2px;
+  }
+
+  .fc-num {
+    display: none;
+  }
+
+  .fc-top {
+    justify-content: center;
+  }
+
+  .fc-name {
+    font-size: 8px;
+    text-align: center;
+    width: 100%;
+  }
+
+  .bots-scaling-box .bars-icon {
+    display: none;
+  }
+
+  .scaling-sub {
+    max-width: 72px;
+    font-size: 9.5px;
+  }
+
+  .overlay-card {
+    padding: 12px;
+    max-width: 92%;
+  }
+
+  .overlay-card h2 {
+    font-size: 20px;
+  }
+
+  .overlay-buttons .action-btn {
+    height: 32px;
+    font-size: 11px;
+  }
+}
+
+/* ==================== ГОРИЗОНТАЛЬНЫЙ РЕЖИМ НА ТЕЛЕФОНЕ (LANDSCAPE) ==================== */
+@media (max-width: 960px) and (max-height: 520px) and (orientation: landscape) {
+  .roster-panel {
+    flex: 0 0 34vh;
+    flex: 0 0 34dvh;
+    height: 34vh;
+    height: 34dvh;
+    max-height: 34vh;
+    max-height: 34dvh;
+  }
+
+  /* В горизонтальном режиме: 13 колонок × 3 ряда = 39 ячеек без скролла */
+  .roster-grid {
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+    grid-template-rows: repeat(3, minmax(0, 1fr));
+  }
+}
+
+
