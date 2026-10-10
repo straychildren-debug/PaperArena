@@ -656,9 +656,9 @@ button:active {
 .arena-frame {
   position: relative;
   width: 100%;
-  max-width: 440px;
-  max-height: 260px;
-  aspect-ratio: 380 / 225;
+  max-width: 580px;
+  max-height: 346px;
+  aspect-ratio: 520 / 310;
   background: #f8f4ea;
   border: 4px solid var(--ink);
   border-radius: 6px;
@@ -2182,15 +2182,15 @@ button,
   min-height: 0;
   display: grid;
   grid-template-columns: repeat(14, minmax(0, 1fr));
-  grid-template-rows: repeat(3, minmax(0, 1fr));
-  gap: 4px;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 3px;
   overflow: hidden;
 }
 
 .hub-cell-card {
   border: 2px solid var(--ink);
-  border-radius: 8px;
-  padding: 2px 3px;
+  border-radius: 7px;
+  padding: 1px 2px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2215,35 +2215,39 @@ button,
   box-shadow: inset 0 0 0 1.5px var(--ink), 0 2px 0 var(--ink);
 }
 
+.hub-cell-card.in-squad-cell {
+  background: #dcfce7;
+}
+
 .hcc-rarity-strip {
   width: 100%;
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 900;
   color: #fff;
   text-align: center;
   border-radius: 4px;
   padding: 0 2px;
-  line-height: 1.25;
+  line-height: 1.2;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .hcc-canvas {
-  width: 50px;
-  height: 26px;
+  width: 44px;
+  height: 22px;
   object-fit: contain;
   pointer-events: none;
 }
 
 .hcc-lock {
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1;
   margin: auto 0;
 }
 
 .hcc-name {
-  font-size: 9px;
+  font-size: 8.5px;
   font-weight: 900;
   white-space: nowrap;
   overflow: hidden;
@@ -2252,10 +2256,89 @@ button,
 }
 
 .hcc-stats {
-  font-size: 8px;
+  font-size: 7.5px;
   font-weight: 900;
   color: var(--ink-soft);
   white-space: nowrap;
+}
+
+/* Панель выбора до 3 бойцов в отряд (макс. 6 на арене) */
+.hub-squad-panel {
+  width: 100%;
+  max-width: 660px;
+  background: #f8f4ea;
+  border: 2px dashed var(--ink);
+  border-radius: 10px;
+  padding: 5px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hub-squad-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 11.5px;
+  font-weight: 900;
+}
+
+.hub-squad-add-btn {
+  padding: 3px 10px;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  background: #86efac;
+  font-size: 11px;
+  font-weight: 900;
+  box-shadow: 0 2px 0 var(--ink);
+}
+
+.hub-squad-add-btn:disabled {
+  background: #d6d1c4;
+  color: #6e685f;
+  cursor: not-allowed;
+}
+
+.hub-squad-slots {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hub-squad-slot-card {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 8px;
+  background: #fffdf8;
+  border: 2px solid var(--ink);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.hub-squad-slot-card.empty-squad-slot {
+  background: #ebe6da;
+  border-style: dashed;
+  color: var(--ink-soft);
+  padding: 5px 12px;
+}
+
+.hub-squad-remove-btn {
+  width: 20px;
+  height: 20px;
+  border: 1.5px solid var(--ink);
+  border-radius: 5px;
+  background: #fca5a5;
+  font-size: 11px;
+  font-weight: 900;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* 4. ЭКРАН ПРОКАЧКИ БОЙЦА (ЗДОРОВЬЕ И УРОН ЗА 15 МОНЕТ) */
@@ -2365,7 +2448,7 @@ button,
   color: var(--ink-soft);
 }
 
-/* В режиме прохождения уровней скрываем лишние панели редактора, оставляя аккуратную арену (в 2 раза меньше!) */
+/* В режиме прохождения уровней скрываем лишние панели редактора, оставляя аккуратную арену */
 body[data-campaign-mode="true"] .player-panel,
 body[data-campaign-mode="true"] .bot-panel,
 body[data-campaign-mode="true"] .roster-panel,
@@ -2382,7 +2465,7 @@ body[data-campaign-mode="true"] .middle-area {
 
 @media (max-width: 960px) {
   .hub-rarity-cells-grid {
-    grid-template-columns: repeat(11, minmax(0, 1fr));
+    grid-template-columns: repeat(14, minmax(0, 1fr));
     grid-template-rows: repeat(4, minmax(0, 1fr));
   }
 }
@@ -2395,7 +2478,7 @@ body[data-campaign-mode="true"] .middle-area {
     grid-template-columns: 1fr;
   }
   .hub-rarity-cells-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     grid-template-rows: repeat(7, minmax(0, 1fr));
   }
   .hcc-stats {

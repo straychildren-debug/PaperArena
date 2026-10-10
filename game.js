@@ -19,7 +19,8 @@ class BattleRoyalPaperGame {
     this.coins = 100; // Стартовые 100 монет (хватает на 1 ящик или 6 прокачек; +40 монет за каждый уровень!)
     this.campaignLevel = 1; // Начинаем с 1 уровня
     this.unlockedFighters = new Set(['swordsman']); // Изначально открыт только Мечник (в ящике все кроме Мечника)
-    this.selectedCampaignFighterId = null; // Выбранный персонаж в ячейке
+    this.selectedCampaignFighterId = 'swordsman'; // Выбранный персонаж в ячейке
+    this.campaignSquad = ['swordsman']; // Отряд игрока на бой (от 1 до 3 бойцов, максимум на арене 6 бойцов!)
     this.fighterUpgrades = {}; // { [classId]: { hp: 0, damage: 0 } }
     this.isCampaignBattle = true;
     this.currentScreen = 'menu'; // 'menu' | 'shop' | 'hub' | 'upgrade' | 'arena'
@@ -94,16 +95,16 @@ class BattleRoyalPaperGame {
   resizeCanvas() {
     const frame = document.getElementById('arenaFrame');
     if (!frame) return;
-    const displayWidth = frame.clientWidth || 380;
-    const displayHeight = frame.clientHeight || 225;
+    const displayWidth = frame.clientWidth || 520;
+    const displayHeight = frame.clientHeight || 310;
 
-    // Арена сделана В 2 РАЗА МЕНЬШЕ (логическое разрешение 380×225 вместо 760×450)!
-    const w = 380;
-    const h = 225;
+    // Арена сделана чуть побольше (логическое разрешение 520×310)!
+    const w = 520;
+    const h = 310;
 
     if (this.canvas.width !== w || this.canvas.height !== h) {
-      const oldW = this.canvas.width || 380;
-      const oldH = this.canvas.height || 225;
+      const oldW = this.canvas.width || 520;
+      const oldH = this.canvas.height || 310;
       this.canvas.width = w;
       this.canvas.height = h;
 
@@ -120,8 +121,8 @@ class BattleRoyalPaperGame {
   }
 
   loadReferenceDefaultTeams() {
-    const w = this.canvas.width || 380;
-    const h = this.canvas.height || 225;
+    const w = this.canvas.width || 520;
+    const h = this.canvas.height || 310;
 
     this.playerBlueprints = [
       this.createBlueprint('swordsman', 'player', w * 0.23, h * 0.50, { hp: 100, speed: 3, damage: 10 })
@@ -138,8 +139,8 @@ class BattleRoyalPaperGame {
 
   createBlueprint(classId, team, x, y, customStats = null) {
     const cls = getFighterClass(classId);
-    const w = this.canvas.width || 380;
-    const h = this.canvas.height || 225;
+    const w = this.canvas.width || 520;
+    const h = this.canvas.height || 310;
 
     if (x == null || y == null) {
       const minX = team === 'player' ? 30 : w * 0.56;
@@ -163,37 +164,44 @@ class BattleRoyalPaperGame {
     };
   }
 
-  // Описание врагов для текущего уровня кампании
+  // Описание врагов для текущего уровня кампании (максимум 6 бойцов на арене: до 3 наших и до 4 соперников, не слишком сильных!)
   getCampaignEnemiesForLevel(lvl) {
     // На 1 уровне вас ждёт соперник Бибизяна!
     if (lvl === 1) {
       return [
-        { classId: 'bibizyana', hp: 75, speed: 3.0, damage: 10 }
+        { classId: 'bibizyana', hp: 70, speed: 2.9, damage: 9 }
       ];
     }
-    // С каждым уровнем враги становятся сильнее и увеличивается их количество!
-    const enemyCount = Math.min(6, 1 + Math.floor(lvl / 2));
-    const statScale = 0.65 + lvl * 0.18;
+
+    // Максимум на арене 6 бойцов (до 3 наших, у соперников может быть до 4, но сумма не больше 6!)
+    const playerCount = Math.max(1, Math.min(3, (this.campaignSquad && this.campaignSquad.length) || 1));
+    const maxAllowedEnemies = Math.min(4, Math.max(1, 6 - playerCount));
+    const rawWantedEnemies = Math.min(4, 1 + Math.floor(lvl / 2));
+    const enemyCount = Math.min(maxAllowedEnemies, rawWantedEnemies);
+
+    // Чтобы соперники (особенно когда их 3 или 4) не были прям слишком сильными, мягко ослабляем статы каждого
+    const multiEnemyBalance = enemyCount >= 4 ? 0.42 : (enemyCount === 3 ? 0.50 : (enemyCount === 2 ? 0.64 : 0.82));
+    const statScale = (0.58 + lvl * 0.09) * multiEnemyBalance;
+
     const orderedByRarity = getFightersSortedByRarity();
-    // Чем выше уровень, тем более редкие и опасные бойцы попадаются против вас
-    const maxPoolIdx = Math.min(orderedByRarity.length - 1, 6 + lvl * 4);
+    const maxPoolIdx = Math.min(orderedByRarity.length - 1, 7 + lvl * 3);
     const enemies = [];
     for (let i = 0; i < enemyCount; i++) {
       const pickIdx = (lvl * 3 + i * 5) % (maxPoolIdx + 1);
       const cls = orderedByRarity[pickIdx] || getFighterClass('bibizyana');
       enemies.push({
         classId: cls.id,
-        hp: Math.max(45, Math.round((cls.hp * statScale) / 5) * 5),
-        speed: Number(Math.min(6.5, cls.speed * (0.92 + lvl * 0.03)).toFixed(1)),
-        damage: Math.max(6, Math.round(cls.damage * statScale))
+        hp: Math.max(35, Math.min(260, Math.round((cls.hp * statScale) / 5) * 5)),
+        speed: Number(Math.min(4.8, cls.speed * (0.88 + lvl * 0.02)).toFixed(1)),
+        damage: Math.max(5, Math.min(38, Math.round(cls.damage * statScale)))
       });
     }
     return enemies;
   }
 
   generateBotTeamForLevel(lvl) {
-    const w = this.canvas.width || 380;
-    const h = this.canvas.height || 225;
+    const w = this.canvas.width || 520;
+    const h = this.canvas.height || 310;
 
     const enemies = this.getCampaignEnemiesForLevel(lvl);
     const newBots = enemies.map((eCfg, idx) => {
@@ -239,9 +247,8 @@ class BattleRoyalPaperGame {
       ? (Math.random() * 0.9 - 0.45)
       : (Math.PI + (Math.random() * 0.9 - 0.45));
 
-    const speedPx = (bp.speed || 3) * 34;
-    // Поскольку арена в 2 раза меньше (380x225), делаем радиус бойцов аккуратным под компактный ринг
-    const baseRadius = isMinion ? 8 : 15;
+    const speedPx = (bp.speed || 3) * 38;
+    const baseRadius = isMinion ? 9 : 16;
     const abilityId = bp.abilityId || bp.classId;
 
     // Для Червя (гусеницы) создаём цепочку из 7 сегментов хвоста!
@@ -459,6 +466,10 @@ class BattleRoyalPaperGame {
       this.startCampaignBattleFromHub();
     });
 
+    document.getElementById('hubAddSelectedToSquadBtn')?.addEventListener('click', () => {
+      this.addSelectedFighterToCampaignSquad();
+    });
+
     document.getElementById('hubUpgradeCharBtn')?.addEventListener('click', () => {
       if (!this.selectedCampaignFighterId) return;
       window.sfx.click();
@@ -486,6 +497,21 @@ class BattleRoyalPaperGame {
     });
 
     this.updateAllCoinsUI();
+  }
+
+  addSelectedFighterToCampaignSquad() {
+    const cid = this.selectedCampaignFighterId || 'swordsman';
+    if (!this.unlockedFighters.has(cid)) {
+      window.sfx.defeat();
+      return;
+    }
+    if (this.campaignSquad.length >= 3) {
+      window.sfx.defeat();
+      return;
+    }
+    window.sfx.click();
+    this.campaignSquad.push(cid);
+    this.renderCampaignHub();
   }
 
   showScreen(screenName) {
@@ -536,7 +562,7 @@ class BattleRoyalPaperGame {
     this.showScreen('shop');
   }
 
-  // Отрисовка нижней части картинки ящика: редкости и все 40 персонажей (кроме Мечника) с шансами выпадения
+  // Отрисовка нижней части картинки ящика: редкости и все 55 персонажей (кроме Мечника) с шансами выпадения
   renderCrateRaritiesAndFighters() {
     const listEl = document.getElementById('crateRaritiesList');
     if (!listEl) return;
@@ -577,7 +603,7 @@ class BattleRoyalPaperGame {
     }
   }
 
-  // Открытие ящика за 100 монет с учётом редкости (чем выше редкость — тем меньше шанс!)
+  // Открытие ящика за 100 монет с учётом редкости (если падает повторка — автоматически продаётся за 20 монет!)
   openCrateFor100Coins() {
     if (this.coins < 100) {
       window.sfx.defeat();
@@ -594,7 +620,7 @@ class BattleRoyalPaperGame {
       boxIll.classList.add('crate-shake');
     }
 
-    // Выбираем редкость по весам (45% Обычная, 28% Редкая, 16% Эпическая, 8% Мифическая, 3% Легендарная)
+    // Выбираем редкость по новым весам (53.5% Обычная, 33% Редкая, 8% Эпическая, 4% Мифическая, 1.5% Легендарная)
     const roll = Math.random() * 100;
     let cumulative = 0;
     let chosenTier = FIGHTER_RARITIES[0];
@@ -606,33 +632,22 @@ class BattleRoyalPaperGame {
       }
     }
 
-    // Все персонажи в ящике (кроме Мечника!)
-    let pool = FIGHTER_CLASSES.filter(fc => fc.inCrate && fc.rarity === chosenTier.id);
-    const lockedInTier = pool.filter(fc => !this.unlockedFighters.has(fc.id));
-    if (lockedInTier.length > 0) {
-      pool = lockedInTier;
-    } else {
-      // Если в этой редкости уже все открыты, ищем неоткрытых в других редкостях
-      const anyLocked = FIGHTER_CLASSES.filter(fc => fc.inCrate && !this.unlockedFighters.has(fc.id));
-      if (anyLocked.length > 0) pool = anyLocked;
-    }
-
+    // Все персонажи выбранной редкости в ящике (кроме Мечника!)
+    const pool = FIGHTER_CLASSES.filter(fc => fc.inCrate && fc.rarity === chosenTier.id);
     const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
     const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
-    this.unlockedFighters.add(droppedFighter.id);
-    this.selectedCampaignFighterId = droppedFighter.id;
 
-    // Если этот боец уже был открыт (когда собраны все), даём ему бонус прокачки!
     if (wasAlreadyUnlocked) {
-      if (!this.fighterUpgrades[droppedFighter.id]) {
-        this.fighterUpgrades[droppedFighter.id] = { hp: 0, damage: 0 };
-      }
-      this.fighterUpgrades[droppedFighter.id].hp += 5;
-      this.fighterUpgrades[droppedFighter.id].damage += 2;
+      // Если падает повторка — она автоматически продаётся за 20 монет!
+      this.coins += 20;
+    } else {
+      this.unlockedFighters.add(droppedFighter.id);
+      this.selectedCampaignFighterId = droppedFighter.id;
     }
 
     // Показываем выпавшего бойца по центру
     const resBox = document.getElementById('crateUnboxedResult');
+    const headerEl = document.getElementById('unboxedHeaderTitle');
     const cnv = document.getElementById('unboxedFighterCanvas');
     const nameEl = document.getElementById('unboxedFighterName');
     const rarEl = document.getElementById('unboxedFighterRarity');
@@ -642,13 +657,20 @@ class BattleRoyalPaperGame {
       resBox.classList.remove('hidden');
       renderFighterThumbnail(cnv, droppedFighter, 'player', true);
       nameEl.textContent = droppedFighter.name.toUpperCase();
-      rarEl.textContent = `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
-      rarEl.style.background = droppedFighter.rarityColor;
+      rarEl.textContent = wasAlreadyUnlocked
+        ? `ПОВТОРКА • ПРОДАНА ЗА +20 🪙`
+        : `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
+      rarEl.style.background = wasAlreadyUnlocked ? '#d97706' : droppedFighter.rarityColor;
+    }
+    if (headerEl) {
+      headerEl.textContent = wasAlreadyUnlocked
+        ? '🔄 ПОВТОРКА! АВТОПРОДАЖА +20 🪙'
+        : '🎉 ВАМ ВЫПАЛ НОВЫЙ БОЕЦ!';
     }
     if (msgEl) {
       msgEl.textContent = wasAlreadyUnlocked
-        ? `Боец «${droppedFighter.name}» усилен (+5 к здоровью и +2 к урону)!`
-        : `Новый боец «${droppedFighter.name}» добавлен в вашу ячейку по редкости!`;
+        ? `🔄 Выпала повторка «${droppedFighter.name}» — автоматически продана за +20 монет!`
+        : `🎉 Новый боец «${droppedFighter.name}» добавлен в вашу ячейку по редкости!`;
     }
 
     this.renderCrateRaritiesAndFighters();
@@ -665,12 +687,69 @@ class BattleRoyalPaperGame {
     const lvlNumEl = document.getElementById('hubLevelNumber');
     if (lvlNumEl) lvlNumEl.textContent = this.campaignLevel;
 
+    // Следим, чтобы в отряде были только открытые бойцы и максимум 3 наших бойца
+    this.campaignSquad = (this.campaignSquad || []).filter(id => this.unlockedFighters.has(id)).slice(0, 3);
+    if (this.campaignSquad.length === 0 && this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId)) {
+      this.campaignSquad = [this.selectedCampaignFighterId];
+    }
+
     const enemies = this.getCampaignEnemiesForLevel(this.campaignLevel);
     const enemyNames = enemies.map(e => getFighterClass(e.classId).name).join(', ');
     const previewEl = document.getElementById('hubEnemyPreviewText');
     if (previewEl) {
       previewEl.innerHTML =
-        `На <strong>${this.campaignLevel} уровне</strong> вас ждёт (${enemies.length} шт.): <strong>${enemyNames}</strong> • Награда за победу: <strong>+40 🪙</strong>`;
+        `На <strong>${this.campaignLevel} уровне</strong> вас ждёт (${enemies.length} шт., макс. 6 бойцов на арене): <strong>${enemyNames}</strong> • Награда: <strong>+40 🪙</strong>`;
+    }
+
+    // Отрисовываем панель отряда (до 3 ваших бойцов)
+    const squadCountEl = document.getElementById('hubSquadCountLabel');
+    if (squadCountEl) {
+      squadCountEl.textContent = `${this.campaignSquad.length} / 3`;
+    }
+
+    const addSquadBtn = document.getElementById('hubAddSelectedToSquadBtn');
+    if (addSquadBtn) {
+      const canAdd = this.campaignSquad.length < 3 && this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId);
+      addSquadBtn.disabled = !canAdd;
+      const selName = this.selectedCampaignFighterId ? getFighterClass(this.selectedCampaignFighterId).name : '';
+      addSquadBtn.textContent = this.campaignSquad.length >= 3
+        ? 'МАКСИМУМ 3 ВАШИХ БОЙЦА'
+        : `➕ ВЗЯТЬ В ОТРЯД: ${selName.toUpperCase()} (${this.campaignSquad.length}/3)`;
+    }
+
+    const squadSlotsEl = document.getElementById('hubSquadSlots');
+    if (squadSlotsEl) {
+      squadSlotsEl.innerHTML = '';
+      for (let i = 0; i < 3; i++) {
+        const cid = this.campaignSquad[i];
+        const slotEl = document.createElement('div');
+        if (cid) {
+          const cls = getFighterClass(cid);
+          const st = this.getUpgradedFighterStats(cid);
+          slotEl.className = 'hub-squad-slot-card';
+          slotEl.innerHTML = `
+            <canvas width="36" height="24"></canvas>
+            <span>#${i + 1} ${cls.name} (❤️${st.hp} ⚔️${st.damage})</span>
+            <button type="button" class="hub-squad-remove-btn" title="Убрать из отряда">✕</button>
+          `;
+          const cnv = slotEl.querySelector('canvas');
+          renderFighterThumbnail(cnv, cls, 'player', false);
+          slotEl.querySelector('.hub-squad-remove-btn').addEventListener('click', (e) => {
+            e.stopPropagation();
+            window.sfx.click();
+            this.campaignSquad.splice(i, 1);
+            this.renderCampaignHub();
+          });
+        } else {
+          slotEl.className = 'hub-squad-slot-card empty-squad-slot';
+          slotEl.textContent = `+ Слот #${i + 1} (нажмите, чтобы добавить)`;
+          slotEl.style.cursor = 'pointer';
+          slotEl.addEventListener('click', () => {
+            this.addSelectedFighterToCampaignSquad();
+          });
+        }
+        squadSlotsEl.appendChild(slotEl);
+      }
     }
 
     const unlockedCountEl = document.getElementById('hubUnlockedCountLabel');
@@ -682,34 +761,38 @@ class BattleRoyalPaperGame {
     const upgBtn = document.getElementById('hubUpgradeCharBtn');
     const hintEl = document.getElementById('hubSelectionHint');
 
+    if (this.campaignSquad.length > 0) {
+      if (playBtn) {
+        playBtn.disabled = false;
+        playBtn.textContent = `⚔️ ИГРАТЬ (ВАШИХ БОЙЦОВ: ${this.campaignSquad.length} ПРОТИВ ${enemies.length})`;
+      }
+    } else {
+      if (playBtn) {
+        playBtn.disabled = true;
+        playBtn.textContent = '⚔️ ИГРАТЬ (ДОБАВЬТЕ ХОТЯ БЫ 1 БОЙЦА В ОТРЯД)';
+      }
+    }
+
     if (this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId)) {
       const selCls = getFighterClass(this.selectedCampaignFighterId);
       const st = this.getUpgradedFighterStats(selCls.id);
-      if (playBtn) {
-        playBtn.disabled = false;
-        playBtn.textContent = `⚔️ ИГРАТЬ (${selCls.name.toUpperCase()})`;
-      }
       if (upgBtn) {
         upgBtn.classList.remove('hidden');
         upgBtn.textContent = `⬆️ ПРОКАЧАТЬ (${selCls.name.toUpperCase()})`;
       }
       if (hintEl) {
-        hintEl.textContent = `Выбран боец: ${selCls.name} (${selCls.rarityName} редкость • ❤️ ${st.hp} HP • ⚔️ ${st.damage} урона). Нажмите «Играть» или «Прокачать»!`;
+        hintEl.textContent = `Выбран: ${selCls.name} (❤️ ${st.hp} HP • ⚔️ ${st.damage} урона). Можно взять до 3 наших бойцов (всего на арене макс. 6)!`;
       }
     } else {
-      if (playBtn) {
-        playBtn.disabled = true;
-        playBtn.textContent = '⚔️ ИГРАТЬ (ВЫБЕРИТЕ ПЕРСОНАЖА В ЯЧЕЙКЕ)';
-      }
       if (upgBtn) {
         upgBtn.classList.add('hidden');
       }
       if (hintEl) {
-        hintEl.textContent = '👇 Сначала выберите персонажа, который находится у вас в ячейках снизу!';
+        hintEl.textContent = '👇 Выберите персонажа в ячейках снизу, чтобы добавить в отряд (до 3) или прокачать!';
       }
     }
 
-    // Отрисовываем сетку с ячейками по редкости (все 41 место)
+    // Отрисовываем сетку с ячейками по редкости (все 56 мест)
     const grid = document.getElementById('hubRarityCellsGrid');
     if (!grid) return;
     grid.innerHTML = '';
@@ -718,17 +801,20 @@ class BattleRoyalPaperGame {
     for (const fc of sortedFighters) {
       const isUnlocked = this.unlockedFighters.has(fc.id);
       const isSelected = this.selectedCampaignFighterId === fc.id;
+      const inSquadCount = this.campaignSquad.filter(id => id === fc.id).length;
       const cell = document.createElement('div');
       cell.className =
         'hub-cell-card' +
         (isUnlocked ? '' : ' locked-cell') +
+        (inSquadCount > 0 ? ' in-squad-cell' : '') +
         (isSelected ? ' selected-hub-cell' : '');
       cell.style.borderColor = fc.rarityBorder;
 
       if (isUnlocked) {
         const st = this.getUpgradedFighterStats(fc.id);
+        const countBadge = inSquadCount > 0 ? ` (×${inSquadCount})` : '';
         cell.innerHTML = `
-          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}${countBadge}</div>
           <canvas class="hcc-canvas" width="60" height="32"></canvas>
           <div class="hcc-name">${fc.name}</div>
           <div class="hcc-stats">❤️${st.hp} ⚔️${st.damage}</div>
@@ -738,7 +824,15 @@ class BattleRoyalPaperGame {
 
         cell.addEventListener('click', () => {
           window.sfx.click();
-          this.selectedCampaignFighterId = fc.id;
+          if (this.selectedCampaignFighterId === fc.id && this.campaignSquad.length < 3) {
+            // Повторный клик по выбранному бойцу сразу добавляет его в отряд (до 3 бойцов)!
+            this.campaignSquad.push(fc.id);
+          } else {
+            this.selectedCampaignFighterId = fc.id;
+            if (this.campaignSquad.length === 0) {
+              this.campaignSquad.push(fc.id);
+            }
+          }
           this.renderCampaignHub();
         });
       } else {
@@ -825,9 +919,13 @@ class BattleRoyalPaperGame {
     this.renderUpgradeScreen();
   }
 
-  // Переход из локации с ячейками на арену (в 2 раза меньше) и запуск боя уровня!
+  // Переход из локации с ячейками на арену и запуск боя уровня (до 3 наших бойцов, максимум 6 на арене)!
   startCampaignBattleFromHub() {
-    if (!this.selectedCampaignFighterId || !this.unlockedFighters.has(this.selectedCampaignFighterId)) {
+    const validSquad = (this.campaignSquad || []).filter(id => this.unlockedFighters.has(id)).slice(0, 3);
+    if (validSquad.length === 0 && this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId)) {
+      validSquad.push(this.selectedCampaignFighterId);
+    }
+    if (validSquad.length === 0) {
       window.sfx.defeat();
       return;
     }
@@ -840,22 +938,23 @@ class BattleRoyalPaperGame {
     this.showScreen('arena');
     this.resizeCanvas();
 
-    const w = this.canvas.width || 380;
-    const h = this.canvas.height || 225;
+    const w = this.canvas.width || 520;
+    const h = this.canvas.height || 310;
 
-    // Ставим выбранного из ячейки бойца игрока с его прокачанными здоровьем и уроном
-    const cid = this.selectedCampaignFighterId;
-    const st = this.getUpgradedFighterStats(cid);
-    this.playerBlueprints = [
-      this.createBlueprint(cid, 'player', w * 0.22, h * 0.50, {
+    // Ставим всех выбранных в отряд бойцов игрока (от 1 до 3) с их прокачанными здоровьем и уроном
+    this.playerBlueprints = validSquad.map((cid, idx) => {
+      const st = this.getUpgradedFighterStats(cid);
+      const py = h * ((idx + 1) / (validSquad.length + 1));
+      const px = w * (idx % 2 === 0 ? 0.22 : 0.30);
+      return this.createBlueprint(cid, 'player', px, py, {
         hp: st.hp,
         speed: st.speed,
         damage: st.damage
-      })
-    ];
+      });
+    });
     this.selectedPlayerUnitId = this.playerBlueprints[0].id;
 
-    // Генерируем соперников уровня (на 1 уровне — Бибизяна, дальше сильнее и больше!)
+    // Генерируем соперников уровня (максимум 6 бойцов на арене в сумме!)
     this.generateBotTeamForLevel(this.campaignLevel);
     this.renderLevelBar();
     this.refreshAllUI();
@@ -1130,6 +1229,19 @@ class BattleRoyalPaperGame {
 
   addUnitToTeam(team, classId) {
     if (this.state !== 'prep') this.stopBattleToPrep();
+    const totalUnits = this.playerBlueprints.length + this.botBlueprints.length;
+    if (totalUnits >= 6) {
+      window.sfx.defeat();
+      return;
+    }
+    if (team === 'player' && this.playerBlueprints.length >= 3) {
+      window.sfx.defeat();
+      return;
+    }
+    if (team === 'bot' && this.botBlueprints.length >= 4) {
+      window.sfx.defeat();
+      return;
+    }
     window.sfx.click();
 
     const bp = this.createBlueprint(classId, team);
@@ -1147,6 +1259,19 @@ class BattleRoyalPaperGame {
 
   duplicateSelectedUnit(team) {
     if (this.state !== 'prep') this.stopBattleToPrep();
+    const totalUnits = this.playerBlueprints.length + this.botBlueprints.length;
+    if (totalUnits >= 6) {
+      window.sfx.defeat();
+      return;
+    }
+    if (team === 'player' && this.playerBlueprints.length >= 3) {
+      window.sfx.defeat();
+      return;
+    }
+    if (team === 'bot' && this.botBlueprints.length >= 4) {
+      window.sfx.defeat();
+      return;
+    }
     const list = team === 'player' ? this.playerBlueprints : this.botBlueprints;
     const selId = team === 'player' ? this.selectedPlayerUnitId : this.selectedBotUnitId;
     const orig = list.find(u => u.id === selId) || list[list.length - 1];
@@ -2099,7 +2224,7 @@ class BattleRoyalPaperGame {
     }
 
     // Контактные бойцы держат оружие по курсу к врагу
-    if (['shield', 'vampire', 'worm', 'claws', 'robo_mech', 'boxer', 'zombie', 'werewolf', 'death', 'doubler'].includes(u.abilityId)) {
+    if (['shield', 'vampire', 'worm', 'claws', 'robo_mech', 'boxer', 'zombie', 'werewolf', 'death', 'doubler', 'lumberjack', 'musketeer'].includes(u.abilityId)) {
       u.weaponAngle = u.aimAngle;
       return;
     }
@@ -2143,7 +2268,11 @@ class BattleRoyalPaperGame {
     }
 
     // Бойцы со снарядами ориентируют оружие по курсу к цели
-    if (['ninja', 'bomber', 'checkmate', 'fairy', 'card_master', 'musician', 'pavuk', 'bibizyana'].includes(u.abilityId)) {
+    if ([
+      'ninja', 'bomber', 'checkmate', 'fairy', 'card_master', 'musician', 'pavuk', 'bibizyana',
+      'slinger', 'blacksmith', 'beekeeper', 'ice_golem', 'samurai', 'cactus', 'magician_hat',
+      'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus'
+    ].includes(u.abilityId)) {
       u.weaponAngle = u.aimAngle;
     }
 
@@ -2831,7 +2960,7 @@ class BattleRoyalPaperGame {
       }
 
       case 'healer': {
-        u.cooldown = 2.8;
+        u.cooldown = 6.0;
         let wounded = null;
         let lowestRatio = 1.0;
         for (const ally of this.units) {
@@ -2843,7 +2972,7 @@ class BattleRoyalPaperGame {
           }
         }
         if (!wounded) wounded = u;
-        const healAmt = Math.round(u.damage * 1.2);
+        const healAmt = Math.max(5, Math.round(u.damage * 0.9));
         wounded.hp = Math.min(wounded.maxHp, wounded.hp + healAmt);
         window.sfx.heal();
         this.addFloatingText(wounded.x, wounded.y - 20, `+${healAmt} HP`, '#3ca628');
@@ -2923,6 +3052,334 @@ class BattleRoyalPaperGame {
           tick: 0.2
         });
         this.addFloatingText(enemy.x, enemy.y - 22, '🌀 ВИХРЬ', '#7d3ce8');
+        break;
+      }
+
+      // ==================== СПОСОБНОСТИ 15 НОВЫХ БОЙЦОВ ====================
+      case 'slinger': {
+        // ПРАЩНИК: каждые 2 с кидает камень из пращи с отталкиванием!
+        if (!enemy) break;
+        u.cooldown = 2.0;
+        window.sfx.shootArrow();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'shuriken',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 8),
+          y: u.y + Math.sin(ang) * (u.radius + 8),
+          vx: Math.cos(ang) * 390,
+          vy: Math.sin(ang) * 390,
+          spin: 0,
+          knockback: 220,
+          radius: 6,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'blacksmith': {
+        // КУЗНЕЦ: каждые 5 с куёт себе +12 HP брони!
+        u.cooldown = 5.0;
+        window.sfx.heal();
+        u.maxHp += 12;
+        u.hp = Math.min(u.maxHp, u.hp + 12);
+        this.spawnConfetti(u.x, u.y, '#f97316', 8);
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🔨 КОВКА БРОНИ (+12 HP)!', '#ea580c');
+        break;
+      }
+
+      case 'beekeeper': {
+        // ПЧЕЛОВОД: каждые 3.5 с выпускает рой из 3 злых пчёл!
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        window.sfx.shootArrow();
+        const baseAng = u.aimAngle;
+        for (const sp of [-0.25, 0, 0.25]) {
+          const ang = baseAng + sp;
+          this.projectiles.push({
+            type: 'rifle_bullet',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 9),
+            y: u.y + Math.sin(ang) * (u.radius + 9),
+            vx: Math.cos(ang) * 370,
+            vy: Math.sin(ang) * 370,
+            radius: 5.5,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🐝 РОЙ ПЧЁЛ ×3!', '#ca8a04');
+        break;
+      }
+
+      case 'ice_golem': {
+        // ЛЕДЯНОЙ ГОЛЕМ: каждые 5 с выпускает кольцо из 6 ледяных осколков вокруг себя!
+        u.cooldown = 5.0;
+        window.sfx.magicIce();
+        for (let k = 0; k < 6; k++) {
+          const ang = (k * Math.PI) / 3;
+          this.projectiles.push({
+            type: 'ice_shard',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 8),
+            y: u.y + Math.sin(ang) * (u.radius + 8),
+            vx: Math.cos(ang) * 310,
+            vy: Math.sin(ang) * 310,
+            radius: 6,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🧊 ЛЕДЯНОЙ ВЗРЫВ!', '#0284c7');
+        break;
+      }
+
+      case 'samurai': {
+        // САМУРАЙ: каждые 4.5 с делает молниеносный разрез Иайдо сквозь врага!
+        if (!enemy) break;
+        u.cooldown = 4.5;
+        const dashAng = Math.atan2(enemy.y - u.y, enemy.x - u.x);
+        const destX = Math.max(28, Math.min(this.canvas.width - 28, enemy.x + Math.cos(dashAng) * 26));
+        const destY = Math.max(28, Math.min(this.canvas.height - 28, enemy.y + Math.sin(dashAng) * 26));
+        this.lightnings.push({
+          x1: u.x,
+          y1: u.y,
+          x2: destX,
+          y2: destY,
+          color: '#ef4444',
+          life: 0.25
+        });
+        u.x = destX;
+        u.y = destY;
+        const slashDmg = Math.round(u.damage * 1.6);
+        window.sfx.hit();
+        this.applyDamage(enemy, slashDmg, u, '#b91c1c');
+        this.addFloatingText(enemy.x, enemy.y - 24, `⛩️ ИАЙДО -${slashDmg}!`, '#991b1b');
+        break;
+      }
+
+      case 'cactus': {
+        // КАКТУС: каждые 4 с выстреливает 8 колючками во все стороны!
+        u.cooldown = 4.0;
+        window.sfx.shootArrow();
+        for (let k = 0; k < 8; k++) {
+          const ang = (k * Math.PI) / 4;
+          this.projectiles.push({
+            type: 'arrow',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 8),
+            y: u.y + Math.sin(ang) * (u.radius + 8),
+            vx: Math.cos(ang) * 350,
+            vy: Math.sin(ang) * 350,
+            radius: 5,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🌵 8 КОЛЮЧЕК!', '#15803d');
+        break;
+      }
+
+      case 'magician_hat': {
+        // ФОКУСНИК: каждые 3.5 с достаёт из шляпы либо 3 голубей, либо взрывного кролика!
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        const baseAng = u.aimAngle;
+        if (Math.random() < 0.5) {
+          window.sfx.shootArrow();
+          for (const sp of [-0.22, 0, 0.22]) {
+            const ang = baseAng + sp;
+            this.projectiles.push({
+              type: 'playing_card',
+              team: u.team,
+              owner: u,
+              suit: '🕊',
+              x: u.x + Math.cos(ang) * (u.radius + 9),
+              y: u.y + Math.sin(ang) * (u.radius + 9),
+              vx: Math.cos(ang) * 410,
+              vy: Math.sin(ang) * 410,
+              spin: ang,
+              radius: 7,
+              damage: u.damage,
+              piercing: false,
+              hitSet: new Set()
+            });
+          }
+          this.addFloatingText(u.x, u.y - u.radius - 16, '🎩 ФОКУС: 3 ГОЛУБЯ!', '#7c3aed');
+        } else {
+          window.sfx.magicFire();
+          this.projectiles.push({
+            type: 'bomb_grenade',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(baseAng) * (u.radius + 10),
+            y: u.y + Math.sin(baseAng) * (u.radius + 10),
+            vx: Math.cos(baseAng) * 290,
+            vy: Math.sin(baseAng) * 290,
+            targetX: enemy.x,
+            targetY: enemy.y,
+            spin: 0,
+            blastRadius: 80,
+            radius: 8,
+            damage: Math.round(u.damage * 1.8),
+            piercing: false,
+            hitSet: new Set()
+          });
+          this.addFloatingText(u.x, u.y - u.radius - 16, '🎩 ВЗРЫВНОЙ КРОЛИК!', '#6d28d9');
+        }
+        break;
+      }
+
+      case 'anubis': {
+        // АНУБИС: каждые 4 с пускает песчаный луч, нанося 38 HP и исцеляя себя на +25 HP!
+        if (!enemy) break;
+        u.cooldown = 4.0;
+        window.sfx.lightning();
+        this.lightnings.push({
+          x1: u.x,
+          y1: u.y,
+          x2: enemy.x,
+          y2: enemy.y,
+          color: '#f59e0b',
+          life: 0.3
+        });
+        enemy.vulnTimer = 3.0;
+        this.applyDamage(enemy, u.damage, u, '#b45309');
+        u.hp = Math.min(u.maxHp, u.hp + 25);
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🐺 ПРОКЛЯТИЕ АНУБИСА (+25 HP)!', '#d97706');
+        break;
+      }
+
+      case 'poseidon': {
+        // ПОСЕЙДОН: каждые 4 с запускает 3 морские волны с мощным отбрасыванием!
+        if (!enemy) break;
+        u.cooldown = 4.0;
+        window.sfx.magicIce();
+        const baseAng = u.aimAngle;
+        for (const sp of [-0.22, 0, 0.22]) {
+          const ang = baseAng + sp;
+          this.projectiles.push({
+            type: 'shuriken',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 10),
+            y: u.y + Math.sin(ang) * (u.radius + 10),
+            vx: Math.cos(ang) * 390,
+            vy: Math.sin(ang) * 390,
+            spin: 0,
+            knockback: 320,
+            radius: 8,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🔱 ЦУНАМИ ПОСЕЙДОНА!', '#0284c7');
+        break;
+      }
+
+      case 'meteor_knight': {
+        // МЕТЕОРИТ: каждые 5 с взрывается огненной волной вокруг себя!
+        u.cooldown = 5.0;
+        this.triggerBombExplosion({
+          x: u.x,
+          y: u.y,
+          team: u.team,
+          owner: u,
+          blastRadius: 95,
+          damage: Math.round(u.damage * 1.35)
+        });
+        this.addFloatingText(u.x, u.y - u.radius - 18, '☄️ ВЗРЫВ МЕТЕОРИТА!', '#ea580c');
+        break;
+      }
+
+      case 'dragon': {
+        // ДРАКОН: каждые 3.5 с выдыхает веер из 5 огненных шаров!
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        window.sfx.magicFire();
+        const baseAng = u.aimAngle;
+        const ballDmg = Math.max(25, Math.round(u.damage * 0.82));
+        for (const sp of [-0.36, -0.18, 0, 0.18, 0.36]) {
+          const ang = baseAng + sp;
+          this.projectiles.push({
+            type: 'fireball',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 10),
+            y: u.y + Math.sin(ang) * (u.radius + 10),
+            vx: Math.cos(ang) * 340,
+            vy: Math.sin(ang) * 340,
+            radius: 8,
+            damage: ballDmg,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🐉 ДЫХАНИЕ ДРАКОНА ×5!', '#dc2626');
+        break;
+      }
+
+      case 'chronos': {
+        // ХРОНОС: каждые 5.5 с останавливает время для врагов на 2.5 с и выпускает 4 клинка времени!
+        u.cooldown = 5.5;
+        window.sfx.magicIce();
+        for (const other of this.units) {
+          if (other.team !== u.team && other.hp > 0) {
+            other.stunTimer = 2.5;
+            other.vx = 0;
+            other.vy = 0;
+            this.addFloatingText(other.x, other.y - other.radius - 14, '⏳ СТОП ВРЕМЕНИ 2.5С!', '#ca8a04');
+          }
+        }
+        for (let d = 0; d < 4; d++) {
+          const ang = u.aimAngle + (d * Math.PI) / 2;
+          this.projectiles.push({
+            type: 'piercing_bullet',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 8),
+            y: u.y + Math.sin(ang) * (u.radius + 8),
+            vx: Math.cos(ang) * 460,
+            vy: Math.sin(ang) * 460,
+            radius: 6,
+            damage: u.damage,
+            piercing: true,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 18, '⏳ ВЛАСТЬ ВРЕМЕНИ!', '#eab308');
+        break;
+      }
+
+      case 'zeus': {
+        // ЗЕВС: каждые 3.5 с бьёт грозой Олимпа по всем врагам на арене на 65 HP с оглушением!
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        window.sfx.lightning();
+        for (const other of this.units) {
+          if (other.team === u.team || other.hp <= 0) continue;
+          this.lightnings.push({
+            x1: u.x,
+            y1: u.y,
+            x2: other.x,
+            y2: other.y,
+            color: '#facc15',
+            life: 0.35
+          });
+          other.stunTimer = 0.65;
+          this.applyDamage(other, u.damage, u, '#ca8a04');
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 18, '⚡ ГРОЗА ЗЕВСА!', '#eab308');
         break;
       }
     }
@@ -3118,11 +3575,42 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    // 10. Робо-Мех, Зомби, Оборотень, Червь, Сферы Призывателя, Ассасин в ближнем бою
+    // 9.4. ДРОВОСЕК: с шансом 25% рубит топором с двойным уроном (×2)!
+    if (attacker.abilityId === 'lumberjack' || attacker.classId === 'lumberjack') {
+      attacker.hitImmunityMap[target.id] = 0.42;
+      const isCrit = Math.random() < 0.25;
+      const dmg = isCrit ? attacker.damage * 2 : attacker.damage;
+      window.sfx.hit();
+      this.applyDamage(target, dmg, attacker, '#b91c1c');
+      if (isCrit) {
+        this.addFloatingText(target.x, target.y - 24, `🪓 РУБКА ×2 (-${dmg})!`, '#dc2626');
+      }
+      return;
+    }
+
+    // 9.5. ЛЕДЯНОЙ ГОЛЕМ: при каждом ударе замораживает и замедляет соперника!
+    if (attacker.abilityId === 'ice_golem' || attacker.classId === 'ice_golem') {
+      attacker.hitImmunityMap[target.id] = 0.42;
+      window.sfx.magicIce();
+      target.slowTimer = 2.5;
+      this.applyDamage(target, attacker.damage, attacker, '#0284c7');
+      this.addFloatingText(target.x, target.y - 22, `🧊 МОРОЗ -${attacker.damage}`, '#0284c7');
+      return;
+    }
+
+    // 10. Робо-Мех, Зомби, Оборотень, Червь, Сферы Призывателя, Ассасин и новые бойцы в ближнем бою
     if (
       attacker.isMinion ||
-      ['assassin', 'worm', 'robo_mech', 'zombie', 'werewolf'].includes(attacker.abilityId) ||
-      ['robo_mech', 'zombie', 'werewolf'].includes(attacker.classId)
+      [
+        'assassin', 'worm', 'robo_mech', 'zombie', 'werewolf',
+        'blacksmith', 'musketeer', 'samurai', 'cactus',
+        'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus'
+      ].includes(attacker.abilityId) ||
+      [
+        'robo_mech', 'zombie', 'werewolf',
+        'blacksmith', 'musketeer', 'samurai', 'cactus',
+        'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus'
+      ].includes(attacker.classId)
     ) {
       attacker.hitImmunityMap[target.id] = 0.42;
       window.sfx.hit();
@@ -3409,6 +3897,20 @@ class BattleRoyalPaperGame {
       }
     }
 
+    // МУШКЕТЁР: с шансом 30% парирует атаку шпагой и отвечает уколом!
+    if (target.classId === 'musketeer' || target.abilityId === 'musketeer') {
+      if (Math.random() < 0.30) {
+        window.sfx.parry();
+        this.addFloatingText(target.x, target.y - target.radius - 14, '🤺 ПАРИРОВАНИЕ!', '#2563eb');
+        this.spawnConfetti(target.x, target.y, '#facc15', 5);
+        if (attacker && attacker.hp > 0 && attacker.id !== target.id) {
+          attacker.hp = Math.max(1, attacker.hp - 10);
+          this.addFloatingText(attacker.x, attacker.y - attacker.radius - 12, '🤺 ОТВЕТ -10!', '#1d4ed8');
+        }
+        return;
+      }
+    }
+
     let dmg = rawAmount;
     if (target.vulnTimer > 0) {
       dmg = Math.round(dmg * 1.25);
@@ -3416,6 +3918,13 @@ class BattleRoyalPaperGame {
     dmg = Math.max(1, Math.round(dmg));
     target.hp = Math.max(0, target.hp - dmg);
     target.flashTimer = 0.12;
+
+    // КАКТУС: возвращает 40% полученного урона шипами обратно атакующему!
+    if ((target.classId === 'cactus' || target.abilityId === 'cactus') && attacker && attacker.hp > 0 && attacker.id !== target.id) {
+      const thornDmg = Math.max(2, Math.round(dmg * 0.4));
+      attacker.hp = Math.max(0, attacker.hp - thornDmg);
+      this.addFloatingText(attacker.x, attacker.y - attacker.radius - 14, `🌵 ШИПЫ -${thornDmg}`, '#15803d');
+    }
 
     const col = textColor || (target.team === 'player' ? '#d93829' : '#1c1a17');
     this.addFloatingText(target.x + (Math.random() * 14 - 7), target.y - target.radius - 8, `-${dmg}`, col);

@@ -71,10 +71,10 @@
         <button id="shopCrateItemBtn" class="crate-showcase-card paper-inner-card" type="button">
           <div class="crate-art-box">
             <div class="crate-icon-big">📦</div>
-            <span class="crate-sparkles">✨ 40 БОЙЦОВ ВНУТРИ ✨</span>
+            <span class="crate-sparkles">✨ 55 БОЙЦОВ ВНУТРИ ✨</span>
           </div>
           <h3 class="crate-title">ЯЩИК БОЙЦОВ</h3>
-          <p class="crate-desc">Содержит всех персонажей по редкости, кроме стартового Мечника!</p>
+          <p class="crate-desc">Содержит всех персонажей по редкости, кроме стартового Мечника! Повторка авто-продаётся за +20 🪙</p>
           <div class="crate-price-badge">НАЖМИТЕ, ЧТОБЫ ОТКРЫТЬ • 100 🪙</div>
         </button>
       </div>
@@ -91,7 +91,7 @@
             <div class="crate-box-illustration" id="crateBoxIllustration">📦</div>
             <!-- Результат выпадения бойца -->
             <div id="crateUnboxedResult" class="crate-unboxed-result hidden">
-              <div class="unboxed-header">🎉 ВАМ ВЫПАЛ БОЕЦ!</div>
+              <div class="unboxed-header" id="unboxedHeaderTitle">🎉 ВАМ ВЫПАЛ БОЕЦ!</div>
               <canvas id="unboxedFighterCanvas" width="96" height="72"></canvas>
               <div id="unboxedFighterName" class="unboxed-name">НИНДЗЯ</div>
               <div id="unboxedFighterRarity" class="unboxed-rarity-badge">Эпическая</div>
@@ -102,12 +102,12 @@
           <button id="openCrate100Btn" class="open-crate-center-btn" type="button">
             🔓 ОТКРЫТЬ ЗА 100 МОНЕТ 🪙
           </button>
-          <div id="crateOpenStatusMsg" class="crate-status-msg">Чем выше редкость, тем меньше шанс выпадения!</div>
+          <div id="crateOpenStatusMsg" class="crate-status-msg">Чем выше редкость, тем меньше шанс выпадения! Если выпадает повторка — она автоматически продаётся за +20 🪙!</div>
         </div>
 
         <!-- Снизу: редкость персонажей и сами персонажи в ящике -->
         <div class="crate-rarities-bottom">
-          <div class="crate-rarities-title">ШАНСЫ ВЫПАДЕНИЯ ПО РЕДКОСТИ (40 БОЙЦОВ В ЯЩИКЕ):</div>
+          <div class="crate-rarities-title">ШАНСЫ ВЫПАДЕНИЯ ПО РЕДКОСТИ (55 БОЙЦОВ В ЯЩИКЕ):</div>
           <div id="crateRaritiesList" class="crate-rarities-list"></div>
         </div>
       </div>
@@ -123,7 +123,7 @@
         <div class="coin-pill">🪙 <strong id="hubCoinsVal">100</strong></div>
       </div>
 
-      <!-- СВЕРХУ: ЦИФРА И НАДПИСЬ УРОВЕНЬ + ЧУТЬ НИЖЕ КНОПКА ИГРАТЬ + КНОПКА ПРОКАЧАТЬ -->
+      <!-- СВЕРХУ: ЦИФРА И НАДПИСЬ УРОВЕНЬ + ОТРЯД (ДО 3 БОЙЦОВ) + КНОПКА ИГРАТЬ + КНОПКА ПРОКАЧАТЬ -->
       <div class="hub-top-stage paper-inner-card">
         <div class="hub-level-badge">
           <span class="hub-level-num" id="hubLevelNumber">1</span>
@@ -131,6 +131,17 @@
         </div>
         <div class="hub-enemy-preview" id="hubEnemyPreviewText">
           На 1 уровне вас ждёт соперник: <strong>🐒 Бибизяна</strong> • Награда за победу: <strong>+40 🪙</strong>
+        </div>
+
+        <!-- Панель выбора до 3 ваших бойцов на бой (максимум на арене 6 бойцов) -->
+        <div class="hub-squad-panel">
+          <div class="hub-squad-title">
+            <span>ВАШИ БОЙЦЫ НА БОЙ: <strong id="hubSquadCountLabel">1 / 3</strong> (МАКС. 6 НА АРЕНЕ)</span>
+            <button id="hubAddSelectedToSquadBtn" class="hub-squad-add-btn" type="button">
+              ➕ ДОБАВИТЬ В ОТРЯД (+1)
+            </button>
+          </div>
+          <div id="hubSquadSlots" class="hub-squad-slots"></div>
         </div>
 
         <!-- Чуть ниже кнопка ИГРАТЬ (нужно сначала выбрать персонажа из ячеек) -->
@@ -144,7 +155,7 @@
           </button>
         </div>
         <div id="hubSelectionHint" class="hub-selection-hint">
-          👇 Нажмите на открытого персонажа в ячейке снизу, чтобы выбрать его для боя или прокачать!
+          👇 Выберите до 3 бойцов из ячеек снизу (на арене максимум 6 бойцов: до 3 ваших и до 4 у соперника)!
         </div>
       </div>
 
@@ -152,7 +163,7 @@
       <div class="hub-cells-section">
         <div class="hub-cells-header">
           <span>ЯЧЕЙКИ ВАШИХ ПЕРСОНАЖЕЙ ПО РЕДКОСТИ</span>
-          <span id="hubUnlockedCountLabel">Открыто: 1 / 41</span>
+          <span id="hubUnlockedCountLabel">Открыто: 1 / 56</span>
         </div>
         <div id="hubRarityCellsGrid" class="hub-rarity-cells-grid"></div>
       </div>
@@ -317,7 +328,7 @@
         </div>
       </aside>
 
-      <!-- ЦЕНТРАЛЬНЫЙ РИНГ (АРЕНА В 2 РАЗА МЕНЬШЕ: 380x225 вместо 760x450) -->
+      <!-- ЦЕНТРАЛЬНЫЙ РИНГ (АРЕНА ЧУТЬ ПОБОЛЬШЕ: 520x310) -->
       <section class="arena-section">
         <div class="arena-frame compact-arena-frame" id="arenaFrame">
           <!-- Декоративные угловые крепления ринга -->
@@ -326,7 +337,7 @@
           <div class="corner-post bl"></div>
           <div class="corner-post br"></div>
 
-          <canvas id="arenaCanvas" width="380" height="225"></canvas>
+          <canvas id="arenaCanvas" width="520" height="310"></canvas>
 
           <!-- Подсказка внизу ринга -->
           <div class="arena-hint" id="arenaHint">

@@ -173,9 +173,9 @@ const FIGHTER_CLASSES = [
     baseColor: '#86d96a',
     hp: 100,
     speed: 3,
-    damage: 10,
-    cardSub: 'лечение',
-    desc: '➕ Исцеляет раненых союзников (3 с)'
+    damage: 9,
+    cardSub: 'лечение 6с',
+    desc: '➕ Медленно исцеляет раненых союзников (раз в 6 с)'
   },
   {
     id: 'engineer',
@@ -520,10 +520,202 @@ const FIGHTER_CLASSES = [
     damage: 10,
     cardSub: 'электро-след 10/0.5с',
     desc: '🪼 250 HP • Бьётся о стенки без урона от удара, но оставляет электрический след: 10 HP каждые 0.5 с на 5 с!'
+  },
+
+  // ==================== 15 НОВЫХ БОЙЦОВ (ПО 3 В КАЖДУЮ РЕДКОСТЬ: №42 – №56) ====================
+  // ⚪ ОБЫЧНЫЕ (+3):
+  {
+    id: 'lumberjack',
+    num: 42,
+    name: 'Дровосек',
+    shape: 'square',
+    baseColor: '#b91c1c',
+    hp: 115,
+    speed: 2.9,
+    damage: 14,
+    cardSub: 'топор 14 (25% ×2)',
+    desc: '🪓 Дровосек с топором: сносит 14 HP при ударе, а с шансом 25% рубит с двойной силой (28 HP)!'
+  },
+  {
+    id: 'slinger',
+    num: 43,
+    name: 'Пращник',
+    shape: 'triangle',
+    baseColor: '#a16207',
+    hp: 90,
+    speed: 3.3,
+    damage: 11,
+    cardSub: 'камень 2с / отброс',
+    desc: '🪨 Каждые 2 с раскручивает пращу и кидает камень (11 HP), который отталкивает врага назад!'
+  },
+  {
+    id: 'blacksmith',
+    num: 44,
+    name: 'Кузнец',
+    shape: 'hexagon',
+    baseColor: '#475569',
+    hp: 130,
+    speed: 2.7,
+    damage: 12,
+    cardSub: 'молот 12 + броня',
+    desc: '🔨 Бьёт раскалённым молотом (12 HP с искрами) и каждые 5 с выковывает себе +12 HP брони!'
+  },
+
+  // 🟢 РЕДКИЕ (+3):
+  {
+    id: 'musketeer',
+    num: 45,
+    name: 'Мушкетёр',
+    shape: 'triangle',
+    baseColor: '#1d4ed8',
+    hp: 135,
+    speed: 3.6,
+    damage: 18,
+    cardSub: 'шпага 18 / парирование',
+    desc: '🤺 Быстрый фехтовальщик со шпагой (18 HP): с шансом 30% парирует атаку врага и отвечает уколом!'
+  },
+  {
+    id: 'beekeeper',
+    num: 46,
+    name: 'Пчеловод',
+    shape: 'circle',
+    baseColor: '#eab308',
+    hp: 140,
+    speed: 3.1,
+    damage: 14,
+    cardSub: 'рой из 3 пчёл ×14',
+    desc: '🐝 Каждые 3.5 с выпускает из улья 3 злых пчелы, которые летят во врага и жалят по 14 HP каждая!'
+  },
+  {
+    id: 'ice_golem',
+    num: 47,
+    name: 'Ледяной Голем',
+    shape: 'hexagon',
+    baseColor: '#38bdf8',
+    hp: 210,
+    speed: 2.4,
+    damage: 16,
+    cardSub: '210 HP / мороз',
+    desc: '🧊 Мощный ледяной танк (210 HP): замораживает врагов при ударе и раз в 5 с пускает кольцо льдинок!'
+  },
+
+  // 🟣 ЭПИЧЕСКИЕ (+3):
+  {
+    id: 'samurai',
+    num: 48,
+    name: 'Самурай',
+    shape: 'triangle',
+    baseColor: '#991b1b',
+    hp: 185,
+    speed: 3.6,
+    damage: 28,
+    cardSub: 'рывок Иайдо 45',
+    desc: '⛩️ Мастер клинка (185 HP): рубит на 28 HP и каждые 4.5 с делает молниеносный разрез сквозь врага на 45 HP!'
+  },
+  {
+    id: 'cactus',
+    num: 49,
+    name: 'Кактус',
+    shape: 'circle',
+    baseColor: '#15803d',
+    hp: 220,
+    speed: 3.0,
+    damage: 20,
+    cardSub: 'шипы + 8 иголок',
+    desc: '🌵 Колючий Кактус (220 HP): возвращает 40% урона шипами при ударе и раз в 4 с стреляет 8 иголками вокруг!'
+  },
+  {
+    id: 'magician_hat',
+    num: 50,
+    name: 'Фокусник',
+    shape: 'square',
+    baseColor: '#6d28d9',
+    hp: 170,
+    speed: 3.4,
+    damage: 26,
+    cardSub: 'фокус из шляпы 3.5с',
+    desc: '🎩 Каждые 3.5 с достаёт из цилиндра фокус: 3 магических голубя (по 26 HP) или взрывного кролика (-48 HP)!'
+  },
+
+  // 🔴 МИФИЧЕСКИЕ (+3):
+  {
+    id: 'anubis',
+    num: 51,
+    name: 'Анубис',
+    shape: 'triangle',
+    baseColor: '#b45309',
+    hp: 260,
+    speed: 3.4,
+    damage: 38,
+    cardSub: 'проклятие + вампиризм',
+    desc: '🐺 Бог пустыни (260 HP): каждые 4 с пускает песчаный луч, который сносит 38 HP врагу и лечит Анубиса на +25 HP!'
+  },
+  {
+    id: 'poseidon',
+    num: 52,
+    name: 'Посейдон',
+    shape: 'hexagon',
+    baseColor: '#0284c7',
+    hp: 270,
+    speed: 3.5,
+    damage: 42,
+    cardSub: 'трезубец / цунами ×3',
+    desc: '🔱 Владыка морей (270 HP): каждые 4 с обрушивает 3 водяные волны по 42 HP, смывающие врагов назад!'
+  },
+  {
+    id: 'meteor_knight',
+    num: 53,
+    name: 'Метеорит',
+    shape: 'circle',
+    baseColor: '#c2410c',
+    hp: 280,
+    speed: 4.0,
+    damage: 48,
+    cardSub: 'таран 48 / взрыв 65',
+    desc: '☄️ Пылающий Метеорит (280 HP): несётся с огромной скоростью (48 HP) и раз в 5 с взрывается огненной волной на 65 HP!'
+  },
+
+  // 🟡 ЛЕГЕНДАРНЫЕ (+3):
+  {
+    id: 'dragon',
+    num: 54,
+    name: 'Дракон',
+    shape: 'triangle',
+    baseColor: '#dc2626',
+    hp: 380,
+    speed: 3.8,
+    damage: 55,
+    cardSub: '5 шаров дракона ×45',
+    desc: '🐉 Древний Дракон (380 HP): каждые 3.5 с выдыхает веер из 5 огненных шаров (по 45 HP) и поджигает арену!'
+  },
+  {
+    id: 'chronos',
+    num: 55,
+    name: 'Хронос',
+    shape: 'hexagon',
+    baseColor: '#ca8a04',
+    hp: 340,
+    speed: 3.7,
+    damage: 50,
+    cardSub: 'стоп времени + 4 клинка',
+    desc: '⏳ Повелитель Времени (340 HP): каждые 5.5 с останавливает врагов на 2.5 с и выпускает 4 стрелки-клинка по 50 HP!'
+  },
+  {
+    id: 'zeus',
+    num: 56,
+    name: 'Зевс',
+    shape: 'circle',
+    baseColor: '#eab308',
+    hp: 400,
+    speed: 3.8,
+    damage: 65,
+    cardSub: '400 HP / гроза Олимпа 65',
+    desc: '⚡ Верховный Зевс (400 HP): каждые 3.5 с поражает врагов небесной молнией Олимпа на 65 HP с оглушением!'
   }
 ];
 
 // ==================== СИСТЕМА РЕДКОСТИ И ЯЩИКА БОЙЦОВ ====================
+// Шансы эпических, мифических и легендарных уменьшены в 2 раза (8%, 4%, 1.5%), а обычных и редких увеличены (53.5%, 33%)!
 const FIGHTER_RARITIES = [
   {
     id: 'common',
@@ -533,8 +725,12 @@ const FIGHTER_RARITIES = [
     color: '#64748b',
     bg: '#f1f5f9',
     border: '#475569',
-    tierChance: 45, // 45% шанс выпадения редкости из ящика
-    fighters: ['swordsman', 'archer', 'shield', 'spearman', 'soldier', 'healer', 'alchemist', 'boomerang', 'worm', 'werewolf']
+    tierChance: 53.5, // Увеличено с 45% до 53.5%
+    fighters: [
+      'swordsman', 'archer', 'shield', 'spearman', 'soldier',
+      'healer', 'alchemist', 'boomerang', 'worm', 'werewolf',
+      'lumberjack', 'slinger', 'blacksmith'
+    ]
   },
   {
     id: 'rare',
@@ -544,8 +740,12 @@ const FIGHTER_RARITIES = [
     color: '#16a34a',
     bg: '#dcfce7',
     border: '#15803d',
-    tierChance: 28, // 28% шанс выпадения редкости из ящика
-    fighters: ['gunslinger', 'pyro', 'cryo', 'thunder', 'berserker', 'engineer', 'summoner', 'graviton', 'hunter', 'boxer']
+    tierChance: 33, // Увеличено с 28% до 33%
+    fighters: [
+      'gunslinger', 'pyro', 'cryo', 'thunder', 'berserker',
+      'engineer', 'summoner', 'graviton', 'hunter', 'boxer',
+      'musketeer', 'beekeeper', 'ice_golem'
+    ]
   },
   {
     id: 'epic',
@@ -555,8 +755,12 @@ const FIGHTER_RARITIES = [
     color: '#9333ea',
     bg: '#f3e8ff',
     border: '#7e22ce',
-    tierChance: 16, // 16% шанс выпадения редкости из ящика
-    fighters: ['assassin', 'vampire', 'claws', 'giant', 'laser_bot', 'teleporter', 'ninja', 'zombie', 'bibizyana']
+    tierChance: 8, // Уменьшено в 2 раза (с 16% до 8%)
+    fighters: [
+      'assassin', 'vampire', 'claws', 'giant', 'laser_bot',
+      'teleporter', 'ninja', 'zombie', 'bibizyana',
+      'samurai', 'cactus', 'magician_hat'
+    ]
   },
   {
     id: 'mythic',
@@ -566,8 +770,12 @@ const FIGHTER_RARITIES = [
     color: '#e11d48',
     bg: '#ffe4e6',
     border: '#be123c',
-    tierChance: 8, // 8% шанс выпадения редкости из ящика
-    fighters: ['plasma_rex', 'robo_mech', 'bomber', 'fairy', 'card_master', 'medusa', 'pavuk']
+    tierChance: 4, // Уменьшено в 2 раза (с 8% до 4%)
+    fighters: [
+      'plasma_rex', 'robo_mech', 'bomber', 'fairy', 'card_master',
+      'medusa', 'pavuk',
+      'anubis', 'poseidon', 'meteor_knight'
+    ]
   },
   {
     id: 'legendary',
@@ -577,8 +785,11 @@ const FIGHTER_RARITIES = [
     color: '#d97706',
     bg: '#fef3c7',
     border: '#b45309',
-    tierChance: 3, // 3% шанс выпадения редкости из ящика
-    fighters: ['superman', 'checkmate', 'death', 'doubler', 'musician']
+    tierChance: 1.5, // Уменьшено в 2 раза (с 3% до 1.5%)
+    fighters: [
+      'superman', 'checkmate', 'death', 'doubler', 'musician',
+      'dragon', 'chronos', 'zeus'
+    ]
   }
 ];
 
@@ -626,6 +837,22 @@ function getFighterClass(id) {
 
 // Цвет заливки фигуры в зависимости от команды и класса
 function getUnitTeamColor(team, classId) {
+  if (classId === 'lumberjack') return team === 'player' ? '#dc2626' : '#991b1b';
+  if (classId === 'slinger') return team === 'player' ? '#ca8a04' : '#854d0e';
+  if (classId === 'blacksmith') return team === 'player' ? '#475569' : '#334155';
+  if (classId === 'musketeer') return team === 'player' ? '#2563eb' : '#1e40af';
+  if (classId === 'beekeeper') return team === 'player' ? '#eab308' : '#ca8a04';
+  if (classId === 'ice_golem') return team === 'player' ? '#38bdf8' : '#0284c7';
+  if (classId === 'samurai') return team === 'player' ? '#b91c1c' : '#7f1d1d';
+  if (classId === 'cactus') return team === 'player' ? '#16a34a' : '#15803d';
+  if (classId === 'magician_hat') return team === 'player' ? '#7c3aed' : '#5b21b6';
+  if (classId === 'anubis') return team === 'player' ? '#d97706' : '#92400e';
+  if (classId === 'poseidon') return team === 'player' ? '#0284c7' : '#0369a1';
+  if (classId === 'meteor_knight') return team === 'player' ? '#ea580c' : '#9a3412';
+  if (classId === 'dragon') return team === 'player' ? '#ef4444' : '#b91c1c';
+  if (classId === 'chronos') return team === 'player' ? '#eab308' : '#a16207';
+  if (classId === 'zeus') return team === 'player' ? '#facc15' : '#ca8a04';
+
   if (classId === 'musician') return team === 'player' ? '#d97706' : '#b45309';
   if (classId === 'pavuk') return team === 'player' ? '#3730a3' : '#4c1d95';
   if (classId === 'bibizyana') return team === 'player' ? '#92400e' : '#78350f';
@@ -1644,6 +1871,297 @@ function drawWeaponGraphic(ctx, abilityId, x, y, scale = 1, angle = -Math.PI / 4
       ctx.lineTo(-1, 8);
       ctx.lineTo(6, 0);
       ctx.lineTo(2, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    // ==================== ОРУЖИЕ 15 НОВЫХ БОЙЦОВ ====================
+    case 'lumberjack': {
+      // Топор Дровосека
+      ctx.fillStyle = '#92400e';
+      ctx.beginPath();
+      roundRectPath(ctx, -12, -2.5, 28, 5, 2);
+      ctx.fill();
+      ctx.stroke();
+      // Лезвие топора
+      ctx.fillStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.moveTo(6, -2);
+      ctx.lineTo(15, -13);
+      ctx.quadraticCurveTo(19, 0, 15, 13);
+      ctx.lineTo(6, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'slinger': {
+      // Праща с камнем
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, 10, -Math.PI * 0.7, Math.PI * 0.7);
+      ctx.stroke();
+      ctx.fillStyle = '#94a3b8';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(9, 0, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'blacksmith': {
+      // Раскалённый молот Кузнеца
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      roundRectPath(ctx, -10, -2.5, 22, 5, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ea580c';
+      ctx.beginPath();
+      roundRectPath(ctx, 6, -10, 11, 20, 3);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'musketeer': {
+      // Изящная шпага-рапира Мушкетёра с золотой гардой
+      ctx.fillStyle = '#e2e8f0';
+      ctx.beginPath();
+      ctx.moveTo(0, -1.8);
+      ctx.lineTo(30, 0);
+      ctx.lineTo(0, 1.8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Чашеобразная золотая гарда
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(0, 0, 6.5, -Math.PI * 0.5, Math.PI * 0.5, true);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'beekeeper': {
+      // Пчелиный улей и пчёлка
+      ctx.rotate(-angle);
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.ellipse(0, 0, 9, 11, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-8, -3);
+      ctx.lineTo(8, -3);
+      ctx.moveTo(-8, 3);
+      ctx.lineTo(8, 3);
+      ctx.stroke();
+      ctx.fillStyle = '#1c1a17';
+      ctx.beginPath();
+      ctx.arc(0, 2, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'ice_golem': {
+      // Огромный ледяной кристалл-кулак
+      ctx.fillStyle = '#7dd3fc';
+      ctx.beginPath();
+      ctx.moveTo(-6, -9);
+      ctx.lineTo(8, -11);
+      ctx.lineTo(16, 0);
+      ctx.lineTo(8, 11);
+      ctx.lineTo(-6, 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'samurai': {
+      // Длинная изогнутая катана Самурая с красной рукоятью
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      roundRectPath(ctx, -11, -2.5, 11, 5, 1.5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      roundRectPath(ctx, -1, -6.5, 3.5, 13, 1);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f8fafc';
+      ctx.beginPath();
+      ctx.moveTo(2, -2.5);
+      ctx.quadraticCurveTo(18, -4.5, 30, -1);
+      ctx.lineTo(27, 2.5);
+      ctx.quadraticCurveTo(15, 0.5, 2, 2.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'cactus': {
+      // Ветвистый зелёный кактус с красным цветком сверху
+      ctx.rotate(-angle);
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      roundRectPath(ctx, -4, -11, 8, 22, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      roundRectPath(ctx, -10, -4, 6, 8, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      roundRectPath(ctx, 4, -6, 6, 8, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.arc(0, -12, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'magician_hat': {
+      // Чёрный цилиндр Фокусника с фиолетовой лентой
+      ctx.rotate(-angle);
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      roundRectPath(ctx, -12, 5, 24, 4, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      roundRectPath(ctx, -8, -10, 16, 15, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#a855f7';
+      ctx.beginPath();
+      ctx.rect(-8, 1, 16, 4);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'anubis': {
+      // Золотой египетский посох Уас / Анкх Анубиса
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      roundRectPath(ctx, -10, -2, 26, 4, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(17, 0, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#0ea5e9';
+      ctx.beginPath();
+      ctx.arc(17, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'poseidon': {
+      // Золотой морской Трезубец Посейдона
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      roundRectPath(ctx, -12, -2, 24, 4, 1.5);
+      ctx.fill();
+      ctx.stroke();
+      // Три зубца
+      ctx.beginPath();
+      ctx.moveTo(10, -9);
+      ctx.lineTo(22, -9);
+      ctx.lineTo(18, -5);
+      ctx.lineTo(12, -5);
+      ctx.moveTo(12, -2);
+      ctx.lineTo(25, 0);
+      ctx.lineTo(12, 2);
+      ctx.moveTo(10, 9);
+      ctx.lineTo(22, 9);
+      ctx.lineTo(18, 5);
+      ctx.lineTo(12, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'meteor_knight': {
+      // Пылающий метеорит с огненным шлейфом
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(-14, 0);
+      ctx.lineTo(4, -10);
+      ctx.lineTo(8, 0);
+      ctx.lineTo(4, 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#7c2d12';
+      ctx.beginPath();
+      ctx.arc(6, 0, 7.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'dragon': {
+      // Огненное крыло и пламя Дракона
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(-6, -8);
+      ctx.quadraticCurveTo(10, -14, 20, 0);
+      ctx.quadraticCurveTo(10, 14, -6, 8);
+      ctx.quadraticCurveTo(2, 0, -6, -8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.arc(9, 0, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'chronos': {
+      // Золотые песочные часы Хроноса
+      ctx.rotate(-angle);
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.moveTo(-8, -10);
+      ctx.lineTo(8, -10);
+      ctx.lineTo(2, 0);
+      ctx.lineTo(8, 10);
+      ctx.lineTo(-8, 10);
+      ctx.lineTo(-2, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'zeus': {
+      // Великая золотая молния Зевса
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.moveTo(-10, -4);
+      ctx.lineTo(4, -11);
+      ctx.lineTo(1, -2);
+      ctx.lineTo(18, -5);
+      ctx.lineTo(-2, 11);
+      ctx.lineTo(2, 2);
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
