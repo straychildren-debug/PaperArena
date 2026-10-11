@@ -1454,9 +1454,37 @@ class BattleRoyalPaperGame {
       syncSpeedButtonsUI();
     });
 
+    const syncMusicButtonsUI = () => {
+      const musicOn = window.sfx.musicEnabled;
+      const arenaMusicBtn = document.getElementById('musicToggleBtn');
+      const menuMusicBtn = document.getElementById('menuMusicToggleBtn');
+      if (arenaMusicBtn) {
+        arenaMusicBtn.textContent = musicOn ? '🎵' : '🎵✕';
+        arenaMusicBtn.classList.toggle('music-muted', !musicOn);
+        arenaMusicBtn.title = musicOn ? 'Фоновая музыка: ВКЛ (нажмите, чтобы отключить)' : 'Фоновая музыка: ВЫКЛ (нажмите, чтобы включить)';
+      }
+      if (menuMusicBtn) {
+        menuMusicBtn.textContent = musicOn ? '🎵 Музыка: ВКЛ' : '🎵✕ Музыка: ВЫКЛ';
+        menuMusicBtn.classList.toggle('music-muted', !musicOn);
+      }
+    };
+
+    document.getElementById('musicToggleBtn')?.addEventListener('click', () => {
+      window.sfx.toggleMusic();
+      window.sfx.click();
+      syncMusicButtonsUI();
+    });
+
+    document.getElementById('menuMusicToggleBtn')?.addEventListener('click', () => {
+      window.sfx.toggleMusic();
+      window.sfx.click();
+      syncMusicButtonsUI();
+    });
+
     document.getElementById('soundToggleBtn').addEventListener('click', (e) => {
       const on = window.sfx.toggle();
       e.currentTarget.textContent = on ? '🔊' : '🔇';
+      e.currentTarget.classList.toggle('sfx-muted', !on);
       if (on) window.sfx.click();
     });
 
@@ -1824,24 +1852,44 @@ class BattleRoyalPaperGame {
     bBtn.classList.toggle('is-ready', this.botReady);
 
     const sBtn = document.getElementById('startBtn');
+    const sIcon = document.getElementById('startBtnIcon');
     const sText = document.getElementById('startBtnText');
+    const sMobIcon = document.getElementById('startBtnMobileStateIcon');
     const resetBtn = document.getElementById('resetArenaBtn');
 
+    if (sBtn) sBtn.dataset.state = this.state;
+
     if (this.state === 'prep') {
-      sBtn.classList.remove('is-fighting');
+      sBtn.classList.remove('is-fighting', 'is-paused');
       sBtn.classList.toggle('not-ready', !(this.playerReady && this.botReady));
+      if (sIcon) sIcon.textContent = '⚔️';
       sText.textContent = 'СТАРТ';
+      if (sMobIcon) sMobIcon.innerHTML = '';
+      sBtn.title = 'Начать бой';
       resetBtn.classList.add('hidden');
       document.getElementById('arenaHint').classList.remove('hidden');
     } else if (this.state === 'battle') {
       sBtn.classList.add('is-fighting');
-      sBtn.classList.remove('not-ready');
+      sBtn.classList.remove('is-paused', 'not-ready');
+      if (sIcon) sIcon.textContent = '⏸';
       sText.textContent = 'ПАУЗА';
+      if (sMobIcon) {
+        // Иконка паузы (две чёткие вертикальные полоски) для мобильной версии
+        sMobIcon.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-label="Пауза"><rect x="5" y="4" width="5" height="16" rx="1.6" stroke="#1c1a17" stroke-width="1.2"/><rect x="14" y="4" width="5" height="16" rx="1.6" stroke="#1c1a17" stroke-width="1.2"/></svg>';
+      }
+      sBtn.title = 'Пауза';
       resetBtn.classList.remove('hidden');
       document.getElementById('arenaHint').classList.add('hidden');
     } else if (this.state === 'paused') {
       sBtn.classList.remove('is-fighting');
+      sBtn.classList.add('is-paused');
+      if (sIcon) sIcon.textContent = '▶';
       sText.textContent = 'ПРОДОЛЖИТЬ';
+      if (sMobIcon) {
+        // Иконка продолжить (треугольник Play) для мобильной версии
+        sMobIcon.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" aria-label="Продолжить"><path d="M6.5 4.2L19.5 12L6.5 19.8V4.2Z" stroke="#1c1a17" stroke-width="1.4" stroke-linejoin="round"/></svg>';
+      }
+      sBtn.title = 'Продолжить';
       resetBtn.classList.remove('hidden');
     }
   }

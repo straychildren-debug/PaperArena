@@ -244,8 +244,19 @@ button:active {
   background: var(--amber-pause);
 }
 
+.start-btn.is-paused {
+  background: var(--green-ready);
+}
+
 .start-swords {
   font-size: 20px;
+}
+
+.mobile-pause-resume-icon {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .secondary-top-btn {
@@ -843,14 +854,32 @@ button:active {
   background: var(--green-ready);
 }
 
-/* Сетка 14×3 = 42 ячейки: все 41 персонаж видны одновременно без полосы прокрутки */
+/* Сетка выбора всех 73 персонажей с удобным вертикальным скроллом */
 .roster-grid {
-  padding: 4px 6px;
+  padding: 5px 8px;
   display: grid;
-  grid-template-columns: repeat(14, minmax(0, 1fr));
-  grid-template-rows: repeat(3, 48px);
-  gap: 3.5px;
-  overflow: hidden;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  grid-auto-rows: 52px;
+  gap: 4px;
+  max-height: 170px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink) #ebe5d8;
+}
+
+.roster-grid::-webkit-scrollbar {
+  width: 7px;
+}
+
+.roster-grid::-webkit-scrollbar-track {
+  background: #ebe5d8;
+  border-radius: 6px;
+}
+
+.roster-grid::-webkit-scrollbar-thumb {
+  background: var(--ink);
+  border-radius: 6px;
 }
 
 .fighter-card {
@@ -1025,24 +1054,29 @@ button,
     overflow: hidden;
   }
 
-  /* 1. ВЕРХНЕЕ МЕНЮ: помещается в 1 компактную строчку на любом экране */
+  /* 1. ВЕРХНЕЕ МЕНЮ В МОБИЛЬНОЙ ВЕРСИИ: 2 аккуратные строки без наложений */
   .top-bar {
     display: flex;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
-    gap: 4px;
-    height: 36px;
-    min-height: 36px;
+    gap: 5px;
+    height: auto;
+    min-height: 0;
     width: 100%;
+    flex-shrink: 0;
   }
 
+  /* Первая строка сверху: уровень слева и баланс монет справа */
   .level-box {
-    padding: 2px 6px;
-    gap: 4px;
+    order: 1;
+    padding: 2px 8px;
+    gap: 5px;
     height: 34px;
     border-radius: 8px;
-    flex: 0 0 auto;
+    flex: 1 1 auto;
+    min-width: 0;
+    justify-content: space-between;
   }
 
   .level-nodes {
@@ -1050,36 +1084,77 @@ button,
   }
 
   .mini-nav-btn {
-    width: 22px;
-    height: 22px;
-    font-size: 10px;
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+    flex-shrink: 0;
   }
 
   .level-title {
     font-size: 13px;
+    white-space: nowrap;
   }
 
   .skull-icon {
     font-size: 15px;
+    flex-shrink: 0;
   }
 
-  .start-zone {
-    flex: 1 1 auto;
-    justify-content: center;
+  .bots-scaling-box {
+    order: 2;
+    flex: 0 0 auto;
+    height: 34px;
+    padding: 2px 8px;
     gap: 4px;
+    border-radius: 8px;
+  }
+
+  /* Вторая строка сверху: кнопки Старт/Пауза, Сброс, 1x, 3x, Музыка (🎵) и Звуки (🔊) */
+  .start-zone {
+    order: 3;
+    flex: 1 1 100%;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     min-width: 0;
   }
 
   .start-btn {
-    min-width: 0;
-    flex: 1 1 auto;
-    max-width: 140px;
+    min-width: 115px;
+    flex: 0 1 160px;
+    max-width: 180px;
     height: 34px;
-    padding: 0 10px;
+    padding: 0 12px;
     font-size: 15px;
-    gap: 4px;
+    gap: 5px;
     border-radius: 8px;
     box-shadow: 0 2px 0 var(--ink);
+  }
+
+  /* В мобильном варианте ПАУЗА и ПРОДОЛЖИТЬ изображаются только иконкой паузы и продолжить (текст не помещается в кнопке) */
+  .start-btn[data-state="battle"],
+  .start-btn[data-state="paused"] {
+    flex: 0 0 48px;
+    min-width: 48px;
+    max-width: 54px;
+    padding: 0;
+    justify-content: center;
+  }
+
+  .start-btn[data-state="battle"] #startBtnText,
+  .start-btn[data-state="battle"] .start-swords,
+  .start-btn[data-state="paused"] #startBtnText,
+  .start-btn[data-state="paused"] .start-swords {
+    display: none !important;
+  }
+
+  .start-btn[data-state="battle"] .mobile-pause-resume-icon,
+  .start-btn[data-state="paused"] .mobile-pause-resume-icon {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
   }
 
   .start-swords {
@@ -1088,19 +1163,11 @@ button,
 
   .secondary-top-btn {
     height: 34px;
-    padding: 0 7px;
-    font-size: 12px;
+    padding: 0 9px;
+    font-size: 12.5px;
     border-radius: 8px;
     box-shadow: 0 2px 0 var(--ink);
     flex-shrink: 0;
-  }
-
-  .bots-scaling-box {
-    flex: 0 1 auto;
-    height: 34px;
-    padding: 2px 6px;
-    gap: 4px;
-    border-radius: 8px;
   }
 
   .bars-icon {
@@ -1432,43 +1499,50 @@ button,
     font-size: 10px;
   }
 
-  /* На планшетах (641px–960px): 11 колонок × 4 ряда = 44 ячейки (все 41 боец без скролла) */
+  /* На планшетах и мобильных (<= 960px): удобный вертикальный скролл в нижней панели с персонажами */
   .roster-grid {
     flex: 1 1 0;
     min-height: 0;
-    padding: 3px;
+    max-height: none;
+    padding: 6px;
     display: grid;
-    grid-template-columns: repeat(11, minmax(0, 1fr));
-    grid-template-rows: repeat(4, minmax(0, 1fr));
-    gap: 2.5px;
-    overflow: hidden;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 64px;
+    gap: 5px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   .fighter-card {
-    padding: 1px 2px;
-    border-radius: 5px;
-    border-width: 1.5px;
+    padding: 3px 5px;
+    border-radius: 7px;
+    border-width: 1.8px;
+    min-height: 62px;
   }
 
   .fc-num {
-    width: 12px;
-    height: 12px;
-    font-size: 7.5px;
-    border-width: 1px;
+    width: 15px;
+    height: 15px;
+    font-size: 8.5px;
+    border-width: 1.3px;
   }
 
   .fc-name {
-    font-size: 8.5px;
+    font-size: 10.5px;
+    font-weight: 900;
   }
 
   .fc-body {
-    height: 62%;
+    height: 36px;
     justify-content: center;
   }
 
   .fc-canvas {
-    width: 100%;
-    height: 100%;
+    width: 64px;
+    height: 34px;
     object-fit: contain;
   }
 
@@ -1477,41 +1551,50 @@ button,
   }
 
   .fc-quick-add {
-    bottom: 1px;
-    right: 1px;
-    gap: 1px;
+    bottom: 2px;
+    right: 2px;
+    gap: 2px;
   }
 
   .fc-qbtn {
-    padding: 0px 3px;
-    font-size: 7.5px;
-    border-width: 1px;
-    border-radius: 3px;
+    padding: 1px 4px;
+    font-size: 8.5px;
+    border-width: 1.2px;
+    border-radius: 4px;
   }
 }
 
 /* ==================== СМАРТФОНЫ В ПОРТРЕТНОЙ ОРИЕНТАЦИИ (<= 640px) ==================== */
 @media (max-width: 640px) {
-  /* 6 колонок × 7 рядов = 42 ячейки: все 41 персонаж на 1 экране без скролла! */
+  /* 3 крупные читаемые колонки с плавным вертикальным скроллом для всех 73 персонажей */
   .roster-grid {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
-    grid-template-rows: repeat(7, minmax(0, 1fr));
-    gap: 2px;
-    padding: 2px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 68px;
+    gap: 5px;
+    padding: 6px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 
   .fc-num {
-    display: none;
+    display: flex;
+    width: 14px;
+    height: 14px;
+    font-size: 8px;
   }
 
   .fc-top {
-    justify-content: center;
+    justify-content: flex-start;
+    gap: 3px;
   }
 
   .fc-name {
-    font-size: 8px;
-    text-align: center;
-    width: 100%;
+    font-size: 10px;
+    text-align: left;
+    width: auto;
   }
 
   .bots-scaling-box .bars-icon {
@@ -1541,18 +1624,23 @@ button,
 /* ==================== ГОРИЗОНТАЛЬНЫЙ РЕЖИМ НА ТЕЛЕФОНЕ (LANDSCAPE) ==================== */
 @media (max-width: 960px) and (max-height: 520px) and (orientation: landscape) {
   .roster-panel {
-    flex: 0 0 34vh;
-    flex: 0 0 34dvh;
-    height: 34vh;
-    height: 34dvh;
-    max-height: 34vh;
-    max-height: 34dvh;
+    flex: 0 0 38vh;
+    flex: 0 0 38dvh;
+    height: 38vh;
+    height: 38dvh;
+    max-height: 38vh;
+    max-height: 38dvh;
   }
 
-  /* В горизонтальном режиме: 14 колонок × 3 ряда = 42 ячейки без скролла */
+  /* В горизонтальном режиме: 6 колонок с вертикальным скроллом */
   .roster-grid {
-    grid-template-columns: repeat(14, minmax(0, 1fr));
-    grid-template-rows: repeat(3, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 58px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
 }
 
@@ -1644,7 +1732,15 @@ button,
 .menu-top-coins {
   width: 100%;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.music-toggle-btn.music-muted,
+.secondary-top-btn.sfx-muted {
+  background: #e5e0d5;
+  color: #6e685f;
 }
 
 .menu-badge-tag {
@@ -2423,16 +2519,34 @@ button,
   flex: 1;
   min-height: 0;
   display: grid;
-  grid-template-columns: repeat(15, minmax(0, 1fr));
-  grid-template-rows: repeat(5, minmax(0, 1fr));
-  gap: 2.5px;
-  overflow: hidden;
+  grid-template-columns: repeat(11, minmax(0, 1fr));
+  grid-auto-rows: 68px;
+  gap: 4px;
+  padding: 2px 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink) #ebe5d8;
+}
+
+.hub-rarity-cells-grid::-webkit-scrollbar {
+  width: 7px;
+}
+
+.hub-rarity-cells-grid::-webkit-scrollbar-track {
+  background: #ebe5d8;
+  border-radius: 6px;
+}
+
+.hub-rarity-cells-grid::-webkit-scrollbar-thumb {
+  background: var(--ink);
+  border-radius: 6px;
 }
 
 .hub-cell-card {
   border: 2px solid var(--ink);
   border-radius: 7px;
-  padding: 1px 2px;
+  padding: 2px 3px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -2463,7 +2577,7 @@ button,
 
 .hcc-rarity-strip {
   width: 100%;
-  font-size: 7.5px;
+  font-size: 8px;
   font-weight: 900;
   color: #fff;
   text-align: center;
@@ -2476,8 +2590,8 @@ button,
 }
 
 .hcc-canvas {
-  width: 44px;
-  height: 22px;
+  width: 48px;
+  height: 25px;
   object-fit: contain;
   pointer-events: none;
 }
@@ -2489,7 +2603,7 @@ button,
 }
 
 .hcc-name {
-  font-size: 8.5px;
+  font-size: 9px;
   font-weight: 900;
   white-space: nowrap;
   overflow: hidden;
@@ -2498,7 +2612,7 @@ button,
 }
 
 .hcc-stats {
-  font-size: 7.5px;
+  font-size: 8px;
   font-weight: 900;
   color: var(--ink-soft);
   white-space: nowrap;
@@ -2712,9 +2826,34 @@ body[data-campaign-mode="true"] .middle-area {
 }
 
 @media (max-width: 960px) {
+  .hub-top-stage {
+    padding: 8px 10px;
+    gap: 5px;
+  }
+
   .hub-rarity-cells-grid {
-    grid-template-columns: repeat(14, minmax(0, 1fr));
-    grid-template-rows: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 76px;
+    gap: 5px;
+    padding: 4px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+
+  .hcc-name {
+    font-size: 10.5px;
+  }
+
+  .hcc-stats {
+    font-size: 9px;
+  }
+
+  .hcc-canvas {
+    width: 54px;
+    height: 28px;
   }
 }
 
@@ -2725,12 +2864,41 @@ body[data-campaign-mode="true"] .middle-area {
   .menu-two-buttons {
     grid-template-columns: 1fr;
   }
+  .hub-top-stage {
+    padding: 6px 8px;
+    gap: 4px;
+  }
+  .hub-level-num {
+    font-size: 24px;
+  }
+  .hub-level-word {
+    font-size: 18px;
+  }
+  .hub-play-btn {
+    padding: 6px 20px;
+    font-size: 18px;
+  }
+  .hub-upgrade-btn {
+    padding: 6px 14px;
+    font-size: 14px;
+  }
   .hub-rarity-cells-grid {
-    grid-template-columns: repeat(8, minmax(0, 1fr));
-    grid-template-rows: repeat(7, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: none;
+    grid-auto-rows: 80px;
+    gap: 6px;
+    padding: 4px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+  .hcc-name {
+    font-size: 10px;
   }
   .hcc-stats {
-    display: none;
+    display: block;
+    font-size: 8.5px;
   }
   .upgrade-stats-boxes {
     grid-template-columns: 1fr;

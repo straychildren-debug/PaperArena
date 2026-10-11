@@ -61,7 +61,7 @@ class SoundFX {
   init() {
     this.unlocked = true;
     this.preloadAudioFiles();
-    if (this.enabled && this.currentMusicMode) {
+    if (this.musicEnabled && this.currentMusicMode) {
       const track = this.musicTracks[this.currentMusicMode];
       if (track && track.paused) {
         track.play().catch(() => {});
@@ -69,27 +69,34 @@ class SoundFX {
     }
   }
 
+  // Переключение только звуковых эффектов (удары, выстрелы, клики)
   toggle() {
     this.enabled = !this.enabled;
-    if (!this.enabled) {
+    return this.enabled;
+  }
+
+  // Отдельное переключение фоновой музыки (остальные звуки остаются)
+  toggleMusic() {
+    this.musicEnabled = !this.musicEnabled;
+    if (!this.musicEnabled) {
       this.stopMusic();
     } else if (this.currentMusicMode) {
       this.playMusic(this.currentMusicMode);
     }
-    return this.enabled;
+    return this.musicEnabled;
   }
 
   playMusic(mode) {
     const prevMode = this.currentMusicMode;
     this.currentMusicMode = mode;
 
-    if (!this.enabled || !this.unlocked) return;
-    this.preloadAudioFiles();
-
     if (prevMode && prevMode !== mode && this.musicTracks[prevMode]) {
       this.musicTracks[prevMode].pause();
       this.musicTracks[prevMode].currentTime = 0;
     }
+
+    if (!this.musicEnabled || !this.unlocked) return;
+    this.preloadAudioFiles();
 
     const nextTrack = this.musicTracks[mode];
     if (nextTrack && nextTrack.paused) {

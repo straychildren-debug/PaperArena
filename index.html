@@ -15,11 +15,12 @@
   <div id="mainMenuScreen" class="screen-view active-screen">
     <div class="paper-screen-card main-menu-card paper-card">
       <div class="menu-top-coins">
+        <button id="menuMusicToggleBtn" class="secondary-top-btn music-toggle-btn" type="button" title="Отключить / включить только фоновую музыку">🎵 Музыка: ВКЛ</button>
         <span class="coin-pill">🪙 Монеты: <strong id="menuCoinsVal">100</strong></span>
       </div>
 
       <div class="menu-hero-header">
-        <div class="menu-badge-tag">БУМАЖНАЯ БИТВА • 41 БОЕЦ</div>
+        <div class="menu-badge-tag">БУМАЖНАЯ БИТВА • 73 БОЙЦА</div>
         <h1 class="menu-main-title">BATTLE ROYAL PAPER</h1>
         <p class="menu-subtitle">Открывай бойцов по редкости из ящика, прокачивай здоровье и урон и проходи уровни!</p>
       </div>
@@ -306,14 +307,16 @@
 
       <!-- Центральная кнопка СТАРТ + ускорение 1x / 2x и отдельная кнопка 3x -->
       <div class="start-zone">
-        <button id="startBtn" class="start-btn">
-          <span class="start-swords">⚔️</span>
+        <button id="startBtn" class="start-btn" data-state="prep" title="Начать бой">
+          <span class="start-swords" id="startBtnIcon">⚔️</span>
           <span id="startBtnText">СТАРТ</span>
+          <span class="mobile-pause-resume-icon" id="startBtnMobileStateIcon" aria-hidden="true"></span>
         </button>
         <button id="resetArenaBtn" class="secondary-top-btn hidden" title="Вернуться к расстановке">↺ СБРОС</button>
         <button id="speedToggleBtn" class="secondary-top-btn" title="Переключить скорость боя (1x / 2x / 3x)">1x</button>
         <button id="speed3xBtn" class="secondary-top-btn speed-3x-btn" title="Ускорить бой в 3 раза (3x)">3x</button>
-        <button id="soundToggleBtn" class="secondary-top-btn" title="Звуковые эффекты">🔊</button>
+        <button id="musicToggleBtn" class="secondary-top-btn music-toggle-btn" type="button" title="Фоновая музыка (вкл / выкл отдельно от звуков)">🎵</button>
+        <button id="soundToggleBtn" class="secondary-top-btn" type="button" title="Звуковые эффекты боя (вкл / выкл)">🔊</button>
       </div>
 
       <!-- Правый индикатор монет и усиления ботов -->
@@ -446,7 +449,7 @@
           🔴 Боты <span class="mob-tab-count" id="mobBotCount">4</span>
         </button>
         <button type="button" class="mobile-tab-btn" data-mobile-tab="roster" id="mobTabRoster">
-          ⚔️ Все бойцы <span class="mob-tab-count">41</span>
+          ⚔️ Все бойцы <span class="mob-tab-count">73</span>
         </button>
       </nav>
 
@@ -529,10 +532,10 @@
       </aside>
     </main>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ: ВЫБОР БОЙЦОВ (41 КЛАСС) -->
+    <!-- НИЖНЯЯ ПАНЕЛЬ: ВЫБОР БОЙЦОВ (73 КЛАССА) -->
     <footer class="roster-panel paper-card" id="rosterPanel">
       <div class="roster-header">
-        <h2>ВЫБОР БОЙЦОВ (41)</h2>
+        <h2>ВЫБОР БОЙЦОВ (73)</h2>
         <div class="roster-controls-hint">
           <span class="roster-hint-text">Нажмите «+Игрок» / «+Бот» на карточке или дважды нажмите по бойцу</span>
           <div class="target-team-switch">
