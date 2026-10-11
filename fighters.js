@@ -946,11 +946,1043 @@ const FIGHTER_CLASSES = [
     inFighterBox: true,
     cardSub: 'прыжок за спину + серп 30',
     desc: '🌑 Теневой Жнец (175 HP): каждые 3.6 с мгновенно прыгает сквозь тень к врагу и рубит серпом на 30 урона!'
+  },
+
+  // ==================== 22 НОВЫХ БОЙЦА ИЗ «ЯЩИКА ЗА 500 МОНЕТ» (12 РЕДКИХ, 6 ЭПИЧЕСКИХ, 4 МИФИЧЕСКИХ: №74–95) ====================
+  // 🟢 12 НОВЫХ РЕДКИХ БОЙЦОВ (ЯЩИК ЗА 500 МОНЕТ):
+  {
+    id: 'halberd_guard',
+    num: 74,
+    name: 'Алебардщик',
+    shape: 'square',
+    baseColor: '#15803d',
+    hp: 155,
+    speed: 2.9,
+    damage: 21,
+    inCrate500: true,
+    cardSub: 'алебарда 21 + отпор',
+    desc: '🪓 Алебардщик (155 HP): каждые 2.9 с делает мощный взмах стальной алебардой на 21 урона и отбрасывает врагов!'
+  },
+  {
+    id: 'dart_frog',
+    num: 75,
+    name: 'Дротикомёт',
+    shape: 'triangle',
+    baseColor: '#22c55e',
+    hp: 120,
+    speed: 3.6,
+    damage: 16,
+    inCrate500: true,
+    cardSub: 'ядовитый дротик 16',
+    desc: '🎯 Дротикомёт (120 HP): каждые 2.2 с выдувает из духовой трубки быстрый ядовитый дротик на 16 урона!'
+  },
+  {
+    id: 'shield_maiden',
+    num: 76,
+    name: 'Валькирия',
+    shape: 'hexagon',
+    baseColor: '#0ea5e9',
+    hp: 160,
+    speed: 3.3,
+    damage: 19,
+    inCrate500: true,
+    cardSub: 'рывок со щитом 19',
+    desc: '🛡️ Валькирия (160 HP): каждые 3.0 с совершает стремительный рывок с крылатым щитом на 19 урона!'
+  },
+  {
+    id: 'cannon_pirate',
+    num: 77,
+    name: 'Канонир',
+    shape: 'circle',
+    baseColor: '#334155',
+    hp: 145,
+    speed: 2.8,
+    damage: 24,
+    inCrate500: true,
+    cardSub: 'пушечное ядро 24',
+    desc: '💣 Канонир (145 HP): каждые 3.2 с стреляет из ручной мортиры тяжёлым ядром на 24 урона с отдачей!'
+  },
+  {
+    id: 'whip_tamer',
+    num: 78,
+    name: 'Укротитель',
+    shape: 'triangle',
+    baseColor: '#b45309',
+    hp: 130,
+    speed: 3.5,
+    damage: 18,
+    inCrate500: true,
+    cardSub: 'удар хлыстом 18 + стан',
+    desc: '🪢 Укротитель (130 HP): каждые 2.6 с щёлкает длинным кнутом по врагу на 18 урона и кратко оглушает!'
+  },
+  {
+    id: 'bone_warrior',
+    num: 79,
+    name: 'Костяной Воин',
+    shape: 'square',
+    baseColor: '#94a3b8',
+    hp: 140,
+    speed: 3.2,
+    damage: 19,
+    inCrate500: true,
+    cardSub: 'бросок кости 19',
+    desc: '🦴 Костяной Воин (140 HP): каждые 2.7 с швыряет вращающуюся кость-бумеранг на 19 урона!'
+  },
+  {
+    id: 'rune_monk',
+    num: 80,
+    name: 'Монах Посоха',
+    shape: 'circle',
+    baseColor: '#eab308',
+    hp: 150,
+    speed: 3.4,
+    damage: 17,
+    inCrate500: true,
+    cardSub: 'волна ци 17 + лечение',
+    desc: '🧘 Монах Посоха (150 HP): каждые 3.1 с выпускает золотую сферу Ци на 17 урона и восстанавливает себе +8 HP!'
+  },
+  {
+    id: 'saw_bot',
+    num: 81,
+    name: 'Пило-Бот',
+    shape: 'hexagon',
+    baseColor: '#64748b',
+    hp: 145,
+    speed: 3.3,
+    damage: 20,
+    inCrate500: true,
+    cardSub: 'дисковая пила 20',
+    desc: '⚙️ Пило-Бот (145 HP): каждые 2.7 с запускает стальную дисковую пилу на 20 урона!'
+  },
+  {
+    id: 'flail_templar',
+    num: 82,
+    name: 'Крестоносец',
+    shape: 'square',
+    baseColor: '#dc2626',
+    hp: 165,
+    speed: 2.8,
+    damage: 22,
+    inCrate500: true,
+    cardSub: 'кистень 22 + толчок',
+    desc: '⛓️ Крестоносец (165 HP): каждые 3.0 с обрушивает шипастый кистень на цепи на 22 урона!'
+  },
+  {
+    id: 'sand_nomad',
+    num: 83,
+    name: 'Кочевник Бури',
+    shape: 'triangle',
+    baseColor: '#d97706',
+    hp: 135,
+    speed: 3.6,
+    damage: 17,
+    inCrate500: true,
+    cardSub: 'песчаный вихрь 17',
+    desc: '🏜️ Кочевник Бури (135 HP): каждые 2.8 с пускает песчаный порыв на 17 урона, замедляющий цель!'
+  },
+  {
+    id: 'harpoon_diver',
+    num: 84,
+    name: 'Гарпунщик',
+    shape: 'hexagon',
+    baseColor: '#0284c7',
+    hp: 150,
+    speed: 3.0,
+    damage: 21,
+    inCrate500: true,
+    cardSub: 'морской гарпун 21',
+    desc: '🔱 Гарпунщик (150 HP): каждые 2.9 с выстреливает тяжёлым морским гарпуном на 21 урона!'
+  },
+  {
+    id: 'drum_shaman',
+    num: 85,
+    name: 'Шаман Ритма',
+    shape: 'circle',
+    baseColor: '#16a34a',
+    hp: 145,
+    speed: 3.1,
+    damage: 18,
+    inCrate500: true,
+    cardSub: 'бой барабана 18 вокруг',
+    desc: '🥁 Шаман Ритма (145 HP): каждые 3.0 с бьёт в боевой тамтам, поражая звуковой волной врагов вокруг на 18 урона!'
+  },
+
+  // 🟣 6 НОВЫХ ЭПИЧЕСКИХ БОЙЦОВ (ЯЩИК ЗА 500 МОНЕТ):
+  {
+    id: 'phantom_duelist',
+    num: 86,
+    name: 'Фантом-Клинок',
+    shape: 'triangle',
+    baseColor: '#7c3aed',
+    hp: 180,
+    speed: 3.8,
+    damage: 31,
+    inCrate500: true,
+    cardSub: 'призрачный выпад 31',
+    desc: '👻 Фантом-Клинок (180 HP): каждые 3.1 с совершает призрачный рывок сквозь тень и выпускает 2 эфирных клинка по 31 урона!'
+  },
+  {
+    id: 'cyber_sniper',
+    num: 87,
+    name: 'Кибер-Снайпер',
+    shape: 'hexagon',
+    baseColor: '#06b6d4',
+    hp: 165,
+    speed: 3.4,
+    damage: 36,
+    inCrate500: true,
+    cardSub: 'рельсотрон 36 насквозь',
+    desc: '🎯 Кибер-Снайпер (165 HP): каждые 3.0 с делает сверхзвуковой выстрел из рельсотрона на 36 пробивного урона!'
+  },
+  {
+    id: 'frost_valkyrie',
+    num: 88,
+    name: 'Ледяная Дева',
+    shape: 'circle',
+    baseColor: '#38bdf8',
+    hp: 190,
+    speed: 3.5,
+    damage: 29,
+    inCrate500: true,
+    cardSub: '3 ледяных копья ×29',
+    desc: '❄️ Ледяная Дева (190 HP): каждые 3.1 с метает веер из 3 ледяных копий по 29 урона с заморозкой!'
+  },
+  {
+    id: 'inferno_executioner',
+    num: 89,
+    name: 'Палач Пламени',
+    shape: 'square',
+    baseColor: '#dc2626',
+    hp: 215,
+    speed: 3.0,
+    damage: 33,
+    inCrate500: true,
+    cardSub: '2 волны пламени ×33',
+    desc: '🔥 Палач Пламени (215 HP): каждые 3.3 с обрушивает пылающую секиру и пускает 2 огненных шара по 33 урона!'
+  },
+  {
+    id: 'storm_caller',
+    num: 90,
+    name: 'Ловец Молний',
+    shape: 'hexagon',
+    baseColor: '#6366f1',
+    hp: 175,
+    speed: 3.6,
+    damage: 30,
+    inCrate500: true,
+    cardSub: 'цепь шторма 30',
+    desc: '🌩️ Ловец Молний (175 HP): каждые 3.0 с бьёт грозовым разрядом по врагам на 30 урона с микро-станом!'
+  },
+  {
+    id: 'venom_queen',
+    num: 91,
+    name: 'Королева Яда',
+    shape: 'circle',
+    baseColor: '#9333ea',
+    hp: 185,
+    speed: 3.4,
+    damage: 28,
+    inCrate500: true,
+    cardSub: '2 колбы яда ×28',
+    desc: '🧪 Королева Яда (185 HP): каждые 3.2 с швыряет 2 ядовитых флакона по 28 урона!'
+  },
+
+  // 🔴 4 НОВЫХ МИФИЧЕСКИХ БОЙЦА (ЯЩИК ЗА 500 МОНЕТ):
+  {
+    id: 'solar_pharaoh',
+    num: 92,
+    name: 'Фараон Солнца',
+    shape: 'triangle',
+    baseColor: '#f59e0b',
+    hp: 275,
+    speed: 3.6,
+    damage: 44,
+    inCrate500: true,
+    cardSub: 'луч Ра 44 + исцеление 20',
+    desc: '☀️ Фараон Солнца (275 HP): каждые 3.4 с поражает врагов солнечным лучом Ра на 44 урона и лечит себя на +20 HP!'
+  },
+  {
+    id: 'void_reaper',
+    num: 93,
+    name: 'Вестник Бездны',
+    shape: 'hexagon',
+    baseColor: '#be123c',
+    hp: 265,
+    speed: 3.8,
+    damage: 46,
+    inCrate500: true,
+    cardSub: '3 серпа бездны ×46',
+    desc: '🌌 Вестник Бездны (265 HP): каждые 3.4 с выпускает 3 всепроникающих клинка бездны по 46 урона!'
+  },
+  {
+    id: 'mecha_titan',
+    num: 94,
+    name: 'Меха-Колосс',
+    shape: 'square',
+    baseColor: '#e11d48',
+    hp: 310,
+    speed: 3.1,
+    damage: 42,
+    inCrate500: true,
+    cardSub: '310 HP • залп 4 ракет ×42',
+    desc: '🤖 Меха-Колосс (310 HP): бронированный гигант, который каждые 3.5 с даёт залп из 4 тяжёлых ракет по 42 урона!'
+  },
+  {
+    id: 'blood_archduke',
+    num: 95,
+    name: 'Кровавый Лорд',
+    shape: 'circle',
+    baseColor: '#9f1239',
+    hp: 280,
+    speed: 3.7,
+    damage: 45,
+    inCrate500: true,
+    cardSub: 'багровый взрыв 45 + вампир',
+    desc: '🩸 Кровавый Лорд (280 HP): каждые 3.3 с поражает врагов багровой молнией на 45 урона и забирает +22 HP себе!'
+  },
+
+  // ==================== 11 НОВЫХ БОЙЦОВ ИЗ «МАЛЕНЬКОГО ЯЩИКА ЗА 20 МОНЕТ» (5 ОБЫЧНЫХ, 4 РЕДКИХ, 2 ЭПИЧЕСКИХ: №96–106) ====================
+  // ⚪ 5 НОВЫХ ОБЫЧНЫХ БОЙЦОВ (МАЛЕНЬКИЙ ЯЩИК ЗА 20 МОНЕТ):
+  {
+    id: 'broom_janitor',
+    num: 96,
+    name: 'Дворник',
+    shape: 'circle',
+    baseColor: '#64748b',
+    hp: 85,
+    speed: 3.0,
+    damage: 9,
+    inMiniCrate20: true,
+    cardSub: 'метла 9 + отталкивание',
+    desc: '🧹 Дворник с Метлой (85 HP): выметает соперников с пути метлой на 9 урона!'
+  },
+  {
+    id: 'cook_pan',
+    num: 97,
+    name: 'Повар',
+    shape: 'square',
+    baseColor: '#94a3b8',
+    hp: 95,
+    speed: 2.8,
+    damage: 10,
+    inMiniCrate20: true,
+    cardSub: 'сковородка 10 урона',
+    desc: '🍳 Повар (95 HP): отбивается чугунной сковородкой и наносит 10 урона при столкновении!'
+  },
+  {
+    id: 'gardener_fork',
+    num: 98,
+    name: 'Садовник',
+    shape: 'triangle',
+    baseColor: '#4ade80',
+    hp: 90,
+    speed: 3.1,
+    damage: 9,
+    inMiniCrate20: true,
+    cardSub: 'садовые вилы 9',
+    desc: '🌱 Садовник (90 HP): бодро бегает по рингу с садовыми вилами и колет врагов на 9 урона!'
+  },
+  {
+    id: 'postman_bag',
+    num: 99,
+    name: 'Почтальон',
+    shape: 'circle',
+    baseColor: '#3b82f6',
+    hp: 88,
+    speed: 3.3,
+    damage: 8,
+    inMiniCrate20: true,
+    cardSub: 'бросок конверта 8',
+    desc: '✉️ Почтальон (88 HP): каждые 2.5 с кидает во врага бумажное письмо-конверт на 8 урона!'
+  },
+  {
+    id: 'miner_pickaxe',
+    num: 100,
+    name: 'Шахтёр',
+    shape: 'hexagon',
+    baseColor: '#78716c',
+    hp: 100,
+    speed: 2.7,
+    damage: 11,
+    inMiniCrate20: true,
+    cardSub: 'удар киркой 11',
+    desc: '⛏️ Шахтёр (100 HP): крепкий работяга в каске, который бьёт стальной киркой на 11 урона!'
+  },
+
+  // 🟢 4 НОВЫХ РЕДКИХ БОЙЦА (МАЛЕНЬКИЙ ЯЩИК ЗА 20 МОНЕТ):
+  {
+    id: 'jester_cards',
+    num: 101,
+    name: 'Шут',
+    shape: 'triangle',
+    baseColor: '#16a34a',
+    hp: 125,
+    speed: 3.6,
+    damage: 16,
+    inMiniCrate20: true,
+    cardSub: '2 бубенца по 16',
+    desc: '🃏 Шут с Бубенцами (125 HP): каждые 2.6 с бросает во врага 2 звенящих бубенца по 16 урона!'
+  },
+  {
+    id: 'ice_skater',
+    num: 102,
+    name: 'Фигурист',
+    shape: 'circle',
+    baseColor: '#38bdf8',
+    hp: 120,
+    speed: 3.9,
+    damage: 15,
+    inMiniCrate20: true,
+    cardSub: 'ледяной конёк 15',
+    desc: '⛸️ Фигурист (120 HP): стремительно скользит по арене и каждые 2.7 с пускает ледяной росчерк на 15 урона!'
+  },
+  {
+    id: 'bamboo_panda',
+    num: 103,
+    name: 'Бамбук-Панда',
+    shape: 'hexagon',
+    baseColor: '#15803d',
+    hp: 155,
+    speed: 2.8,
+    damage: 18,
+    inMiniCrate20: true,
+    cardSub: '155 HP • бамбук 18',
+    desc: '🐼 Бамбук-Панда (155 HP): каждые 2.9 с бьёт бамбуковым шестом на 18 урона и отталкивает соперника!'
+  },
+  {
+    id: 'alchemist_apprentice',
+    num: 104,
+    name: 'Чародей-Ученик',
+    shape: 'square',
+    baseColor: '#0d9488',
+    hp: 125,
+    speed: 3.2,
+    damage: 17,
+    inMiniCrate20: true,
+    cardSub: 'магический шар 17',
+    desc: '✨ Чародей-Ученик (125 HP): каждые 2.7 с выпускает из книги заклинаний искрящийся снаряд на 17 урона!'
+  },
+
+  // 🟣 2 НОВЫХ ЭПИЧЕСКИХ БОЙЦА (МАЛЕНЬКИЙ ЯЩИК ЗА 20 МОНЕТ — МАЛЕНЬКИЙ ШАНС ВЫПАДЕНИЯ!):
+  {
+    id: 'emerald_valkyrie',
+    num: 105,
+    name: 'Изумрудный Страж',
+    shape: 'hexagon',
+    baseColor: '#10b981',
+    hp: 195,
+    speed: 3.6,
+    damage: 32,
+    inMiniCrate20: true,
+    cardSub: '3 изумрудных луча ×32',
+    desc: '💚 Изумрудный Страж (195 HP): редчайший эпический боец маленького ящика — каждые 3.0 с выпускает 3 изумрудных копья по 32 урона!'
+  },
+  {
+    id: 'eclipse_ninja',
+    num: 106,
+    name: 'Ниндзя Затмения',
+    shape: 'triangle',
+    baseColor: '#6d28d9',
+    hp: 180,
+    speed: 3.9,
+    damage: 34,
+    inMiniCrate20: true,
+    cardSub: '3 теневых сюрикена ×34',
+    desc: '🌑 Ниндзя Затмения (180 HP): редчайший эпический боец маленького ящика — каждые 3.1 с метает веер из 3 сюрикенов затмения по 34 урона!'
+  },
+
+  // ==================== 24 НОВЫХ БОЙЦА ИЗ ЯЩИКА «ЭКСКЛЮЗИВ» ЗА 1 000 МОНЕТ (10 ЭПИЧЕСКИХ, 7 МИФИЧЕСКИХ, 5 ЛЕГЕНДАРНЫХ, 2 ГАЛАКТИЧЕСКИХ: №107–130) ====================
+  // 🟣 10 НОВЫХ ЭПИЧЕСКИХ БОЙЦОВ (ЯЩИК «ЭКСКЛЮЗИВ»):
+  {
+    id: 'chrono_assassin',
+    num: 107,
+    name: 'Хроно-Ассасин',
+    shape: 'triangle',
+    baseColor: '#6366f1',
+    hp: 185,
+    speed: 4.0,
+    damage: 32,
+    inExclusiveCrate: true,
+    cardSub: 'прыжок времени 32 + холод',
+    desc: '⏱️ Хроно-Ассасин (185 HP): каждые 3.2 с совершает скачок сквозь время к врагу, наносит 32 урона и замедляет цель!'
+  },
+  {
+    id: 'lava_berserker',
+    num: 108,
+    name: 'Берсерк Лавы',
+    shape: 'hexagon',
+    baseColor: '#ea580c',
+    hp: 215,
+    speed: 3.3,
+    damage: 34,
+    inExclusiveCrate: true,
+    cardSub: '2 сгустка лавы ×34',
+    desc: '🌋 Берсерк Лавы (215 HP): каждые 3.3 с швыряет 2 раскалённых сгустка магмы по 34 урона с поджогом!'
+  },
+  {
+    id: 'electro_spear',
+    num: 109,
+    name: 'Громовой Улан',
+    shape: 'square',
+    baseColor: '#0284c7',
+    hp: 195,
+    speed: 3.6,
+    damage: 31,
+    inExclusiveCrate: true,
+    cardSub: 'электро-копьё 31 + стан',
+    desc: '⚡ Громовой Улан (195 HP): каждые 3.0 с метает электрическое копьё на 31 урона, оглушающее цель на 0.4 с!'
+  },
+  {
+    id: 'mirror_mage',
+    num: 110,
+    name: 'Зеркальный Маг',
+    shape: 'circle',
+    baseColor: '#ec4899',
+    hp: 175,
+    speed: 3.4,
+    damage: 29,
+    inExclusiveCrate: true,
+    cardSub: '3 зеркальных луча ×29',
+    desc: '🪞 Зеркальный Маг (175 HP): каждые 3.1 с выпускает веером 3 сквозных зеркальных осколка по 29 урона!'
+  },
+  {
+    id: 'plague_doctor',
+    num: 111,
+    name: 'Чумной Доктор',
+    shape: 'hexagon',
+    baseColor: '#16a34a',
+    hp: 190,
+    speed: 3.2,
+    damage: 28,
+    inExclusiveCrate: true,
+    cardSub: 'колба 28 + лечение 14',
+    desc: '🧪 Чумной Доктор (190 HP): каждые 3.2 с бросает токсичную колбу на 28 урона и исцеляет себя на +14 HP!'
+  },
+  {
+    id: 'gravity_hammer',
+    num: 112,
+    name: 'Грави-Молот',
+    shape: 'square',
+    baseColor: '#7c3aed',
+    hp: 225,
+    speed: 2.9,
+    damage: 35,
+    inExclusiveCrate: true,
+    cardSub: 'грави-удар 35 + стяжка',
+    desc: '🔨 Грави-Молот (225 HP): каждые 3.5 с создаёт гравитационный импульс на 35 урона, притягивающий соперников!'
+  },
+  {
+    id: 'starlight_archer',
+    num: 113,
+    name: 'Звёздный Лучник',
+    shape: 'triangle',
+    baseColor: '#38bdf8',
+    hp: 170,
+    speed: 3.7,
+    damage: 30,
+    inExclusiveCrate: true,
+    cardSub: '3 звёздные стрелы ×30',
+    desc: '🌟 Звёздный Лучник (170 HP): каждые 2.8 с выпускает веером 3 сияющие астральные стрелы по 30 урона!'
+  },
+  {
+    id: 'iron_juggernaut',
+    num: 114,
+    name: 'Джаггернаут',
+    shape: 'hexagon',
+    baseColor: '#475569',
+    hp: 240,
+    speed: 2.8,
+    damage: 30,
+    inExclusiveCrate: true,
+    cardSub: '240 HP • таран 30 + отброс',
+    desc: '🛡️ Стальной Джаггернаут (240 HP): каждые 3.3 с идёт на неудержимый таран на 30 урона, отбрасывая врагов!'
+  },
+  {
+    id: 'crimson_duelist',
+    num: 115,
+    name: 'Алый Дуэлянт',
+    shape: 'triangle',
+    baseColor: '#e11d48',
+    hp: 185,
+    speed: 3.9,
+    damage: 33,
+    inExclusiveCrate: true,
+    cardSub: 'багровый выпад 33',
+    desc: '🤺 Алый Дуэлянт (185 HP): каждые 2.9 с делает молниеносный выпад и пускает багровую волну рапиры на 33 урона!'
+  },
+  {
+    id: 'frost_shaman',
+    num: 116,
+    name: 'Морозный Шаман',
+    shape: 'circle',
+    baseColor: '#06b6d4',
+    hp: 190,
+    speed: 3.3,
+    damage: 30,
+    inExclusiveCrate: true,
+    cardSub: '4 льдины бурана ×30',
+    desc: '❄️ Морозный Шаман (190 HP): каждые 3.2 с вызывает вихрь из 4 ледяных кристаллов по 30 урона с замедлением!'
+  },
+
+  // 🔴 7 НОВЫХ МИФИЧЕСКИХ БОЙЦОВ (ЯЩИК «ЭКСКЛЮЗИВ»):
+  {
+    id: 'astral_monk',
+    num: 117,
+    name: 'Астральный Монах',
+    shape: 'circle',
+    baseColor: '#8b5cf6',
+    hp: 275,
+    speed: 3.7,
+    damage: 45,
+    inExclusiveCrate: true,
+    cardSub: '3 удара Ци ×45 + хил 18',
+    desc: '🧘 Астральный Монах (275 HP): каждые 3.2 с выпускает 3 астральных импульса по 45 урона и лечит себя на +18 HP!'
+  },
+  {
+    id: 'cyber_valkyrie',
+    num: 118,
+    name: 'Кибер-Валькирия',
+    shape: 'hexagon',
+    baseColor: '#06b6d4',
+    hp: 285,
+    speed: 3.8,
+    damage: 47,
+    inExclusiveCrate: true,
+    cardSub: '2 неоновых лазера ×47',
+    desc: '🤖 Кибер-Валькирия (285 HP): каждые 3.2 с пикирует на цель и стреляет 2 пробивными лазерами по 47 урона!'
+  },
+  {
+    id: 'magma_behemoth',
+    num: 119,
+    name: 'Магмовый Бегемот',
+    shape: 'square',
+    baseColor: '#dc2626',
+    hp: 325,
+    speed: 3.0,
+    damage: 48,
+    inExclusiveCrate: true,
+    cardSub: '325 HP • взрыв вулкана 60',
+    desc: '🌋 Магмовый Бегемот (325 HP): каждые 3.6 с сотрясает арену взрывом лавы вокруг себя на 60 урона!'
+  },
+  {
+    id: 'shadow_emperor',
+    num: 120,
+    name: 'Император Теней',
+    shape: 'triangle',
+    baseColor: '#312e81',
+    hp: 270,
+    speed: 3.9,
+    damage: 46,
+    inExclusiveCrate: true,
+    cardSub: 'теневой блинк + 2 серпа 46',
+    desc: '🌑 Император Теней (270 HP): каждые 3.3 с телепортируется к врагу, рубит на 46 урона и выпускает 2 серпа тени!'
+  },
+  {
+    id: 'crystal_archon',
+    num: 121,
+    name: 'Кристальный Архонт',
+    shape: 'hexagon',
+    baseColor: '#ec4899',
+    hp: 280,
+    speed: 3.5,
+    damage: 44,
+    inExclusiveCrate: true,
+    cardSub: '4 алмазных луча ×44',
+    desc: '💎 Кристальный Архонт (280 HP): каждые 3.2 с выпускает крестом 4 призматических снаряда по 44 урона!'
+  },
+  {
+    id: 'tempest_djinn',
+    num: 122,
+    name: 'Джинн Урагана',
+    shape: 'circle',
+    baseColor: '#0284c7',
+    hp: 265,
+    speed: 4.0,
+    damage: 45,
+    inExclusiveCrate: true,
+    cardSub: '3 штормовых вихря ×45',
+    desc: '🌪️ Джинн Урагана (265 HP): каждые 3.1 с запускает веером 3 ураганных снаряда по 45 урона с мощным отбросом!'
+  },
+  {
+    id: 'necro_alchemist',
+    num: 123,
+    name: 'Некро-Алхимик',
+    shape: 'square',
+    baseColor: '#65a30d',
+    hp: 290,
+    speed: 3.3,
+    damage: 43,
+    inExclusiveCrate: true,
+    cardSub: 'эликсир 43 + вампир 20',
+    desc: '🧪 Некро-Алхимик (290 HP): каждые 3.3 с кидает 2 некро-колбы по 43 урона и похищает +20 HP здоровья!'
+  },
+
+  // 🟡 5 НОВЫХ ЛЕГЕНДАРНЫХ БОЙЦОВ (ЯЩИК «ЭКСКЛЮЗИВ»):
+  {
+    id: 'celestial_phoenix',
+    num: 124,
+    name: 'Небесный Феникс',
+    shape: 'triangle',
+    baseColor: '#f97316',
+    hp: 390,
+    speed: 4.1,
+    damage: 58,
+    inExclusiveCrate: true,
+    cardSub: '5 огненных перьев + хил 25',
+    desc: '🦅 Небесный Феникс (390 HP): каждые 3.3 с выпускает веер из 5 солнечных шаров пламени и возрождает себе +25 HP!'
+  },
+  {
+    id: 'abyss_leviathan',
+    num: 125,
+    name: 'Левиафан Бездны',
+    shape: 'hexagon',
+    baseColor: '#1e3a8a',
+    hp: 430,
+    speed: 3.5,
+    damage: 62,
+    inExclusiveCrate: true,
+    cardSub: '430 HP • 3 цунами ×62',
+    desc: '🐉 Левиафан Бездны (430 HP): каждые 3.5 с обрушивает 3 сокрушительные волны глубин по 62 урона с замедлением!'
+  },
+  {
+    id: 'omega_prime',
+    num: 126,
+    name: 'Омега-Прайм',
+    shape: 'square',
+    baseColor: '#2563eb',
+    hp: 420,
+    speed: 3.6,
+    damage: 60,
+    inExclusiveCrate: true,
+    cardSub: 'омега-луч 60 + 3 снаряда',
+    desc: '🤖 Омега-Прайм (420 HP): каждые 3.4 с выжигает врагов сквозным омега-лучом на 60 урона и даёт залп из 3 плазма-ракет!'
+  },
+  {
+    id: 'valkyrie_queen',
+    num: 127,
+    name: 'Королева Валькирий',
+    shape: 'hexagon',
+    baseColor: '#eab308',
+    hp: 400,
+    speed: 4.0,
+    damage: 64,
+    inExclusiveCrate: true,
+    cardSub: 'копья света 64 + стан',
+    desc: '👑 Королева Валькирий (400 HP): каждые 3.3 с поражает врагов небесными копьями на 64 урона с оглушением!'
+  },
+  {
+    id: 'chaos_overlord',
+    num: 128,
+    name: 'Владыка Хаоса',
+    shape: 'circle',
+    baseColor: '#991b1b',
+    hp: 410,
+    speed: 3.8,
+    damage: 62,
+    inExclusiveCrate: true,
+    cardSub: 'взрыв и 4 клинка хаоса ×62',
+    desc: '🔥 Владыка Хаоса (410 HP): каждые 3.5 с выпускает 4 багровых метеора хаоса по 62 урона и поджигает арену!'
+  },
+
+  // 🌌 2 НОВЫХ ГАЛАКТИЧЕСКИХ БОЙЦА (ЯЩИК «ЭКСКЛЮЗИВ» • КАЖДЫЙ ЗАНИМАЕТ СРАЗУ 3 МЕСТА!):
+  {
+    id: 'galactic_lightning',
+    num: 129,
+    name: 'Молния',
+    shape: 'hexagon',
+    baseColor: '#38bdf8',
+    hp: 850,
+    speed: 5.2,
+    damage: 100,
+    squadWeight: 3,
+    inExclusiveCrate: true,
+    cardSub: '850 HP • молния 3.5с • рывок 100 (3 места)',
+    desc: '⚡ Галактический боец «Молния» (850 HP, занимает сразу 3 места!): очень быстро двигается, каждые 3.5 с стреляет молнией во врагов, а каждые 5 с делает стремительный рывок и при задевании сносит 100 HP! Когда просто двигается без рывка — касанием урона не наносит.'
+  },
+  {
+    id: 'skeleton_king',
+    num: 130,
+    name: 'Король скелетов',
+    shape: 'hexagon',
+    baseColor: '#f5f5f4',
+    hp: 1100,
+    speed: 2.1,
+    damage: 65,
+    squadWeight: 3,
+    inExclusiveCrate: true,
+    cardSub: '1100 HP • скелеты + 3 черепа (3 места)',
+    desc: '👑💀 Галактический боец «Король скелетов» (1100 HP, занимает сразу 3 места!): в королевской мантии и золотой короне с двуручным костяным мечом (65 урона + 18 вампиризма). Каждые 4 с пускает веером 3 черепа душ (по 50 HP) и призывает скелетов-стражей! Дебаф: медленно ходит, раз в 7 с корона душ отнимает 20 HP и получает +20% урона от огня/взрывов.'
+  },
+
+  // ==================== 20 НОВЫХ БОЙЦОВ ИЗ «ЯЩИКА ЗА 35 МОНЕТ» (10 ОБЫЧНЫХ, 5 РЕДКИХ, 5 ЭПИЧЕСКИХ: №131–150) ====================
+  // ⚪ 10 НОВЫХ ОБЫЧНЫХ БОЙЦОВ (ЯЩИК ЗА 35 МОНЕТ):
+  {
+    id: 'baker_pin',
+    num: 131,
+    name: 'Пекарь',
+    shape: 'circle',
+    baseColor: '#f59e0b',
+    hp: 92,
+    speed: 2.9,
+    damage: 10,
+    inCrate35: true,
+    cardSub: 'скалка 10 урона',
+    desc: '🥖 Пекарь со Скалкой (92 HP): размахивает тяжёлой деревянной скалкой и наносит 10 урона при столкновении!'
+  },
+  {
+    id: 'fisherman_rod',
+    num: 132,
+    name: 'Рыбак',
+    shape: 'triangle',
+    baseColor: '#0284c7',
+    hp: 88,
+    speed: 3.1,
+    damage: 9,
+    inCrate35: true,
+    cardSub: 'заброс крючка 9',
+    desc: '🎣 Рыбак (88 HP): каждые 2.5 с забрасывает удочку с блесной во врага на 9 урона!'
+  },
+  {
+    id: 'carpenter_saw',
+    num: 133,
+    name: 'Плотник',
+    shape: 'square',
+    baseColor: '#b45309',
+    hp: 98,
+    speed: 2.8,
+    damage: 11,
+    inCrate35: true,
+    cardSub: 'ручная пила 11',
+    desc: '🪚 Плотник (98 HP): вооружён острой столярной ножовкой и наносит 11 урона в ближнем бою!'
+  },
+  {
+    id: 'tailor_scissors',
+    num: 134,
+    name: 'Портной',
+    shape: 'triangle',
+    baseColor: '#ec4899',
+    hp: 86,
+    speed: 3.3,
+    damage: 10,
+    inCrate35: true,
+    cardSub: 'ножницы 10 урона',
+    desc: '✂️ Портной (86 HP): проворно бегает по арене со стальными ножницами и стрижёт соперников на 10 урона!'
+  },
+  {
+    id: 'lantern_watchman',
+    num: 135,
+    name: 'Сторож',
+    shape: 'hexagon',
+    baseColor: '#475569',
+    hp: 104,
+    speed: 2.7,
+    damage: 10,
+    inCrate35: true,
+    cardSub: 'фонарь 10 урона',
+    desc: '🏮 Ночной Сторож (104 HP): обходит дозором ринг и бьёт кованым фонарём на 10 урона!'
+  },
+  {
+    id: 'shepherd_crook',
+    num: 136,
+    name: 'Пастух',
+    shape: 'circle',
+    baseColor: '#84cc16',
+    hp: 94,
+    speed: 3.1,
+    damage: 9,
+    inCrate35: true,
+    cardSub: 'посох 9 + толчок',
+    desc: '🐏 Пастух (94 HP): орудует изогнутым деревянным посохом, нанося 9 урона при ударе!'
+  },
+  {
+    id: 'potter_jug',
+    num: 137,
+    name: 'Гончар',
+    shape: 'square',
+    baseColor: '#d97706',
+    hp: 90,
+    speed: 3.0,
+    damage: 9,
+    inCrate35: true,
+    cardSub: 'бросок кувшина 9',
+    desc: '🏺 Гончар (90 HP): каждые 2.6 с запускает во врага обожжённый глиняный кувшин на 9 урона!'
+  },
+  {
+    id: 'chimney_sweep',
+    num: 138,
+    name: 'Трубочист',
+    shape: 'circle',
+    baseColor: '#334155',
+    hp: 92,
+    speed: 3.2,
+    damage: 10,
+    inCrate35: true,
+    cardSub: 'ёршик на гире 10',
+    desc: '🧹 Трубочист (92 HP): крутит чугунную гирю с ёршиком и сносит 10 HP при столкновении!'
+  },
+  {
+    id: 'drummer_boy',
+    num: 139,
+    name: 'Барабанщик',
+    shape: 'hexagon',
+    baseColor: '#ef4444',
+    hp: 95,
+    speed: 3.1,
+    damage: 9,
+    inCrate35: true,
+    cardSub: 'маршевый барабан 9',
+    desc: '🥁 Полковой Барабанщик (95 HP): бодро марширует по арене и бьёт палочками на 9 урона!'
+  },
+  {
+    id: 'bell_ringer',
+    num: 140,
+    name: 'Звонарь',
+    shape: 'square',
+    baseColor: '#eab308',
+    hp: 102,
+    speed: 2.8,
+    damage: 11,
+    inCrate35: true,
+    cardSub: 'бронзовый колокол 11',
+    desc: '🔔 Звонарь (102 HP): оглушительно бьёт тяжёлым медным колоколом на 11 урона!'
+  },
+
+  // 🟢 5 НОВЫХ РЕДКИХ БОЙЦОВ (ЯЩИК ЗА 35 МОНЕТ):
+  {
+    id: 'falconer_hawk',
+    num: 141,
+    name: 'Сокольник',
+    shape: 'triangle',
+    baseColor: '#a16207',
+    hp: 130,
+    speed: 3.5,
+    damage: 18,
+    inCrate35: true,
+    cardSub: 'налёт сокола 18',
+    desc: '🦅 Сокольник (130 HP): каждые 2.6 с отправляет в полёт охотничьего сокола, клюющего врага на 18 урона!'
+  },
+  {
+    id: 'alchemist_bomb',
+    num: 142,
+    name: 'Гренадёр',
+    shape: 'circle',
+    baseColor: '#dc2626',
+    hp: 140,
+    speed: 3.0,
+    damage: 20,
+    inCrate35: true,
+    cardSub: 'пороховая петарда 20',
+    desc: '🧨 Гренадёр (140 HP): каждые 2.9 с кидает горящую пороховую петарду на 20 огненного урона!'
+  },
+  {
+    id: 'gladiator_net',
+    num: 143,
+    name: 'Ретиарий',
+    shape: 'square',
+    baseColor: '#d97706',
+    hp: 150,
+    speed: 3.2,
+    damage: 19,
+    inCrate35: true,
+    cardSub: 'трезубец и сеть 19',
+    desc: '🔱 Гладиатор-Ретиарий (150 HP): каждые 2.8 с делает выпад с сетью и трезубцем на 19 урона с замедлением!'
+  },
+  {
+    id: 'glacier_pikeman',
+    num: 144,
+    name: 'Ледоруб',
+    shape: 'hexagon',
+    baseColor: '#0284c7',
+    hp: 155,
+    speed: 2.9,
+    damage: 20,
+    inCrate35: true,
+    cardSub: 'ледяной осколок 20',
+    desc: '⛏️ Северный Ледоруб (155 HP): каждые 2.8 с откалывает ледяную глыбу и пускает её во врага на 20 урона!'
+  },
+  {
+    id: 'desert_dervish',
+    num: 145,
+    name: 'Дервиш',
+    shape: 'triangle',
+    baseColor: '#eab308',
+    hp: 135,
+    speed: 3.8,
+    damage: 17,
+    inCrate35: true,
+    cardSub: 'танец сабель 17',
+    desc: '⚔️ Пустынный Дервиш (135 HP): каждые 2.6 с совершает вихревой рывок с парными саблями на 17 урона!'
+  },
+
+  // 🟣 5 НОВЫХ ЭПИЧЕСКИХ БОЙЦОВ (ЯЩИК ЗА 35 МОНЕТ):
+  {
+    id: 'arcane_arbalester',
+    num: 146,
+    name: 'Маго-Арбалетчик',
+    shape: 'triangle',
+    baseColor: '#7c3aed',
+    hp: 175,
+    speed: 3.5,
+    damage: 30,
+    inCrate35: true,
+    cardSub: '2 рунных болта ×30',
+    desc: '🏹 Маго-Арбалетчик (175 HP): каждые 2.9 с стреляет дуплетом из 2 пробивных магических болтов по 30 урона!'
+  },
+  {
+    id: 'blood_samurai',
+    num: 147,
+    name: 'Кровавый Ронин',
+    shape: 'triangle',
+    baseColor: '#be123c',
+    hp: 185,
+    speed: 3.7,
+    damage: 31,
+    inCrate35: true,
+    cardSub: 'клинок крови 31 + хил 12',
+    desc: '🗡️ Кровавый Ронин (185 HP): каждые 3.0 с делает багровый разрез на 31 урона и восстанавливает +12 HP!'
+  },
+  {
+    id: 'thunder_golem',
+    num: 148,
+    name: 'Грозовой Голем',
+    shape: 'hexagon',
+    baseColor: '#2563eb',
+    hp: 220,
+    speed: 2.7,
+    damage: 29,
+    inCrate35: true,
+    cardSub: '220 HP • кулак грома 29',
+    desc: '⚡ Грозовой Голем (220 HP): каждые 3.2 с выпускает разряд шаровой молнии на 29 урона с оглушением!'
+  },
+  {
+    id: 'toxic_arachnid',
+    num: 149,
+    name: 'Тарантул',
+    shape: 'circle',
+    baseColor: '#15803d',
+    hp: 180,
+    speed: 3.6,
+    damage: 28,
+    inCrate35: true,
+    cardSub: '2 плевка яда ×28',
+    desc: '🕷️ Ядовитый Тарантул (180 HP): каждые 3.0 с выстреливает 2 сгустками едкого яда по 28 урона!'
+  },
+  {
+    id: 'sun_paladin',
+    num: 150,
+    name: 'Паладин Света',
+    shape: 'square',
+    baseColor: '#f59e0b',
+    hp: 210,
+    speed: 3.1,
+    damage: 30,
+    inCrate35: true,
+    cardSub: 'молот света 30 + хил 15',
+    desc: '☀️ Паладин Света (210 HP): каждые 3.1 с поражает врага солнечным лучом на 30 урона и исцеляется на +15 HP!'
   }
 ];
 
-// ==================== СИСТЕМА РЕДКОСТИ, КОНТЕЙНЕРА БОЙЦОВ И БОКСА БОЙЦОВ ====================
-// Шансы эпических, мифических и легендарных уменьшены в 2 раза (8%, 4%, 1.5%), а обычных и редких увеличены (53.5%, 33%)!
+// ==================== СИСТЕМА РЕДКОСТИ (6 РЕДКОСТЕЙ ВКЛЮЧАЯ ГАЛАКТИЧЕСКУЮ) И 6 ЯЩИКОВ/БОКСОВ В МАГАЗИНЕ ====================
 const FIGHTER_RARITIES = [
   {
     id: 'common',
@@ -960,14 +1992,23 @@ const FIGHTER_RARITIES = [
     color: '#64748b',
     bg: '#f1f5f9',
     border: '#475569',
-    tierChance: 53.5,
-    boxTierChance: 58, // В Боксе бойцов (где только обычные, редкие и эпические)
+    tierChance: 53.5,          // Контейнер бойцов (1 000 🪙)
+    boxTierChance: 58,         // Бокс бойцов (50 🪙)
+    crate500TierChance: 0,     // Ящик за 500 🪙
+    miniCrate20TierChance: 75, // Маленький ящик за 20 🪙
+    exclusiveTierChance: 0,    // Ящик «Эксклюзив» за 1 000 🪙
+    crate35TierChance: 65,     // Ящик за 35 🪙 (10 обычных бойцов)
     fighters: [
       'swordsman', 'archer', 'shield', 'spearman', 'soldier',
       'healer', 'alchemist', 'boomerang', 'worm', 'werewolf',
       'lumberjack', 'slinger', 'blacksmith',
-      // 5 новых очень слабых обычных бойцов без способностей из «Бокса бойцов»:
-      'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant'
+      // 5 обычных бойцов без способностей из «Бокса бойцов» (50 🪙):
+      'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant',
+      // 5 обычных бойцов из «Маленького ящика» (20 🪙):
+      'broom_janitor', 'cook_pan', 'gardener_fork', 'postman_bag', 'miner_pickaxe',
+      // 10 обычных бойцов из «Ящика за 35 🪙»:
+      'baker_pin', 'fisherman_rod', 'carpenter_saw', 'tailor_scissors', 'lantern_watchman',
+      'shepherd_crook', 'potter_jug', 'chimney_sweep', 'drummer_boy', 'bell_ringer'
     ]
   },
   {
@@ -978,14 +2019,25 @@ const FIGHTER_RARITIES = [
     color: '#16a34a',
     bg: '#dcfce7',
     border: '#15803d',
-    tierChance: 33,
-    boxTierChance: 30,
+    tierChance: 33,            // Контейнер бойцов (1 000 🪙)
+    boxTierChance: 30,         // Бокс бойцов (50 🪙)
+    crate500TierChance: 64,    // Ящик за 500 🪙 (12 редких бойцов)
+    miniCrate20TierChance: 22, // Маленький ящик за 20 🪙 (4 редких бойца)
+    exclusiveTierChance: 0,    // Ящик «Эксклюзив» за 1 000 🪙
+    crate35TierChance: 25,     // Ящик за 35 🪙 (5 редких бойцов)
     fighters: [
       'gunslinger', 'pyro', 'cryo', 'thunder', 'berserker',
       'engineer', 'summoner', 'graviton', 'hunter', 'boxer',
       'musketeer', 'beekeeper', 'ice_golem',
-      // 5 новых редких бойцов из «Бокса бойцов»:
-      'crossbow_scout', 'fencer_fox', 'snow_thrower', 'torch_bearer', 'anchor_sailor'
+      // 5 редких бойцов из «Бокса бойцов» (50 🪙):
+      'crossbow_scout', 'fencer_fox', 'snow_thrower', 'torch_bearer', 'anchor_sailor',
+      // 12 редких бойцов из «Ящика за 500 🪙»:
+      'halberd_guard', 'dart_frog', 'shield_maiden', 'cannon_pirate', 'whip_tamer', 'bone_warrior',
+      'rune_monk', 'saw_bot', 'flail_templar', 'sand_nomad', 'harpoon_diver', 'drum_shaman',
+      // 4 редких бойца из «Маленького ящика за 20 🪙»:
+      'jester_cards', 'ice_skater', 'bamboo_panda', 'alchemist_apprentice',
+      // 5 редких бойцов из «Ящика за 35 🪙»:
+      'falconer_hawk', 'alchemist_bomb', 'gladiator_net', 'glacier_pikeman', 'desert_dervish'
     ]
   },
   {
@@ -996,14 +2048,27 @@ const FIGHTER_RARITIES = [
     color: '#9333ea',
     bg: '#f3e8ff',
     border: '#7e22ce',
-    tierChance: 8,
-    boxTierChance: 12,
+    tierChance: 8,            // Контейнер бойцов (1 000 🪙)
+    boxTierChance: 12,        // Бокс бойцов (50 🪙)
+    crate500TierChance: 26,   // Ящик за 500 🪙 (6 эпических бойцов)
+    miniCrate20TierChance: 3, // Маленький ящик за 20 🪙 (2 эпических бойца)
+    exclusiveTierChance: 54,  // Ящик «Эксклюзив» за 1 000 🪙 (10 эпических бойцов)
+    crate35TierChance: 10,    // Ящик за 35 🪙 (5 эпических бойцов)
     fighters: [
       'assassin', 'vampire', 'claws', 'giant', 'laser_bot',
       'teleporter', 'ninja', 'zombie', 'bibizyana',
       'samurai', 'cactus', 'magician_hat',
-      // 6 новых эпических бойцов из «Бокса бойцов»:
-      'wind_ronin', 'tesla_bot', 'witch_brew', 'magma_guard', 'crystal_sniper', 'shadow_scythe'
+      // 6 эпических бойцов из «Бокса бойцов» (50 🪙):
+      'wind_ronin', 'tesla_bot', 'witch_brew', 'magma_guard', 'crystal_sniper', 'shadow_scythe',
+      // 6 эпических бойцов из «Ящика за 500 🪙»:
+      'phantom_duelist', 'cyber_sniper', 'frost_valkyrie', 'inferno_executioner', 'storm_caller', 'venom_queen',
+      // 2 эпических бойца из «Маленького ящика за 20 🪙»:
+      'emerald_valkyrie', 'eclipse_ninja',
+      // 10 эпических бойцов из ящика «Эксклюзив» (1 000 🪙):
+      'chrono_assassin', 'lava_berserker', 'electro_spear', 'mirror_mage', 'plague_doctor',
+      'gravity_hammer', 'starlight_archer', 'iron_juggernaut', 'crimson_duelist', 'frost_shaman',
+      // 5 эпических бойцов из «Ящика за 35 🪙»:
+      'arcane_arbalester', 'blood_samurai', 'thunder_golem', 'toxic_arachnid', 'sun_paladin'
     ]
   },
   {
@@ -1016,10 +2081,19 @@ const FIGHTER_RARITIES = [
     border: '#be123c',
     tierChance: 4,
     boxTierChance: 0,
+    crate500TierChance: 10,  // Ящик за 500 🪙 (4 мифических бойца)
+    miniCrate20TierChance: 0,
+    exclusiveTierChance: 28, // Ящик «Эксклюзив» за 1 000 🪙 (7 мифических бойцов)
+    crate35TierChance: 0,
     fighters: [
       'plasma_rex', 'robo_mech', 'bomber', 'fairy', 'card_master',
       'medusa', 'pavuk',
-      'anubis', 'poseidon', 'meteor_knight'
+      'anubis', 'poseidon', 'meteor_knight',
+      // 4 мифических бойца из «Ящика за 500 🪙»:
+      'solar_pharaoh', 'void_reaper', 'mecha_titan', 'blood_archduke',
+      // 7 мифических бойцов из ящика «Эксклюзив» (1 000 🪙):
+      'astral_monk', 'cyber_valkyrie', 'magma_behemoth', 'shadow_emperor',
+      'crystal_archon', 'tempest_djinn', 'necro_alchemist'
     ]
   },
   {
@@ -1032,14 +2106,44 @@ const FIGHTER_RARITIES = [
     border: '#b45309',
     tierChance: 1.5,
     boxTierChance: 0,
+    crate500TierChance: 0,
+    miniCrate20TierChance: 0,
+    exclusiveTierChance: 15, // Ящик «Эксклюзив» за 1 000 🪙 (5 легендарных бойцов)
+    crate35TierChance: 0,
     fighters: [
       'superman', 'checkmate', 'death', 'doubler', 'musician',
-      'dragon', 'chronos', 'zeus', 'sky_guardian'
+      'dragon', 'chronos', 'zeus', 'sky_guardian',
+      // 5 легендарных бойцов из ящика «Эксклюзив» (1 000 🪙):
+      'celestial_phoenix', 'abyss_leviathan', 'omega_prime', 'valkyrie_queen', 'chaos_overlord'
+    ]
+  },
+  {
+    id: 'galactic',
+    order: 6,
+    name: 'Галактическая',
+    badge: 'Галактический',
+    color: '#4f46e5',
+    bg: '#e0e7ff',
+    border: '#3730a3',
+    tierChance: 0,
+    boxTierChance: 0,
+    crate500TierChance: 0,
+    miniCrate20TierChance: 0,
+    exclusiveTierChance: 3, // Ящик «Эксклюзив» за 1 000 🪙 (2 галактических бойца: Молния и Король скелетов)
+    crate35TierChance: 0,
+    fighters: [
+      'galactic_lightning', 'skeleton_king'
     ]
   }
 ];
 
-// Проставляем каждому бойцу его редкость, цвет редкости, шанс выпадения в Контейнере (55 бойцов) или Боксе бойцов (16 новых бойцов)
+function isTripleSlotFighter(id) {
+  if (!id) return false;
+  const fc = FIGHTER_CLASSES.find(c => c.id === id);
+  return Boolean(fc && fc.squadWeight === 3);
+}
+
+// Проставляем каждому бойцу его редкость, цвет редкости и шанс выпадения в соответствующем ящике/боксе
 (function assignFighterRarities() {
   for (const fc of FIGHTER_CLASSES) {
     let foundTier = FIGHTER_RARITIES[0];
@@ -1052,20 +2156,37 @@ const FIGHTER_RARITIES = [
     fc.rarity = foundTier.id;
     fc.rarityOrder = foundTier.order;
     fc.rarityName = foundTier.name;
-    fc.rarityBadge = fc.id === 'sky_guardian' ? 'Небесный (3 места)' : foundTier.badge;
+    fc.rarityBadge = fc.id === 'sky_guardian'
+      ? 'Небесный (3 места)'
+      : (fc.squadWeight === 3 ? `${foundTier.badge} (3 места)` : foundTier.badge);
     fc.rarityColor = fc.id === 'sky_guardian' ? '#0284c7' : foundTier.color;
     fc.rarityBg = foundTier.bg;
     fc.rarityBorder = fc.id === 'sky_guardian' ? '#0284c7' : foundTier.border;
     fc.tierChance = foundTier.tierChance;
     fc.boxTierChance = foundTier.boxTierChance || 0;
+    fc.crate500TierChance = foundTier.crate500TierChance || 0;
+    fc.miniCrate20TierChance = foundTier.miniCrate20TierChance || 0;
+    fc.exclusiveTierChance = foundTier.exclusiveTierChance || 0;
+    fc.crate35TierChance = foundTier.crate35TierChance || 0;
 
-    // В «Контейнере бойцов» находятся 55 основных бойцов (кроме Мечника, Стражника небес и 16 бойцов из Бокса бойцов)
     fc.inFighterBox = Boolean(fc.inFighterBox);
-    fc.inCrate = !fc.inFighterBox && fc.id !== 'swordsman' && fc.id !== 'sky_guardian';
+    fc.inCrate500 = Boolean(fc.inCrate500);
+    fc.inMiniCrate20 = Boolean(fc.inMiniCrate20);
+    fc.inExclusiveCrate = Boolean(fc.inExclusiveCrate);
+    fc.inCrate35 = Boolean(fc.inCrate35);
+    fc.inCrate =
+      !fc.inFighterBox &&
+      !fc.inCrate500 &&
+      !fc.inMiniCrate20 &&
+      !fc.inExclusiveCrate &&
+      !fc.inCrate35 &&
+      fc.id !== 'swordsman' &&
+      fc.id !== 'sky_guardian';
 
     const crateCountInTier = foundTier.fighters.filter(id => {
       const fObj = FIGHTER_CLASSES.find(x => x.id === id);
-      return id !== 'swordsman' && id !== 'sky_guardian' && !(fObj && fObj.inFighterBox);
+      return id !== 'swordsman' && id !== 'sky_guardian' &&
+        !(fObj && (fObj.inFighterBox || fObj.inCrate500 || fObj.inMiniCrate20 || fObj.inExclusiveCrate || fObj.inCrate35));
     }).length || 1;
 
     const boxCountInTier = foundTier.fighters.filter(id => {
@@ -1073,9 +2194,41 @@ const FIGHTER_RARITIES = [
       return Boolean(fObj && fObj.inFighterBox);
     }).length || 1;
 
-    fc.dropChance = fc.inCrate
-      ? Number((foundTier.tierChance / crateCountInTier).toFixed(2))
-      : (fc.inFighterBox ? Number(((foundTier.boxTierChance || 0) / boxCountInTier).toFixed(2)) : 0);
+    const crate500CountInTier = foundTier.fighters.filter(id => {
+      const fObj = FIGHTER_CLASSES.find(x => x.id === id);
+      return Boolean(fObj && fObj.inCrate500);
+    }).length || 1;
+
+    const miniCrate20CountInTier = foundTier.fighters.filter(id => {
+      const fObj = FIGHTER_CLASSES.find(x => x.id === id);
+      return Boolean(fObj && fObj.inMiniCrate20);
+    }).length || 1;
+
+    const exclusiveCountInTier = foundTier.fighters.filter(id => {
+      const fObj = FIGHTER_CLASSES.find(x => x.id === id);
+      return Boolean(fObj && fObj.inExclusiveCrate);
+    }).length || 1;
+
+    const crate35CountInTier = foundTier.fighters.filter(id => {
+      const fObj = FIGHTER_CLASSES.find(x => x.id === id);
+      return Boolean(fObj && fObj.inCrate35);
+    }).length || 1;
+
+    if (fc.inCrate) {
+      fc.dropChance = Number((foundTier.tierChance / crateCountInTier).toFixed(2));
+    } else if (fc.inFighterBox) {
+      fc.dropChance = Number(((foundTier.boxTierChance || 0) / boxCountInTier).toFixed(2));
+    } else if (fc.inCrate500) {
+      fc.dropChance = Number(((foundTier.crate500TierChance || 0) / crate500CountInTier).toFixed(2));
+    } else if (fc.inMiniCrate20) {
+      fc.dropChance = Number(((foundTier.miniCrate20TierChance || 0) / miniCrate20CountInTier).toFixed(2));
+    } else if (fc.inExclusiveCrate) {
+      fc.dropChance = Number(((foundTier.exclusiveTierChance || 0) / exclusiveCountInTier).toFixed(2));
+    } else if (fc.inCrate35) {
+      fc.dropChance = Number(((foundTier.crate35TierChance || 0) / crate35CountInTier).toFixed(2));
+    } else {
+      fc.dropChance = 0;
+    }
   }
 })();
 
@@ -1113,6 +2266,85 @@ function getUnitTeamColor(team, classId) {
   if (classId === 'magma_guard') return team === 'player' ? '#ef4444' : '#b91c1c';
   if (classId === 'crystal_sniper') return team === 'player' ? '#f472b6' : '#db2777';
   if (classId === 'shadow_scythe') return team === 'player' ? '#6d28d9' : '#4c1d95';
+  if (classId === 'halberd_guard') return team === 'player' ? '#475569' : '#334155';
+  if (classId === 'dart_frog') return team === 'player' ? '#10b981' : '#059669';
+  if (classId === 'shield_maiden') return team === 'player' ? '#0284c7' : '#0369a1';
+  if (classId === 'cannon_pirate') return team === 'player' ? '#b91c1c' : '#7f1d1d';
+  if (classId === 'whip_tamer') return team === 'player' ? '#d97706' : '#b45309';
+  if (classId === 'bone_warrior') return team === 'player' ? '#a8a29e' : '#78716c';
+  if (classId === 'rune_monk') return team === 'player' ? '#06b6d4' : '#0891b2';
+  if (classId === 'saw_bot') return team === 'player' ? '#64748b' : '#475569';
+  if (classId === 'flail_templar') return team === 'player' ? '#eab308' : '#ca8a04';
+  if (classId === 'sand_nomad') return team === 'player' ? '#f59e0b' : '#d97706';
+  if (classId === 'harpoon_diver') return team === 'player' ? '#0ea5e9' : '#0284c7';
+  if (classId === 'drum_shaman') return team === 'player' ? '#16a34a' : '#15803d';
+  if (classId === 'phantom_duelist') return team === 'player' ? '#8b5cf6' : '#6d28d9';
+  if (classId === 'cyber_sniper') return team === 'player' ? '#06b6d4' : '#0e7490';
+  if (classId === 'frost_valkyrie') return team === 'player' ? '#38bdf8' : '#0284c7';
+  if (classId === 'inferno_executioner') return team === 'player' ? '#dc2626' : '#991b1b';
+  if (classId === 'storm_caller') return team === 'player' ? '#3b82f6' : '#1d4ed8';
+  if (classId === 'venom_queen') return team === 'player' ? '#84cc16' : '#4d7c0f';
+  if (classId === 'solar_pharaoh') return team === 'player' ? '#facc15' : '#ca8a04';
+  if (classId === 'void_reaper') return team === 'player' ? '#4c1d95' : '#2e1065';
+  if (classId === 'mecha_titan') return team === 'player' ? '#2563eb' : '#1e40af';
+  if (classId === 'blood_archduke') return team === 'player' ? '#9f1239' : '#881337';
+  if (classId === 'broom_janitor') return team === 'player' ? '#78716c' : '#57534e';
+  if (classId === 'cook_pan') return team === 'player' ? '#fb923c' : '#ea580c';
+  if (classId === 'gardener_fork') return team === 'player' ? '#22c55e' : '#16a34a';
+  if (classId === 'postman_bag') return team === 'player' ? '#3b82f6' : '#2563eb';
+  if (classId === 'miner_pickaxe') return team === 'player' ? '#eab308' : '#ca8a04';
+  if (classId === 'jester_cards') return team === 'player' ? '#ec4899' : '#db2777';
+  if (classId === 'ice_skater') return team === 'player' ? '#7dd3fc' : '#38bdf8';
+  if (classId === 'bamboo_panda') return team === 'player' ? '#4ade80' : '#16a34a';
+  if (classId === 'alchemist_apprentice') return team === 'player' ? '#a855f7' : '#7e22ce';
+  if (classId === 'emerald_valkyrie') return team === 'player' ? '#10b981' : '#047857';
+  if (classId === 'eclipse_ninja') return team === 'player' ? '#312e81' : '#1e1b4b';
+  // 24 новых бойца из ящика «Эксклюзив» (1 000 🪙):
+  if (classId === 'chrono_assassin') return team === 'player' ? '#6366f1' : '#4338ca';
+  if (classId === 'lava_berserker') return team === 'player' ? '#ea580c' : '#c2410c';
+  if (classId === 'electro_spear') return team === 'player' ? '#0284c7' : '#0369a1';
+  if (classId === 'mirror_mage') return team === 'player' ? '#ec4899' : '#be185d';
+  if (classId === 'plague_doctor') return team === 'player' ? '#16a34a' : '#15803d';
+  if (classId === 'gravity_hammer') return team === 'player' ? '#7c3aed' : '#5b21b6';
+  if (classId === 'starlight_archer') return team === 'player' ? '#38bdf8' : '#0284c7';
+  if (classId === 'iron_juggernaut') return team === 'player' ? '#475569' : '#334155';
+  if (classId === 'crimson_duelist') return team === 'player' ? '#e11d48' : '#9f1239';
+  if (classId === 'frost_shaman') return team === 'player' ? '#06b6d4' : '#0e7490';
+  if (classId === 'astral_monk') return team === 'player' ? '#8b5cf6' : '#6d28d9';
+  if (classId === 'cyber_valkyrie') return team === 'player' ? '#06b6d4' : '#0891b2';
+  if (classId === 'magma_behemoth') return team === 'player' ? '#dc2626' : '#991b1b';
+  if (classId === 'shadow_emperor') return team === 'player' ? '#312e81' : '#1e1b4b';
+  if (classId === 'crystal_archon') return team === 'player' ? '#ec4899' : '#db2777';
+  if (classId === 'tempest_djinn') return team === 'player' ? '#0284c7' : '#075985';
+  if (classId === 'necro_alchemist') return team === 'player' ? '#65a30d' : '#3f6212';
+  if (classId === 'celestial_phoenix') return team === 'player' ? '#f97316' : '#ea580c';
+  if (classId === 'abyss_leviathan') return team === 'player' ? '#1e3a8a' : '#172554';
+  if (classId === 'omega_prime') return team === 'player' ? '#2563eb' : '#1d4ed8';
+  if (classId === 'valkyrie_queen') return team === 'player' ? '#eab308' : '#ca8a04';
+  if (classId === 'chaos_overlord') return team === 'player' ? '#991b1b' : '#7f1d1d';
+  if (classId === 'galactic_lightning') return team === 'player' ? '#38bdf8' : '#0284c7';
+  if (classId === 'skeleton_king') return team === 'player' ? '#f5f5f4' : '#d6d3d1';
+  // 20 новых бойцов из ящика за 35 🪙:
+  if (classId === 'baker_pin') return team === 'player' ? '#f59e0b' : '#d97706';
+  if (classId === 'fisherman_rod') return team === 'player' ? '#0284c7' : '#0369a1';
+  if (classId === 'carpenter_saw') return team === 'player' ? '#b45309' : '#92400e';
+  if (classId === 'tailor_scissors') return team === 'player' ? '#ec4899' : '#db2777';
+  if (classId === 'lantern_watchman') return team === 'player' ? '#475569' : '#334155';
+  if (classId === 'shepherd_crook') return team === 'player' ? '#84cc16' : '#65a30d';
+  if (classId === 'potter_jug') return team === 'player' ? '#d97706' : '#b45309';
+  if (classId === 'chimney_sweep') return team === 'player' ? '#334155' : '#1e293b';
+  if (classId === 'drummer_boy') return team === 'player' ? '#ef4444' : '#dc2626';
+  if (classId === 'bell_ringer') return team === 'player' ? '#eab308' : '#ca8a04';
+  if (classId === 'falconer_hawk') return team === 'player' ? '#a16207' : '#854d0e';
+  if (classId === 'alchemist_bomb') return team === 'player' ? '#dc2626' : '#b91c1c';
+  if (classId === 'gladiator_net') return team === 'player' ? '#d97706' : '#b45309';
+  if (classId === 'glacier_pikeman') return team === 'player' ? '#0284c7' : '#0369a1';
+  if (classId === 'desert_dervish') return team === 'player' ? '#eab308' : '#ca8a04';
+  if (classId === 'arcane_arbalester') return team === 'player' ? '#7c3aed' : '#6d28d9';
+  if (classId === 'blood_samurai') return team === 'player' ? '#be123c' : '#9f1239';
+  if (classId === 'thunder_golem') return team === 'player' ? '#2563eb' : '#1d4ed8';
+  if (classId === 'toxic_arachnid') return team === 'player' ? '#15803d' : '#166534';
+  if (classId === 'sun_paladin') return team === 'player' ? '#f59e0b' : '#d97706';
   if (classId === 'lumberjack') return team === 'player' ? '#dc2626' : '#991b1b';
   if (classId === 'slinger') return team === 'player' ? '#ca8a04' : '#854d0e';
   if (classId === 'blacksmith') return team === 'player' ? '#475569' : '#334155';
@@ -2707,6 +3939,1205 @@ function drawWeaponGraphic(ctx, abilityId, x, y, scale = 1, angle = -Math.PI / 4
       ctx.stroke();
       break;
     }
+
+    case 'halberd_guard': {
+      // Длинная стальная алебарда
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-10, -2, 24, 4);
+      ctx.strokeRect(-10, -2, 24, 4);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.moveTo(8, -10);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(8, 10);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'dart_frog': {
+      // Бамбуковая духовая трубка с зелёным дротиком
+      ctx.fillStyle = '#a3e635';
+      ctx.fillRect(-6, -2.5, 18, 5);
+      ctx.strokeRect(-6, -2.5, 18, 5);
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.moveTo(12, -3);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(12, 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'shield_maiden': {
+      // Круглый норманнский щит с золотым умбоном
+      ctx.fillStyle = '#0284c7';
+      ctx.beginPath();
+      ctx.arc(0, 0, 10, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(0, 0, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'cannon_pirate': {
+      // Чугунная ручная мортира пирата
+      ctx.fillStyle = '#334155';
+      ctx.beginPath();
+      roundRectPath(ctx, -6, -5, 18, 10, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.arc(13, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'whip_tamer': {
+      // Кожаный кнут укротителя
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-8, -2.5, 8, 5);
+      ctx.strokeRect(-8, -2.5, 8, 5);
+      ctx.strokeStyle = '#b45309';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.quadraticCurveTo(8, -8, 16, 2);
+      ctx.stroke();
+      break;
+    }
+
+    case 'bone_warrior': {
+      // Зазубренная костяная булава
+      ctx.fillStyle = '#f5f5f4';
+      ctx.beginPath();
+      roundRectPath(ctx, -8, -3, 18, 6, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(10, -4, 4, 0, Math.PI * 2);
+      ctx.arc(10, 4, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'rune_monk': {
+      // Светящийся рунический посох
+      ctx.fillStyle = '#0891b2';
+      ctx.fillRect(-8, -2, 18, 4);
+      ctx.strokeRect(-8, -2, 18, 4);
+      ctx.fillStyle = '#67e8f9';
+      ctx.beginPath();
+      ctx.arc(11, 0, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'saw_bot': {
+      // Зубчатая циркулярная пила
+      ctx.fillStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.arc(2, 0, 9.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(2, 0, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'flail_templar': {
+      // Цепной моргенштерн храмовника
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-9, -2, 10, 4);
+      ctx.strokeRect(-9, -2, 10, 4);
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(9, 0, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'sand_nomad': {
+      // Изогнутый золотистый ятаган пустыни
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.moveTo(-4, 2);
+      ctx.quadraticCurveTo(8, -8, 17, -2);
+      ctx.quadraticCurveTo(8, 5, -4, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'harpoon_diver': {
+      // Морской стальной гарпун с зазубринами
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-8, -2, 18, 4);
+      ctx.strokeRect(-8, -2, 18, 4);
+      ctx.beginPath();
+      ctx.moveTo(18, 0);
+      ctx.lineTo(9, -6);
+      ctx.lineTo(11, 0);
+      ctx.lineTo(9, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'drum_shaman': {
+      // Ритуальный боевой барабан с колотушкой
+      ctx.fillStyle = '#fef3c7';
+      ctx.beginPath();
+      ctx.arc(2, 0, 8.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#16a34a';
+      ctx.beginPath();
+      ctx.arc(2, 0, 4, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'phantom_duelist': {
+      // Призрачная фиолетовая шпага
+      ctx.fillStyle = '#c084fc';
+      ctx.beginPath();
+      ctx.arc(-2, 0, 4.5, -Math.PI * 0.5, Math.PI * 0.5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#e9d5ff';
+      ctx.beginPath();
+      ctx.moveTo(2, -2);
+      ctx.lineTo(20, 0);
+      ctx.lineTo(2, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'cyber_sniper': {
+      // Высокотехнологичный неоновый рельсотрон
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-8, -4, 22, 8);
+      ctx.strokeRect(-8, -4, 22, 8);
+      ctx.fillStyle = '#22d3ee';
+      ctx.fillRect(-4, -1.5, 18, 3);
+      break;
+    }
+
+    case 'frost_valkyrie': {
+      // Кристальное ледяное копьё Валькирии
+      ctx.fillStyle = '#bae6fd';
+      ctx.beginPath();
+      ctx.moveTo(-6, 0);
+      ctx.lineTo(6, -6);
+      ctx.lineTo(19, 0);
+      ctx.lineTo(6, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'inferno_executioner': {
+      // Раскалённая секира Палача Инферно
+      ctx.fillStyle = '#450a0a';
+      ctx.fillRect(-8, -2, 18, 4);
+      ctx.strokeRect(-8, -2, 18, 4);
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(4, -11);
+      ctx.quadraticCurveTo(16, 0, 4, 11);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'storm_caller': {
+      // Грозовой скипетр с молнией
+      ctx.fillStyle = '#60a5fa';
+      ctx.beginPath();
+      ctx.moveTo(-6, -2);
+      ctx.lineTo(4, -7);
+      ctx.lineTo(2, -1);
+      ctx.lineTo(15, -4);
+      ctx.lineTo(4, 6);
+      ctx.lineTo(6, 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'venom_queen': {
+      // Изумрудный ядовитый скипетр Королевы
+      ctx.fillStyle = '#365314';
+      ctx.fillRect(-8, -2, 16, 4);
+      ctx.strokeRect(-8, -2, 16, 4);
+      ctx.fillStyle = '#a3e635';
+      ctx.beginPath();
+      ctx.arc(10, 0, 5.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'solar_pharaoh': {
+      // Золотой солнечный посох Ра
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(-8, -2, 16, 4);
+      ctx.strokeRect(-8, -2, 16, 4);
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(10, 0, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'void_reaper': {
+      // Коса Чёрной Бездны
+      ctx.fillStyle = '#1e1b4b';
+      ctx.fillRect(-8, -2, 18, 4);
+      ctx.strokeRect(-8, -2, 18, 4);
+      ctx.fillStyle = '#c084fc';
+      ctx.beginPath();
+      ctx.arc(6, 0, 10, -Math.PI * 0.7, Math.PI * 0.4);
+      ctx.quadraticCurveTo(9, 0, 6, -7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'mecha_titan': {
+      // Сдвоенная ракетно-плазменная пушка Меха-Титана
+      ctx.fillStyle = '#3b82f6';
+      ctx.fillRect(-7, -7, 18, 5);
+      ctx.strokeRect(-7, -7, 18, 5);
+      ctx.fillRect(-7, 2, 18, 5);
+      ctx.strokeRect(-7, 2, 18, 5);
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(11, -6, 4, 3);
+      ctx.fillRect(11, 3, 4, 3);
+      break;
+    }
+
+    case 'blood_archduke': {
+      // Багровый королевский клинок Архигерцога
+      ctx.fillStyle = '#f43f5e';
+      ctx.beginPath();
+      ctx.moveTo(-4, -4);
+      ctx.lineTo(19, 0);
+      ctx.lineTo(-4, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(-6, -7, 3, 14);
+      ctx.strokeRect(-6, -7, 3, 14);
+      break;
+    }
+
+    case 'broom_janitor': {
+      // Деревянная метла уборщика
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-9, -1.8, 15, 3.6);
+      ctx.strokeRect(-9, -1.8, 15, 3.6);
+      ctx.fillStyle = '#fde047';
+      ctx.beginPath();
+      ctx.moveTo(6, -5);
+      ctx.lineTo(16, -8);
+      ctx.lineTo(16, 8);
+      ctx.lineTo(6, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'cook_pan': {
+      // Чугунная сковородка поварёнка с глазуньей
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(-10, -2, 9, 4);
+      ctx.strokeRect(-10, -2, 9, 4);
+      ctx.beginPath();
+      ctx.arc(5, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(5, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'gardener_fork': {
+      // Садовые вилы
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-9, -2, 14, 4);
+      ctx.strokeRect(-9, -2, 14, 4);
+      ctx.fillStyle = '#94a3b8';
+      ctx.fillRect(5, -6, 3, 12);
+      ctx.strokeRect(5, -6, 3, 12);
+      ctx.fillRect(8, -5, 8, 2);
+      ctx.fillRect(8, -1, 8, 2);
+      ctx.fillRect(8, 3, 8, 2);
+      break;
+    }
+
+    case 'postman_bag': {
+      // Почтовый конверт с печатью
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(-7, -6, 16, 12);
+      ctx.strokeRect(-7, -6, 16, 12);
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(1, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    case 'miner_pickaxe': {
+      // Стальная кирка шахтёра
+      ctx.fillStyle = '#78350f';
+      ctx.fillRect(-8, -2, 16, 4);
+      ctx.strokeRect(-8, -2, 16, 4);
+      ctx.fillStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.moveTo(6, -10);
+      ctx.quadraticCurveTo(12, 0, 6, 10);
+      ctx.lineTo(3, 8);
+      ctx.quadraticCurveTo(7, 0, 3, -8);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'jester_cards': {
+      // Веер ярких карт шута
+      ctx.fillStyle = '#f43f5e';
+      ctx.fillRect(-4, -7, 12, 9);
+      ctx.strokeRect(-4, -7, 12, 9);
+      ctx.fillStyle = '#facc15';
+      ctx.fillRect(0, -3, 12, 9);
+      ctx.strokeRect(0, -3, 12, 9);
+      break;
+    }
+
+    case 'ice_skater': {
+      // Серебристое лезвие конька
+      ctx.fillStyle = '#e0f2fe';
+      ctx.beginPath();
+      roundRectPath(ctx, -6, -4, 18, 8, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(-4, -1.5, 14, 3);
+      break;
+    }
+
+    case 'bamboo_panda': {
+      // Зелёный стебель бамбука
+      ctx.fillStyle = '#22c55e';
+      ctx.fillRect(-8, -3.5, 22, 7);
+      ctx.strokeRect(-8, -3.5, 22, 7);
+      ctx.beginPath();
+      ctx.moveTo(-1, -3.5);
+      ctx.lineTo(-1, 3.5);
+      ctx.moveTo(7, -3.5);
+      ctx.lineTo(7, 3.5);
+      ctx.stroke();
+      break;
+    }
+
+    case 'alchemist_apprentice': {
+      // Маленькая фиолетовая колба ученика
+      ctx.fillStyle = '#c084fc';
+      ctx.beginPath();
+      ctx.arc(2, 0, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f59e0b';
+      ctx.fillRect(8, -2.5, 4, 5);
+      ctx.strokeRect(8, -2.5, 4, 5);
+      break;
+    }
+
+    case 'emerald_valkyrie': {
+      // Изумрудное копьё Валькирии
+      ctx.fillStyle = '#34d399';
+      ctx.beginPath();
+      ctx.moveTo(-6, 0);
+      ctx.lineTo(5, -6.5);
+      ctx.lineTo(19, 0);
+      ctx.lineTo(5, 6.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+
+    case 'eclipse_ninja': {
+      // Четырёхконечный сюрикен Затмения с золотым ядром
+      ctx.fillStyle = '#4f46e5';
+      ctx.beginPath();
+      for (let i = 0; i < 8; i++) {
+        const rad = i % 2 === 0 ? 10 : 4;
+        const a = (i * Math.PI) / 4;
+        const px = Math.cos(a) * rad;
+        const py = Math.sin(a) * rad;
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    // =========================================================================
+    // ЯЩИК «ЭКСКЛЮЗИВ» ЗА 1000 МОНЕТ (24 БОЙЦА: #107–#130)
+    // =========================================================================
+    case 'chrono_assassin': {
+      // Хроно-клинок в форме стрелки часов с песочными часами на гарде
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(-4, -3);
+      ctx.lineTo(18, 0);
+      ctx.lineTo(-4, 3);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(-5, 0, 4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'lava_berserker': {
+      // Двуручная раскалённая секира с лавовыми прожилками
+      ctx.strokeStyle = '#451a03';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(14, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#ea580c';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(2, -12);
+      ctx.quadraticCurveTo(16, -8, 14, 0);
+      ctx.quadraticCurveTo(16, 8, 2, 12);
+      ctx.lineTo(4, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'electro_spear': {
+      // Громовое копьё с зигзагообразным остриём
+      ctx.strokeStyle = '#1e3a8a';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.moveTo(-14, 0);
+      ctx.lineTo(8, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(6, -5);
+      ctx.lineTo(20, 0);
+      ctx.lineTo(6, 5);
+      ctx.lineTo(9, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'mirror_mage': {
+      // Зеркальная призма в золотой оправе
+      ctx.fillStyle = '#e0f2fe';
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, -10);
+      ctx.lineTo(10, 0);
+      ctx.lineTo(0, 10);
+      ctx.lineTo(-10, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-2, -2, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'plague_doctor': {
+      // Чумное кадило с зелёным дымом на цепи
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(4, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(8, 0, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#a7f3d0';
+      ctx.beginPath();
+      ctx.arc(8, -2, 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'gravity_hammer': {
+      // Гравитационный фиолетовый молот
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(8, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#7c3aed';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(4, -10, 11, 20, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#c4b5fd';
+      ctx.beginPath();
+      ctx.arc(9.5, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'starlight_archer': {
+      // Звёздный лук со светящейся стрелой
+      ctx.strokeStyle = '#6366f1';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.arc(-2, 0, 11, -Math.PI * 0.48, Math.PI * 0.48);
+      ctx.stroke();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-6, 0);
+      ctx.lineTo(15, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(15, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'iron_juggernaut': {
+      // Шипастый стальной таранный щит
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.roundRect(-5, -11, 12, 22, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#94a3b8';
+      for (const sy of [-6, 0, 6]) {
+        ctx.beginPath();
+        ctx.moveTo(7, sy - 2.5);
+        ctx.lineTo(14, sy);
+        ctx.lineTo(7, sy + 2.5);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'crimson_duelist': {
+      // Алая рапира с чашеобразной золотой гардой
+      ctx.fillStyle = '#e11d48';
+      ctx.beginPath();
+      ctx.arc(-4, 0, 5, -Math.PI * 0.5, Math.PI * 0.5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = '#fda4af';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(1, 0);
+      ctx.lineTo(22, 0);
+      ctx.stroke();
+      break;
+    }
+    case 'frost_shaman': {
+      // Посох вечной мерзлоты с ледяным кристаллом
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 2.8;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(8, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(8, -7);
+      ctx.lineTo(17, 0);
+      ctx.lineTo(8, 7);
+      ctx.lineTo(4, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'astral_monk': {
+      // Астральные золотые чакры-сферы
+      ctx.fillStyle = '#c084fc';
+      ctx.beginPath();
+      ctx.arc(4, -5, 4.5, 0, Math.PI * 2);
+      ctx.arc(8, 4, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'cyber_valkyrie': {
+      // Неоновое плазменное копьё Валькирии
+      ctx.strokeStyle = '#0f172a';
+      ctx.lineWidth = 2.8;
+      ctx.beginPath();
+      ctx.moveTo(-14, 0);
+      ctx.lineTo(6, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#f43f5e';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(4, -6);
+      ctx.lineTo(21, 0);
+      ctx.lineTo(4, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'magma_behemoth': {
+      // Огромный кулак из магмы и базальта
+      ctx.fillStyle = '#dc2626';
+      ctx.beginPath();
+      ctx.roundRect(-5, -9, 14, 18, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.arc(3, 0, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'shadow_emperor': {
+      // Скипетр Императора Теней с тёмным кристаллом
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(8, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#581c87';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(11, 0, 6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#e879f9';
+      ctx.beginPath();
+      ctx.arc(11, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'crystal_archon': {
+      // Парящий радужный кристалл Архонта
+      ctx.fillStyle = '#ec4899';
+      ctx.beginPath();
+      ctx.moveTo(-4, 0);
+      ctx.lineTo(5, -9);
+      ctx.lineTo(16, 0);
+      ctx.lineTo(5, 9);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'tempest_djinn': {
+      //Золотая волшебная лампа бури с вихрем
+      ctx.fillStyle = '#eab308';
+      ctx.beginPath();
+      ctx.ellipse(2, 2, 8, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(11, -3, 4.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'necro_alchemist': {
+      // Колба с бурлящим некро-эликсиром
+      ctx.fillStyle = '#84cc16';
+      ctx.beginPath();
+      ctx.arc(4, 2, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillRect(1, -8, 6, 4);
+      ctx.strokeRect(1, -8, 6, 4);
+      break;
+    }
+    case 'celestial_phoenix': {
+      // Пылающее крыло-клинок Небесного Феникса
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.moveTo(-6, 4);
+      ctx.quadraticCurveTo(6, -12, 20, -2);
+      ctx.quadraticCurveTo(10, 6, -6, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(4, -1, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'abyss_leviathan': {
+      // Трезубец глубин Левиафана
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 2.8;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(16, 0);
+      ctx.moveTo(7, -7);
+      ctx.lineTo(15, -5);
+      ctx.moveTo(7, 7);
+      ctx.lineTo(15, 5);
+      ctx.stroke();
+      break;
+    }
+    case 'omega_prime': {
+      // Двухствольная омега-пушка аннигиляции
+      ctx.fillStyle = '#334155';
+      ctx.fillRect(-6, -7, 18, 14);
+      ctx.strokeRect(-6, -7, 18, 14);
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(12, -3.5, 2.5, 0, Math.PI * 2);
+      ctx.arc(12, 3.5, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'valkyrie_queen': {
+      // Королевский золотой меч-копьё Зари
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.moveTo(-6, -5);
+      ctx.lineTo(21, 0);
+      ctx.lineTo(-6, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(-2, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'chaos_overlord': {
+      // Двуручный зазубренный клинок Хаоса
+      ctx.fillStyle = '#991b1b';
+      ctx.beginPath();
+      ctx.moveTo(-6, -6);
+      ctx.lineTo(20, 0);
+      ctx.lineTo(-6, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#a855f7';
+      ctx.beginPath();
+      ctx.arc(2, 0, 3.2, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'galactic_lightning': {
+      // Галактический зигзаг-молния в руке бойца «Молния»
+      ctx.fillStyle = '#facc15';
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-8, -4);
+      ctx.lineTo(4, -9);
+      ctx.lineTo(1, -2);
+      ctx.lineTo(19, -5);
+      ctx.lineTo(4, 8);
+      ctx.lineTo(7, 1);
+      ctx.lineTo(-8, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'skeleton_king': {
+      // Проклятый двуручный костяной меч Короля скелетов с черепом на гарде
+      ctx.fillStyle = '#f5f5f4';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-4, -5);
+      ctx.lineTo(23, 0);
+      ctx.lineTo(-4, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      // Изумрудная руна на лезвии
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(14, 0);
+      ctx.stroke();
+      // Золотая гарда с черепом
+      ctx.fillStyle = '#eab308';
+      ctx.strokeStyle = '#1c1a17';
+      ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.arc(-5, 0, 5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#10b981';
+      ctx.beginPath();
+      ctx.arc(-5, 0, 2, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+
+    // =========================================================================
+    // ЯЩИК ЗА 35 МОНЕТ (20 БОЙЦОВ: #131–#150)
+    // =========================================================================
+    case 'baker_pin': {
+      // Деревянная скалка Пекаря
+      ctx.fillStyle = '#d97706';
+      ctx.beginPath();
+      ctx.roundRect(-8, -4, 20, 8, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#92400e';
+      ctx.fillRect(-13, -2, 5, 4);
+      ctx.fillRect(12, -2, 5, 4);
+      break;
+    }
+    case 'fisherman_rod': {
+      // Удочка Рыбака с крючком
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-10, 2);
+      ctx.lineTo(15, -5);
+      ctx.stroke();
+      ctx.strokeStyle = '#94a3b8';
+      ctx.lineWidth = 1.6;
+      ctx.beginPath();
+      ctx.moveTo(15, -5);
+      ctx.lineTo(15, 5);
+      ctx.arc(13, 5, 2, 0, Math.PI);
+      ctx.stroke();
+      break;
+    }
+    case 'carpenter_saw': {
+      // Зубчатая ножовка Плотника
+      ctx.fillStyle = '#cbd5e1';
+      ctx.beginPath();
+      ctx.moveTo(-4, -5);
+      ctx.lineTo(16, -3);
+      ctx.lineTo(16, 4);
+      ctx.lineTo(-4, 5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#b45309';
+      ctx.fillRect(-10, -5, 6, 10);
+      ctx.strokeRect(-10, -5, 6, 10);
+      break;
+    }
+    case 'tailor_scissors': {
+      // Острые портновские ножницы
+      ctx.strokeStyle = '#64748b';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-4, -4);
+      ctx.lineTo(15, 4);
+      ctx.moveTo(-4, 4);
+      ctx.lineTo(15, -4);
+      ctx.stroke();
+      ctx.strokeStyle = '#eab308';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(-7, -4, 3.5, 0, Math.PI * 2);
+      ctx.arc(-7, 4, 3.5, 0, Math.PI * 2);
+      ctx.stroke();
+      break;
+    }
+    case 'lantern_watchman': {
+      // Кованый фонарь Ночного сторожа
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.roundRect(-2, -6, 12, 12, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(4, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'shepherd_crook': {
+      // Изогнутый посох Пастуха
+      ctx.strokeStyle = '#92400e';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(8, 0);
+      ctx.arc(8, -4, 4, Math.PI * 0.5, -Math.PI * 0.8, true);
+      ctx.stroke();
+      break;
+    }
+    case 'potter_jug': {
+      // Глиняный кувшин Гончара
+      ctx.fillStyle = '#c2410c';
+      ctx.beginPath();
+      ctx.arc(4, 0, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#9a3412';
+      ctx.fillRect(1, -9, 6, 4);
+      ctx.strokeRect(1, -9, 6, 4);
+      break;
+    }
+    case 'chimney_sweep': {
+      // Круглая щётка Трубочиста на шесте
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(8, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath();
+      ctx.arc(10, 0, 6.5, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'drummer_boy': {
+      // Походный барабан с палочками
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.roundRect(-3, -7, 12, 14, 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = '#fef08a';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(-3, -6);
+      ctx.lineTo(9, 6);
+      ctx.moveTo(9, -6);
+      ctx.lineTo(-3, 6);
+      ctx.stroke();
+      break;
+    }
+    case 'bell_ringer': {
+      // Бронзовый колокол Звонаря
+      ctx.fillStyle = '#ca8a04';
+      ctx.beginPath();
+      ctx.moveTo(-2, -6);
+      ctx.lineTo(11, -9);
+      ctx.lineTo(11, 9);
+      ctx.lineTo(-2, 6);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#fef08a';
+      ctx.beginPath();
+      ctx.arc(12, 0, 2.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'falconer_hawk': {
+      // Перчатка Сокольничего с когтями ястреба
+      ctx.fillStyle = '#78350f';
+      ctx.beginPath();
+      ctx.roundRect(-4, -6, 12, 12, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f59e0b';
+      ctx.beginPath();
+      ctx.moveTo(8, -4);
+      ctx.lineTo(16, 0);
+      ctx.lineTo(8, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'alchemist_bomb': {
+      // Круглая бомба-колба Подрывника с фитилём
+      ctx.fillStyle = '#334155';
+      ctx.beginPath();
+      ctx.arc(4, 1, 7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#f97316';
+      ctx.beginPath();
+      ctx.arc(10, -6, 3, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'gladiator_net': {
+      // Трезубец и ловчая сеть Ретиария
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(-10, 0);
+      ctx.lineTo(15, 0);
+      ctx.moveTo(9, -5);
+      ctx.lineTo(15, -4);
+      ctx.moveTo(9, 5);
+      ctx.lineTo(15, 4);
+      ctx.stroke();
+      break;
+    }
+    case 'glacier_pikeman': {
+      // Длинная ледяная пика
+      ctx.strokeStyle = '#475569';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.moveTo(-14, 0);
+      ctx.lineTo(6, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.moveTo(5, -4);
+      ctx.lineTo(20, 0);
+      ctx.lineTo(5, 4);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'desert_dervish': {
+      // Изогнутый золотой ятаган Дервиша
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath();
+      ctx.moveTo(-4, 2);
+      ctx.quadraticCurveTo(8, -8, 18, -2);
+      ctx.quadraticCurveTo(9, 6, -4, 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'arcane_arbalester': {
+      // Рунический арбалет с фиолетовым кристаллом
+      ctx.fillStyle = '#6d28d9';
+      ctx.fillRect(-6, -3, 16, 6);
+      ctx.strokeRect(-6, -3, 16, 6);
+      ctx.strokeStyle = '#c084fc';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(6, -10);
+      ctx.lineTo(11, 0);
+      ctx.lineTo(6, 10);
+      ctx.stroke();
+      break;
+    }
+    case 'blood_samurai': {
+      // Багровая катана Кровавого ронина
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.moveTo(-4, -2.5);
+      ctx.lineTo(20, 0);
+      ctx.lineTo(-4, 2.5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#1c1a17';
+      ctx.fillRect(-11, -2, 7, 4);
+      break;
+    }
+    case 'thunder_golem': {
+      // Громовой каменный кулак с молнией
+      ctx.fillStyle = '#475569';
+      ctx.beginPath();
+      ctx.roundRect(-4, -8, 13, 16, 3);
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.beginPath();
+      ctx.arc(3, 0, 3.5, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'toxic_arachnid': {
+      // Ядовитые зелёные жвалы Вдовы
+      ctx.fillStyle = '#22c55e';
+      ctx.beginPath();
+      ctx.moveTo(-2, -6);
+      ctx.lineTo(14, -2);
+      ctx.lineTo(-2, -1);
+      ctx.moveTo(-2, 6);
+      ctx.lineTo(14, 2);
+      ctx.lineTo(-2, 1);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
+    case 'sun_paladin': {
+      // Солнечный молот Паладина Света
+      ctx.strokeStyle = '#78350f';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(-12, 0);
+      ctx.lineTo(7, 0);
+      ctx.stroke();
+      ctx.fillStyle = '#facc15';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.roundRect(4, -9, 10, 18, 2);
+      ctx.fill();
+      ctx.stroke();
+      break;
+    }
   }
 
   ctx.restore();
@@ -2767,6 +5198,134 @@ function drawSkyGuardianDetails(ctx, x, y, radius, timeSec = 0) {
     else ctx.lineTo(Math.cos(a) * r, Math.sin(a) * r);
   }
   ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// Отрисовка галактических дуг молний, электрической короны и символа грозы для бойца «Молния» (3 слота)
+function drawGalacticLightningDetails(ctx, x, y, radius, timeSec = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Вращающееся кольцо галактической плазмы вокруг тела
+  ctx.strokeStyle = 'rgba(56, 189, 248, 0.75)';
+  ctx.lineWidth = 2.2;
+  ctx.setLineDash([5, 4]);
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 1.18, timeSec * 3, timeSec * 3 + Math.PI * 2);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Электрические рога-молнии по бокам шлема
+  for (const side of [-1, 1]) {
+    ctx.save();
+    ctx.scale(side, 1);
+    ctx.fillStyle = '#facc15';
+    ctx.strokeStyle = '#1c1a17';
+    ctx.lineWidth = 1.8;
+    ctx.beginPath();
+    ctx.moveTo(radius * 0.55, -radius * 0.45);
+    ctx.lineTo(radius * 1.35, -radius * 0.95);
+    ctx.lineTo(radius * 1.02, -radius * 0.35);
+    ctx.lineTo(radius * 1.48, -radius * 0.52);
+    ctx.lineTo(radius * 0.72, radius * 0.08);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // Яркая эмблема молнии в центре груди
+  ctx.fillStyle = '#fef08a';
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(radius * 0.12, -radius * 0.55);
+  ctx.lineTo(-radius * 0.32, radius * 0.05);
+  ctx.lineTo(radius * 0.04, radius * 0.05);
+  ctx.lineTo(-radius * 0.14, radius * 0.58);
+  ctx.lineTo(radius * 0.34, -radius * 0.06);
+  ctx.lineTo(0, -radius * 0.06);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+// Отрисовка королевской мантии, черепа с горящими глазами и проклятой золотой короны «Короля скелетов» (3 слота)
+function drawSkeletonKingDetails(ctx, x, y, radius, timeSec = 0) {
+  ctx.save();
+  ctx.translate(x, y);
+
+  // Тёмно-пурпурная королевская мантия позади плеч с золотой каймой
+  ctx.fillStyle = '#4c1d95';
+  ctx.strokeStyle = '#eab308';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(0, radius * 0.12, radius * 1.15, Math.PI * 0.15, Math.PI * 0.85);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Глазницы черепа с призрачно-изумрудным свечением некроманта
+  for (const side of [-1, 1]) {
+    const ex = side * radius * 0.34;
+    const ey = -radius * 0.12;
+    ctx.fillStyle = '#1c1a17';
+    ctx.beginPath();
+    ctx.arc(ex, ey, radius * 0.22, 0, Math.PI * 2);
+    ctx.fill();
+
+    const pulse = 0.75 + Math.sin(timeSec * 6) * 0.25;
+    ctx.fillStyle = `rgba(16, 185, 129, ${pulse})`;
+    ctx.beginPath();
+    ctx.arc(ex, ey, radius * 0.11, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Треугольная носовая впадина и зубастый оскал черепа
+  ctx.fillStyle = '#1c1a17';
+  ctx.beginPath();
+  ctx.moveTo(0, radius * 0.02);
+  ctx.lineTo(-radius * 0.1, radius * 0.2);
+  ctx.lineTo(radius * 0.1, radius * 0.2);
+  ctx.closePath();
+  ctx.fill();
+
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 1.8;
+  ctx.beginPath();
+  ctx.moveTo(-radius * 0.38, radius * 0.42);
+  ctx.lineTo(radius * 0.38, radius * 0.42);
+  for (const tx of [-0.24, -0.08, 0.08, 0.24]) {
+    ctx.moveTo(radius * tx, radius * 0.32);
+    ctx.lineTo(radius * tx, radius * 0.52);
+  }
+  ctx.stroke();
+
+  // Проклятая зубчатая золотая корона на голове с кристаллом душ
+  ctx.fillStyle = '#facc15';
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(-radius * 0.65, -radius * 0.62);
+  ctx.lineTo(-radius * 0.72, -radius * 1.18);
+  ctx.lineTo(-radius * 0.32, -radius * 0.88);
+  ctx.lineTo(0, -radius * 1.32);
+  ctx.lineTo(radius * 0.32, -radius * 0.88);
+  ctx.lineTo(radius * 0.72, -radius * 1.18);
+  ctx.lineTo(radius * 0.65, -radius * 0.62);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Изумрудный камень душ в центре короны
+  ctx.fillStyle = '#10b981';
+  ctx.beginPath();
+  ctx.arc(0, -radius * 0.88, radius * 0.14, 0, Math.PI * 2);
   ctx.fill();
   ctx.stroke();
 
@@ -3080,6 +5639,12 @@ function renderFighterThumbnail(canvas, unitOrClass, team = 'player', showDualIc
   if (classId === 'sky_guardian' || abilityId === 'sky_guardian') {
     drawSkyGuardianDetails(ctx, cx, cy, r, 0);
   }
+  if (classId === 'galactic_lightning' || abilityId === 'galactic_lightning') {
+    drawGalacticLightningDetails(ctx, cx, cy, r, 0);
+  }
+  if (classId === 'skeleton_king' || abilityId === 'skeleton_king') {
+    drawSkeletonKingDetails(ctx, cx, cy, r, 0);
+  }
   if (classId === 'vampire' || abilityId === 'vampire') {
     drawVampireFangs(ctx, cx, cy, r, 0);
   }
@@ -3093,7 +5658,7 @@ function renderFighterThumbnail(canvas, unitOrClass, team = 'player', showDualIc
   const wx = cx + r * 1.35;
   const wy = cy + 1;
   let angle = -Math.PI / 4;
-  if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'zombie', 'werewolf', 'death', 'fairy', 'musician', 'sky_guardian'].includes(abilityId)) angle = 0;
+  if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'zombie', 'werewolf', 'death', 'fairy', 'musician', 'sky_guardian', 'galactic_lightning', 'skeleton_king'].includes(abilityId)) angle = 0;
   if (abilityId === 'spearman') angle = -Math.PI / 5;
 
   drawWeaponGraphic(ctx, abilityId, wx, wy, 0.85, angle, team);
@@ -3102,3 +5667,4 @@ function renderFighterThumbnail(canvas, unitOrClass, team = 'player', showDualIc
     drawWeaponGraphic(ctx, abilityId, wx + 22, wy + 2, 0.75, -Math.PI / 4, team);
   }
 }
+

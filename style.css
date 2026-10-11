@@ -1927,6 +1927,62 @@ button,
   color: #ffffff;
 }
 
+.crate-500-center {
+  background: linear-gradient(180deg, #fff1f2 0%, #ffe4e6 100%);
+}
+
+.open-crate-500-btn {
+  background: #fb7185;
+  color: #1c1a17;
+}
+
+.open-crate-500-btn:hover:not(:disabled) {
+  background: #e11d48;
+  color: #ffffff;
+}
+
+.mini-crate-20-center {
+  background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
+}
+
+.open-mini-crate-20-btn {
+  background: #34d399;
+  color: #1c1a17;
+}
+
+.open-mini-crate-20-btn:hover:not(:disabled) {
+  background: #059669;
+  color: #ffffff;
+}
+
+.exclusive-crate-center {
+  background: linear-gradient(180deg, #eef2ff 0%, #e0e7ff 50%, #fae8ff 100%);
+}
+
+.open-exclusive-crate-btn {
+  background: linear-gradient(90deg, #6366f1 0%, #a855f7 100%);
+  color: #ffffff;
+}
+
+.open-exclusive-crate-btn:hover:not(:disabled) {
+  background: linear-gradient(90deg, #4f46e5 0%, #9333ea 100%);
+  color: #ffffff;
+}
+
+.crate-35-center {
+  background: linear-gradient(180deg, #fffbeb 0%, #fef3c7 100%);
+}
+
+.open-crate-35-btn {
+  background: #fbbf24;
+  color: #1c1a17;
+}
+
+.open-crate-35-btn:hover:not(:disabled) {
+  background: #d97706;
+  color: #ffffff;
+}
+
 .shop-shelf-view {
   flex: 1;
   min-height: 0;
@@ -2420,6 +2476,39 @@ button,
   gap: 6px;
   background: #fffdf7;
   flex-shrink: 0;
+}
+
+.hub-level-selector-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.hub-lvl-nav-btn {
+  padding: 5px 12px;
+  background: #f3efe4;
+  border: 2.5px solid var(--ink);
+  border-radius: 10px;
+  font-family: 'Pangolin', 'Nunito', sans-serif;
+  font-size: 14px;
+  font-weight: 900;
+  color: var(--ink);
+  box-shadow: 0 3px 0 var(--ink);
+  cursor: pointer;
+}
+
+.hub-lvl-nav-btn:hover:not(:disabled) {
+  background: #fde047;
+  transform: translateY(-1px);
+}
+
+.hub-lvl-nav-btn:disabled {
+  background: #d6d1c4;
+  color: #6e685f;
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 .hub-level-badge {

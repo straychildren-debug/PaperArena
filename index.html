@@ -16,11 +16,11 @@
     <div class="paper-screen-card main-menu-card paper-card">
       <div class="menu-top-coins">
         <button id="menuMusicToggleBtn" class="secondary-top-btn music-toggle-btn" type="button" title="Отключить / включить только фоновую музыку">🎵 Музыка: ВКЛ</button>
-        <span class="coin-pill">🪙 Монеты: <strong id="menuCoinsVal">100</strong></span>
+        <span class="coin-pill">🪙 Монеты: <strong id="menuCoinsVal">20</strong></span>
       </div>
 
       <div class="menu-hero-header">
-        <div class="menu-badge-tag">БУМАЖНАЯ БИТВА • 73 БОЙЦА</div>
+        <div class="menu-badge-tag">БУМАЖНАЯ БИТВА • 150 БОЙЦОВ</div>
         <h1 class="menu-main-title">BATTLE ROYAL PAPER</h1>
         <p class="menu-subtitle">Открывай бойцов по редкости из ящика, прокачивай здоровье и урон и проходи уровни!</p>
       </div>
@@ -41,7 +41,7 @@
         <button id="menuShopBtn" class="big-menu-btn shop-menu-btn" type="button">
           <span class="btn-emoji">📦</span>
           <span class="btn-label">МАГАЗИН</span>
-          <small class="btn-sub">Контейнер • 1 000 🪙 | Бокс • 50 🪙 | Стражник • 50 000 🪙</small>
+          <small class="btn-sub">Ящики: 20 🪙 | 35 🪙 | 50 🪙 | 500 🪙 | 1 000 🪙 | Эксклюзив 1 000 🪙</small>
         </button>
 
         <button id="menuPlayBtn" class="big-menu-btn play-menu-btn" type="button">
@@ -57,29 +57,41 @@
     </div>
   </div>
 
-  <!-- ==================== 2. МАГАЗИН (2 ВКЛАДКИ: КОНТЕЙНЕР БОЙЦОВ + СТРАЖНИК НЕБЕС | БОКС БОЙЦОВ) ==================== -->
+  <!-- ==================== 2. МАГАЗИН (6 ВКЛАДОК: КОНТЕЙНЕР + СТРАЖНИК | ЭКСКЛЮЗИВ 1000 | ЯЩИК 500 | БОКС 50 | ЯЩИК 35 | МАЛЕНЬКИЙ ЯЩИК 20) ==================== -->
   <div id="shopScreen" class="screen-view hidden">
     <div class="paper-screen-card shop-screen-card paper-card">
       <div class="screen-top-bar">
         <button id="shopBackBtn" class="back-nav-btn" type="button">← В МЕНЮ</button>
         <h2 class="screen-title">✨ НЕБЕСНАЯ ЛАВКА И МАГАЗИН ✨</h2>
-        <div class="coin-pill">🪙 <strong id="shopCoinsVal">100</strong></div>
+        <div class="coin-pill">🪙 <strong id="shopCoinsVal">20</strong></div>
       </div>
 
-      <!-- Вкладки магазина: «Контейнер бойцов» и новая вкладка «Бокс бойцов» -->
+      <!-- Вкладки магазина -->
       <div class="shop-tabs-bar">
         <button id="shopTabContainerBtn" class="shop-tab-btn active-shop-tab" type="button">
-          📦 КОНТЕЙНЕР БОЙЦОВ (1 000 🪙) И СТРАЖНИК НЕБЕС
+          📦 КОНТЕЙНЕР (1 000 🪙) И СТРАЖНИК
+        </button>
+        <button id="shopTabExclusiveBtn" class="shop-tab-btn" type="button">
+          🌌 ЭКСКЛЮЗИВ (1 000 🪙 • 24 БОЙЦА)
         </button>
         <button id="shopTabFighterBoxBtn" class="shop-tab-btn" type="button">
-          🎁 БОКС БОЙЦОВ (50 🪙 • 16 НОВЫХ БОЙЦОВ)
+          🎁 БОКС БОЙЦОВ (50 🪙 • 16 БОЙЦОВ)
+        </button>
+        <button id="shopTabCrate500Btn" class="shop-tab-btn" type="button">
+          💎 ЯЩИК ЗА 500 🪙 (22 НОВЫХ БОЙЦА)
+        </button>
+        <button id="shopTabCrate35Btn" class="shop-tab-btn" type="button">
+          🎒 ЯЩИК ЗА 35 🪙 (20 НОВЫХ БОЙЦОВ)
+        </button>
+        <button id="shopTabMiniCrate20Btn" class="shop-tab-btn" type="button">
+          🧰 МАЛЕНЬКИЙ ЯЩИК (20 🪙 • 11 НОВЫХ)
         </button>
       </div>
 
       <!-- ВКЛАДКА 1: Контейнер бойцов и рядом с ним стоит Стражник небес (50 000 монет)! -->
       <div id="shopShelfView" class="shop-shelf-view">
         <div class="shop-awning-banner">
-          <span>🏮 ДОБРО ПОЖАЛОВАТЬ В МАГАЗИН АРЕНЫ! ВЫБЕРИТЕ КОНТЕЙНЕР БОЙЦОВ, БОКС БОЙЦОВ ИЛИ ЛЕГЕНДУ НЕБЕС 🏮</span>
+          <span>🏮 ДОБРО ПОЖАЛОВАТЬ В МАГАЗИН АРЕНЫ! ВЫБЕРИТЕ ЯЩИК ИЛИ ЛЕГЕНДУ НЕБЕС • ПОВТОРКА ДАЁТ +10 HP И +10 УРОНА! 🏮</span>
         </div>
 
         <div class="shop-showcase-row">
@@ -91,7 +103,7 @@
               <span class="crate-sparkles">✨ 55 БОЙЦОВ ВНУТРИ ✨</span>
             </div>
             <h3 class="crate-title">КОНТЕЙНЕР БОЙЦОВ</h3>
-            <p class="crate-desc">Содержит основных персонажей всех 5 редкостей, кроме стартового Мечника! Повторка авто-продаётся за +20 🪙</p>
+            <p class="crate-desc">Содержит основных персонажей всех 5 редкостей, кроме стартового Мечника! Повторка даёт +10 ❤️ здоровья и +10 ⚔️ урона бойцу!</p>
             <div class="crate-price-badge">🔓 НАЖМИТЕ, ЧТОБЫ ОТКРЫТЬ • 1 000 🪙</div>
           </button>
 
@@ -148,7 +160,7 @@
           <button id="openCrate100Btn" class="open-crate-center-btn" type="button">
             🔓 ОТКРЫТЬ КОНТЕЙНЕР ЗА 1 000 МОНЕТ 🪙
           </button>
-          <div id="crateOpenStatusMsg" class="crate-status-msg">Чем выше редкость, тем меньше шанс выпадения! Если выпадает повторка — она автоматически продаётся за +20 🪙!</div>
+          <div id="crateOpenStatusMsg" class="crate-status-msg">Чем выше редкость, тем меньше шанс выпадения! Если выпадает повторка — боец получает +10 к здоровью и +10 к урону!</div>
         </div>
 
         <!-- Снизу: редкость персонажей и сами персонажи в контейнере -->
@@ -158,7 +170,7 @@
         </div>
       </div>
 
-      <!-- ВКЛАДКА 2: НОВАЯ ВКЛАДКА «БОКС БОЙЦОВ» (5 НОВЫХ СЛАБЫХ ОБЫЧНЫХ БЕЗ СПОСОБНОСТЕЙ, 5 НОВЫХ РЕДКИХ, 6 НОВЫХ ЭПИЧЕСКИХ) -->
+      <!-- ВКЛАДКА 2: «БОКС БОЙЦОВ» (50 МОНЕТ) -->
       <div id="fighterBoxTabView" class="crate-picture-view hidden">
         <div class="crate-picture-center fighter-box-center paper-inner-card">
           <div class="crate-center-header">
@@ -180,13 +192,141 @@
             🔓 ОТКРЫТЬ БОКС БОЙЦОВ ЗА 50 МОНЕТ 🪙
           </button>
           <div id="fighterBoxStatusMsg" class="crate-status-msg">
-            В Боксе бойцов находятся 16 особых персонажей: 5 очень слабых обычных (без способностей), 5 новых редких и 6 новых эпических! Повторка продаётся за +20 🪙.
+            В Боксе бойцов находятся 16 особых персонажей: 5 обычных (без способностей), 5 редких и 6 эпических! Повторка даёт +10 ❤️ HP и +10 ⚔️ урона бойцу.
           </div>
         </div>
 
         <div class="crate-rarities-bottom">
           <div class="crate-rarities-title">СОДЕРЖИМОЕ «БОКСА БОЙЦОВ» (16 ЭКСКЛЮЗИВНЫХ БОЙЦОВ: 5 ОБЫЧНЫХ, 5 РЕДКИХ, 6 ЭПИЧЕСКИХ):</div>
           <div id="fighterBoxRaritiesList" class="crate-rarities-list"></div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 3: НОВЫЙ ЯЩИК ЗА 500 МОНЕТ (12 РЕДКИХ, 6 ЭПИЧЕСКИХ, 4 МИФИЧЕСКИХ) -->
+      <div id="crate500TabView" class="crate-picture-view hidden">
+        <div class="crate-picture-center crate-500-center paper-inner-card">
+          <div class="crate-center-header">
+            <button id="crate500BackToShelfBtn" class="mini-back-link" type="button">← К Контейнеру и Стражнику</button>
+            <span class="crate-center-title">💎 ЯЩИК ЗА 500 🪙 (12 НОВЫХ РЕДКИХ • 6 ЭПИЧЕСКИХ • 4 МИФИЧЕСКИХ)</span>
+          </div>
+
+          <div class="crate-center-visual">
+            <div class="crate-box-illustration" id="crate500Illustration">💎</div>
+            <div id="crate500UnboxedResult" class="crate-unboxed-result hidden">
+              <div class="unboxed-header" id="crate500UnboxedHeader">🎉 ВАМ ВЫПАЛ БОЕЦ ИЗ ЯЩИКА 500!</div>
+              <canvas id="crate500UnboxedCanvas" width="96" height="72"></canvas>
+              <div id="crate500UnboxedName" class="unboxed-name">СОЛНЕЧНЫЙ ФАРАОН</div>
+              <div id="crate500UnboxedRarity" class="unboxed-rarity-badge">Мифическая</div>
+            </div>
+          </div>
+
+          <button id="openCrate500Btn" class="open-crate-center-btn open-crate-500-btn" type="button">
+            🔓 ОТКРЫТЬ ЯЩИК ЗА 500 МОНЕТ 🪙
+          </button>
+          <div id="crate500StatusMsg" class="crate-status-msg">
+            В этом элитном ящике за 500 🪙 вас ждут 22 новых бойца: 12 редких, 6 эпических и 4 могущественных мифических! Повторка даёт +10 ❤️ HP и +10 ⚔️ урона бойцу.
+          </div>
+        </div>
+
+        <div class="crate-rarities-bottom">
+          <div class="crate-rarities-title">СОДЕРЖИМОЕ ЯЩИКА ЗА 500 🪙 (22 НОВЫХ БОЙЦА: 12 РЕДКИХ, 6 ЭПИЧЕСКИХ, 4 МИФИЧЕСКИХ):</div>
+          <div id="crate500RaritiesList" class="crate-rarities-list"></div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 4: НОВЫЙ МАЛЕНЬКИЙ ЯЩИК ЗА 20 МОНЕТ (5 ОБЫЧНЫХ, 4 РЕДКИХ, 2 ЭПИЧЕСКИХ С МАЛЫМ ШАНСОМ) -->
+      <div id="miniCrate20TabView" class="crate-picture-view hidden">
+        <div class="crate-picture-center mini-crate-20-center paper-inner-card">
+          <div class="crate-center-header">
+            <button id="miniCrate20BackToShelfBtn" class="mini-back-link" type="button">← К Контейнеру и Стражнику</button>
+            <span class="crate-center-title">🧰 МАЛЕНЬКИЙ ЯЩИК ЗА 20 🪙 (5 ОБЫЧНЫХ • 4 РЕДКИХ • 2 ЭПИЧЕСКИХ)</span>
+          </div>
+
+          <div class="crate-center-visual">
+            <div class="crate-box-illustration" id="miniCrate20Illustration">🧰</div>
+            <div id="miniCrate20UnboxedResult" class="crate-unboxed-result hidden">
+              <div class="unboxed-header" id="miniCrate20UnboxedHeader">🎉 ВАМ ВЫПАЛ БОЕЦ ИЗ МАЛЕНЬКОГО ЯЩИКА!</div>
+              <canvas id="miniCrate20UnboxedCanvas" width="96" height="72"></canvas>
+              <div id="miniCrate20UnboxedName" class="unboxed-name">УБОРЩИК С МЕТЛОЙ</div>
+              <div id="miniCrate20UnboxedRarity" class="unboxed-rarity-badge">Обычная</div>
+            </div>
+          </div>
+
+          <button id="openMiniCrate20Btn" class="open-crate-center-btn open-mini-crate-20-btn" type="button">
+            🔓 ОТКРЫТЬ МАЛЕНЬКИЙ ЯЩИК ЗА 20 МОНЕТ 🪙
+          </button>
+          <div id="miniCrate20StatusMsg" class="crate-status-msg">
+            Доступный маленький ящик всего за 20 🪙! Содержит 5 новых обычных, 4 новых редких и 2 редчайших эпических бойца (маленький шанс на эпик — 3%)! Повторка даёт +10 ❤️ HP и +10 ⚔️ урона бойцу.
+          </div>
+        </div>
+
+        <div class="crate-rarities-bottom">
+          <div class="crate-rarities-title">СОДЕРЖИМОЕ МАЛЕНЬКОГО ЯЩИКА ЗА 20 🪙 (11 НОВЫХ БОЙЦОВ: 5 ОБЫЧНЫХ, 4 РЕДКИХ, 2 ЭПИЧЕСКИХ):</div>
+          <div id="miniCrate20RaritiesList" class="crate-rarities-list"></div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 5: ЯЩИК «ЭКСКЛЮЗИВ» ЗА 1 000 МОНЕТ (10 ЭПИЧЕСКИХ, 7 МИФИЧЕСКИХ, 5 ЛЕГЕНДАРНЫХ, 2 ГАЛАКТИЧЕСКИХ) -->
+      <div id="exclusiveCrateTabView" class="crate-picture-view hidden">
+        <div class="crate-picture-center exclusive-crate-center paper-inner-card">
+          <div class="crate-center-header">
+            <button id="exclusiveCrateBackToShelfBtn" class="mini-back-link" type="button">← К Контейнеру и Стражнику</button>
+            <span class="crate-center-title">🌌 ЯЩИК «ЭКСКЛЮЗИВ» ЗА 1 000 🪙 (10 ЭПИЧЕСКИХ • 7 МИФИЧЕСКИХ • 5 ЛЕГЕНДАРНЫХ • 2 ГАЛАКТИЧЕСКИХ)</span>
+          </div>
+
+          <div class="crate-center-visual">
+            <div class="crate-box-illustration" id="exclusiveCrateIllustration">🌌</div>
+            <div id="exclusiveCrateUnboxedResult" class="crate-unboxed-result hidden">
+              <div class="unboxed-header" id="exclusiveCrateUnboxedHeader">🎉 ВАМ ВЫПАЛ БОЕЦ ИЗ «ЭКСКЛЮЗИВА»!</div>
+              <canvas id="exclusiveCrateUnboxedCanvas" width="96" height="72"></canvas>
+              <div id="exclusiveCrateUnboxedName" class="unboxed-name">МОЛНИЯ</div>
+              <div id="exclusiveCrateUnboxedRarity" class="unboxed-rarity-badge">Галактическая</div>
+            </div>
+          </div>
+
+          <button id="openExclusiveCrate1000Btn" class="open-crate-center-btn open-exclusive-crate-btn" type="button">
+            🔓 ОТКРЫТЬ «ЭКСКЛЮЗИВ» ЗА 1 000 МОНЕТ 🪙
+          </button>
+          <div id="exclusiveCrateStatusMsg" class="crate-status-msg">
+            Уникальный ящик «Эксклюзив» за 1 000 🪙! Содержит 24 новых элитных бойца, включая 2 Галактических титана на 3 слота — ⚡ Молнию и 💀 Короля скелетов! Повторка даёт +10 ❤️ HP и +10 ⚔️ урона.
+          </div>
+        </div>
+
+        <div class="crate-rarities-bottom">
+          <div class="crate-rarities-title">СОДЕРЖИМОЕ ЯЩИКА «ЭКСКЛЮЗИВ» (24 НОВЫХ БОЙЦА: 10 ЭПИЧЕСКИХ, 7 МИФИЧЕСКИХ, 5 ЛЕГЕНДАРНЫХ, 2 ГАЛАКТИЧЕСКИХ):</div>
+          <div id="exclusiveCrateRaritiesList" class="crate-rarities-list"></div>
+        </div>
+      </div>
+
+      <!-- ВКЛАДКА 6: ЯЩИК ЗА 35 МОНЕТ (10 ОБЫЧНЫХ, 5 РЕДКИХ, 5 ЭПИЧЕСКИХ) -->
+      <div id="crate35TabView" class="crate-picture-view hidden">
+        <div class="crate-picture-center crate-35-center paper-inner-card">
+          <div class="crate-center-header">
+            <button id="crate35BackToShelfBtn" class="mini-back-link" type="button">← К Контейнеру и Стражнику</button>
+            <span class="crate-center-title">🎒 ЯЩИК ЗА 35 🪙 (10 НОВЫХ ОБЫЧНЫХ • 5 РЕДКИХ • 5 ЭПИЧЕСКИХ)</span>
+          </div>
+
+          <div class="crate-center-visual">
+            <div class="crate-box-illustration" id="crate35Illustration">🎒</div>
+            <div id="crate35UnboxedResult" class="crate-unboxed-result hidden">
+              <div class="unboxed-header" id="crate35UnboxedHeader">🎉 ВАМ ВЫПАЛ БОЕЦ ИЗ ЯЩИКА ЗА 35 🪙!</div>
+              <canvas id="crate35UnboxedCanvas" width="96" height="72"></canvas>
+              <div id="crate35UnboxedName" class="unboxed-name">ПЕКАРЬ</div>
+              <div id="crate35UnboxedRarity" class="unboxed-rarity-badge">Обычная</div>
+            </div>
+          </div>
+
+          <button id="openCrate35Btn" class="open-crate-center-btn open-crate-35-btn" type="button">
+            🔓 ОТКРЫТЬ ЯЩИК ЗА 35 МОНЕТ 🪙
+          </button>
+          <div id="crate35StatusMsg" class="crate-status-msg">
+            Отличный походный ящик за 35 🪙! Внутри 20 новых бойцов: 10 обычных мастеров, 5 редких воинов и 5 эпических героев! Повторка даёт +10 ❤️ HP и +10 ⚔️ урона бойцу.
+          </div>
+        </div>
+
+        <div class="crate-rarities-bottom">
+          <div class="crate-rarities-title">СОДЕРЖИМОЕ ЯЩИКА ЗА 35 🪙 (20 НОВЫХ БОЙЦОВ: 10 ОБЫЧНЫХ, 5 РЕДКИХ, 5 ЭПИЧЕСКИХ):</div>
+          <div id="crate35RaritiesList" class="crate-rarities-list"></div>
         </div>
       </div>
     </div>
@@ -198,17 +338,21 @@
       <div class="screen-top-bar">
         <button id="hubBackToMenuBtn" class="back-nav-btn" type="button">← В МЕНЮ</button>
         <button id="hubGoShopQuickBtn" class="back-nav-btn shop-quick-btn" type="button">📦 МАГАЗИН</button>
-        <div class="coin-pill">🪙 <strong id="hubCoinsVal">100</strong></div>
+        <div class="coin-pill">🪙 <strong id="hubCoinsVal">20</strong></div>
       </div>
 
-      <!-- СВЕРХУ: ЦИФРА И НАДПИСЬ УРОВЕНЬ + ОТРЯД (ДО 3 БОЙЦОВ) + КНОПКА ИГРАТЬ + КНОПКА ПРОКАЧАТЬ -->
+      <!-- СВЕРХУ: ВЫБОР УРОВНЯ (МОЖНО ВЕРНУТЬСЯ НА ПРЕДЫДУЩИЕ УРОВНИ) + ОТРЯД + КНОПКА ИГРАТЬ + КНОПКА ПРОКАЧАТЬ -->
       <div class="hub-top-stage paper-inner-card">
-        <div class="hub-level-badge">
-          <span class="hub-level-num" id="hubLevelNumber">1</span>
-          <span class="hub-level-word">УРОВЕНЬ</span>
+        <div class="hub-level-selector-row">
+          <button id="hubPrevLevelBtn" class="hub-lvl-nav-btn" type="button" title="Вернуться на предыдущий уровень">◀ ПРЕД. УРОВЕНЬ</button>
+          <div class="hub-level-badge">
+            <span class="hub-level-num" id="hubLevelNumber">1</span>
+            <span class="hub-level-word">УРОВЕНЬ</span>
+          </div>
+          <button id="hubNextLevelBtn" class="hub-lvl-nav-btn" type="button" title="Перейти на следующий открытый уровень">СЛЕД. УРОВЕНЬ ▶</button>
         </div>
         <div class="hub-enemy-preview" id="hubEnemyPreviewText">
-          На 1 уровне вас ждёт соперник: <strong>🐒 Бибизяна</strong> • Награда за победу: <strong>+20 🪙</strong>
+          На 1 уровне вас ждёт соперник: <strong>🐒 Бибизяна</strong> • Награда за победу: <strong>+2 🪙</strong>
         </div>
 
         <!-- Панель выбора до 3 ваших бойцов на бой (максимум на арене 6 бойцов) -->
@@ -241,20 +385,20 @@
       <div class="hub-cells-section">
         <div class="hub-cells-header">
           <span>ЯЧЕЙКИ ВАШИХ ПЕРСОНАЖЕЙ ПО РЕДКОСТИ</span>
-          <span id="hubUnlockedCountLabel">Открыто: 1 / 73</span>
+          <span id="hubUnlockedCountLabel">Открыто: 1 / 150</span>
         </div>
         <div id="hubRarityCellsGrid" class="hub-rarity-cells-grid"></div>
       </div>
     </div>
   </div>
 
-  <!-- ==================== 4. ЛОКАЦИЯ ПРОКАЧКИ ПЕРСОНАЖА (ЗА 15 МОНЕТ: +5 ХП ИЛИ +2 УРОНА) ==================== -->
+  <!-- ==================== 4. ЛОКАЦИЯ ПРОКАЧКИ ПЕРСОНАЖА (ЗА 2 МОНЕТЫ: +5 ХП ИЛИ +2 УРОНА) ==================== -->
   <div id="upgradeScreen" class="screen-view hidden">
     <div class="paper-screen-card upgrade-screen-card paper-card">
       <div class="screen-top-bar">
         <button id="upgradeBackBtn" class="back-nav-btn" type="button">← К ЯЧЕЙКАМ</button>
         <h2 class="screen-title">⬆️ ПРОКАЧКА БОЙЦА</h2>
-        <div class="coin-pill">🪙 <strong id="upgradeCoinsVal">100</strong></div>
+        <div class="coin-pill">🪙 <strong id="upgradeCoinsVal">20</strong></div>
       </div>
 
       <div class="upgrade-fighter-showcase paper-inner-card">
@@ -272,7 +416,7 @@
           <div class="upgrade-stat-big-number" id="upgradeStatHpNum">100</div>
           <div class="upgrade-stat-label">ЗДОРОВЬЕ</div>
           <button id="upgradeHp15Btn" class="upgrade-buy-btn hp-buy-btn" type="button">
-            ПРОКАЧАТЬ (+5 ЗДОРОВЬЯ) • 15 🪙
+            ПРОКАЧАТЬ (+5 ЗДОРОВЬЯ) • 2 🪙
           </button>
         </div>
 
@@ -280,13 +424,13 @@
           <div class="upgrade-stat-big-number" id="upgradeStatDmgNum">10</div>
           <div class="upgrade-stat-label">УРОН</div>
           <button id="upgradeDmg15Btn" class="upgrade-buy-btn dmg-buy-btn" type="button">
-            ПРОКАЧАТЬ (+2 УРОНА) • 15 🪙
+            ПРОКАЧАТЬ (+2 УРОНА) • 2 🪙
           </button>
         </div>
       </div>
 
       <div id="upgradeStatusFeedback" class="upgrade-feedback-msg">
-        Каждая прокачка стоит 15 монет и навсегда усиливает этого бойца (+5 к здоровью или +2 к урону)!
+        Каждая прокачка стоит 2 монеты и навсегда усиливает этого бойца (+5 к здоровью или +2 к урону)!
       </div>
     </div>
   </div>
@@ -321,9 +465,9 @@
 
       <!-- Правый индикатор монет и усиления ботов -->
       <div class="bots-scaling-box paper-card" id="botScalingCard" title="Баланс монет и сложность уровня">
-        <div class="coin-pill arena-coin-pill">🪙 <strong id="arenaCoinsVal">100</strong></div>
+        <div class="coin-pill arena-coin-pill">🪙 <strong id="arenaCoinsVal">20</strong></div>
         <div class="scaling-text-wrap">
-          <span class="scaling-main" id="arenaEnemyHeader">НАГРАДА ЗА ПОБЕДУ: +20 🪙</span>
+          <span class="scaling-main" id="arenaEnemyHeader">НАГРАДА ЗА ПОБЕДУ: +2 🪙</span>
           <span class="scaling-sub" id="scalingSubtext">Уровень 1 • Соперник: Бибизяна</span>
         </div>
       </div>
@@ -422,7 +566,7 @@
 
           <!-- Подсказка внизу ринга -->
           <div class="arena-hint" id="arenaHint">
-            💡 Увеличенная арена! Победите врагов и получите +20 монет 🪙
+            💡 Увеличенная арена! Победите врагов и получите +2 монеты 🪙
           </div>
 
           <!-- Оверлей победы / поражения -->
@@ -440,7 +584,7 @@
         </div>
       </section>
 
-      <!-- МОБИЛЬНЫЙ ПЕРЕКЛЮЧАТЕЛЬ ВКЛАДОК (ВИДЕН НА СМАРТФОНАХ И ПЛАНШЕТАХ) -->
+      <!-- МОБИЛЬНЫЙ ПЕРЕКЛЮЧАЧАТЕЛЬ ВКЛАДОК (ВИДЕН НА СМАРТФОНАХ И ПЛАНШЕТАХ) -->
       <nav class="mobile-tabs-bar" id="mobileTabsBar" aria-label="Переключение панелей на телефоне">
         <button type="button" class="mobile-tab-btn active-mobile-tab" data-mobile-tab="player" id="mobTabPlayer">
           🔵 Ваша команда <span class="mob-tab-count" id="mobPlayerCount">4</span>
@@ -449,7 +593,7 @@
           🔴 Боты <span class="mob-tab-count" id="mobBotCount">4</span>
         </button>
         <button type="button" class="mobile-tab-btn" data-mobile-tab="roster" id="mobTabRoster">
-          ⚔️ Все бойцы <span class="mob-tab-count">73</span>
+          ⚔️ Все бойцы <span class="mob-tab-count">150</span>
         </button>
       </nav>
 
@@ -532,10 +676,10 @@
       </aside>
     </main>
 
-    <!-- НИЖНЯЯ ПАНЕЛЬ: ВЫБОР БОЙЦОВ (73 КЛАССА) -->
+    <!-- НИЖНЯЯ ПАНЕЛЬ: ВЫБОР БОЙЦОВ (150 КЛАССОВ) -->
     <footer class="roster-panel paper-card" id="rosterPanel">
       <div class="roster-header">
-        <h2>ВЫБОР БОЙЦОВ (73)</h2>
+        <h2>ВЫБОР БОЙЦОВ (150)</h2>
         <div class="roster-controls-hint">
           <span class="roster-hint-text">Нажмите «+Игрок» / «+Бот» на карточке или дважды нажмите по бойцу</span>
           <div class="target-team-switch">

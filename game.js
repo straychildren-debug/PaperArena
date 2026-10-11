@@ -16,8 +16,10 @@ class BattleRoyalPaperGame {
     this.completedLevels = new Set();
 
     // ==================== ПРОГРЕССИЯ: МОНЕТЫ, УРОВЕНЬ, ОТКРЫТЫЕ БОЙЦЫ И ПРОКАЧКА ====================
-    this.coins = 100; // Стартовые 100 монет (хватает на 1 ящик или 6 прокачек; +40 монет за каждый уровень!)
-    this.campaignLevel = 1; // Начинаем с 1 уровня
+    this.coins = 20; // Стартовые 20 монет в начале игры!
+    this.campaignLevel = 1; // Текущий выбранный уровень
+    this.maxCampaignLevel = 1; // Максимальный открытый уровень кампании (можно возвращаться на предыдущие уровни!)
+    this.lastFinishedCampaignLevel = 1;
     this.unlockedFighters = new Set(['swordsman']); // Изначально открыт только Мечник (в ящике все кроме Мечника)
     this.selectedCampaignFighterId = 'swordsman'; // Выбранный персонаж в ячейке
     this.campaignSquad = ['swordsman']; // Отряд игрока на бой (от 1 до 3 бойцов, максимум на арене 6 бойцов!)
@@ -164,36 +166,61 @@ class BattleRoyalPaperGame {
     };
   }
 
-  // Описание врагов для текущего уровня кампании (максимум 6 бойцов на арене: до 3 наших и до 4 соперников, не слишком сильных!)
+  // Описание врагов для текущего уровня кампании (максимум 6 бойцов на арене: до 3 наших и до 4 соперников)
+  // Соперники меняются не каждый уровень (особенно в начальных уровнях 1-15 и на уровнях 50+),
+  // а получают +здоровье и +урон с ростом уровня. При этом у игрока те же бойцы сохраняют свою базовую/прокачанную статистику!
   getCampaignEnemiesForLevel(lvl) {
-    // На 1 уровне вас ждёт соперник Бибизяна!
-    if (lvl === 1) {
+    // На 1, 2 и 3 уровнях вас ждёт соперник Бибизяна, получающая +HP и +урон с каждым уровнем!
+    if (lvl <= 3) {
       return [
-        { classId: 'bibizyana', hp: 70, speed: 2.9, damage: 9 }
+        {
+          classId: 'bibizyana',
+          hp: 70 + (lvl - 1) * 15,
+          speed: 2.9,
+          damage: 9 + (lvl - 1) * 2
+        }
       ];
+    }
+
+    // Определяем индекс этапа (stageIdx), чтобы состав соперников не менялся на каждом уровне:
+    // - Уровни 4..15: одни и те же соперники держатся по 3 уровня подряд, получая +HP и +урон
+    // - Уровни 16..49: соперники держатся по 2–3 уровня подряд
+    // - Уровни 50+: соперники держатся по 4 уровня подряд, в основном усиливаясь за счёт +HP и +урона!
+    let stageIdx;
+    if (lvl <= 15) {
+      stageIdx = Math.floor((lvl - 1) / 3);
+    } else if (lvl < 50) {
+      stageIdx = 5 + Math.floor((lvl - 16) / 2);
+    } else {
+      stageIdx = 22 + Math.floor((lvl - 50) / 4);
     }
 
     // Максимум на арене 6 бойцов (до 3 наших, у соперников может быть до 4, но сумма не больше 6!)
     const playerCount = Math.max(1, Math.min(3, (this.campaignSquad && this.campaignSquad.length) || 1));
     const maxAllowedEnemies = Math.min(4, Math.max(1, 6 - playerCount));
-    const rawWantedEnemies = Math.min(4, 1 + Math.floor(lvl / 2));
+    const rawWantedEnemies = Math.min(4, 1 + Math.floor(stageIdx / 2));
     const enemyCount = Math.min(maxAllowedEnemies, rawWantedEnemies);
 
-    // Чтобы соперники (особенно когда их 3 или 4) не были прям слишком сильными, мягко ослабляем статы каждого
-    const multiEnemyBalance = enemyCount >= 4 ? 0.42 : (enemyCount === 3 ? 0.50 : (enemyCount === 2 ? 0.64 : 0.82));
-    const statScale = (0.58 + lvl * 0.09) * multiEnemyBalance;
+    // Чтобы соперники (особенно когда их 3 или 4) были сбалансированы, учитываем их количество,
+    // а с каждым уровнем добавляем им +здоровье и +урон!
+    const multiEnemyBalance = enemyCount >= 4 ? 0.44 : (enemyCount === 3 ? 0.52 : (enemyCount === 2 ? 0.66 : 0.85));
+    const baseScale = (0.58 + stageIdx * 0.08) * multiEnemyBalance;
+    const bonusHpPerLvl = Math.round((lvl - 1) * (lvl >= 50 ? 9 : 6) * multiEnemyBalance);
+    const bonusDmgPerLvl = Math.round((lvl - 1) * (lvl >= 50 ? 1.8 : 1.1) * multiEnemyBalance);
 
-    const orderedByRarity = getFightersSortedByRarity().filter(fc => fc.id !== 'sky_guardian');
-    const maxPoolIdx = Math.min(orderedByRarity.length - 1, 7 + lvl * 3);
+    const orderedByRarity = getFightersSortedByRarity().filter(fc => !isTripleSlotFighter(fc.id));
+    const maxPoolIdx = Math.min(orderedByRarity.length - 1, 8 + stageIdx * 4);
     const enemies = [];
     for (let i = 0; i < enemyCount; i++) {
-      const pickIdx = (lvl * 3 + i * 5) % (maxPoolIdx + 1);
+      const pickIdx = (stageIdx * 5 + i * 7) % (maxPoolIdx + 1);
       const cls = orderedByRarity[pickIdx] || getFighterClass('bibizyana');
+      const scaledHp = Math.round((cls.hp * baseScale + bonusHpPerLvl) / 5) * 5;
+      const scaledDmg = Math.round(cls.damage * baseScale + bonusDmgPerLvl);
       enemies.push({
         classId: cls.id,
-        hp: Math.max(35, Math.min(260, Math.round((cls.hp * statScale) / 5) * 5)),
-        speed: Number(Math.min(4.8, cls.speed * (0.88 + lvl * 0.02)).toFixed(1)),
-        damage: Math.max(5, Math.min(38, Math.round(cls.damage * statScale)))
+        hp: Math.max(40, scaledHp),
+        speed: Number(Math.min(4.8, cls.speed * (0.90 + Math.min(25, stageIdx) * 0.015)).toFixed(1)),
+        damage: Math.max(6, scaledDmg)
       });
     }
     return enemies;
@@ -249,9 +276,9 @@ class BattleRoyalPaperGame {
 
     const speedPx = (bp.speed || 3) * 38;
     const abilityId = bp.abilityId || bp.classId;
-    const isSkyGuardian = bp.classId === 'sky_guardian' || abilityId === 'sky_guardian';
-    // Все бойцы на арене сделаны чуть-чуть побольше (обычные бойцы 20px, Стражник небес 23px)!
-    const baseRadius = isMinion ? 11 : (isSkyGuardian ? 23 : 20);
+    const isTripleBoss = !isMinion && (isTripleSlotFighter(bp.classId) || isTripleSlotFighter(abilityId));
+    // Все бойцы на арене сделаны чуть-чуть побольше (обычные бойцы 20px, боссы на 3 слота 23px)!
+    const baseRadius = isMinion ? 11 : (isTripleBoss ? 23 : 20);
 
     // Для Червя (гусеницы) создаём цепочку из 7 сегментов хвоста!
     const segments = [];
@@ -279,6 +306,8 @@ class BattleRoyalPaperGame {
     if (abilityId === 'bibizyana') initialCd = 2.2;     // Бибизяна каждые 7 с кидает 1 банан на 45 урона
     if (abilityId === 'medusa') initialCd = 0.15;       // Медуза оставляет за собой электрический след
     if (abilityId === 'sky_guardian') initialCd = 10.0; // Стражник небес каждые 10 с замирает на 1.5 с и бьёт лучом во все стороны!
+    if (abilityId === 'galactic_lightning') initialCd = 3.5; // Молния стреляет молнией каждые 3.5 секунды!
+    if (abilityId === 'skeleton_king') initialCd = 2.2;      // Король скелетов каждые 4 с выпускает черепа и призывает скелета-стража!
 
     return {
       id: bp.id || this.nextUid(),
@@ -327,6 +356,9 @@ class BattleRoyalPaperGame {
       skyGuardianTimer: 10.0, // Стражник небес: каждые 10 с замирает в непробиваемом щите и бьёт лучом во все стороны на 150 HP!
       skyBeamTimer: 0,        // Длительность 1.5 с, пока Стражник небес стоит в щите и стреляет лучом во все стороны
       skySavedSpeedAng: angle,
+      lightningDashTimer: 5.0,    // Молния: каждые 5 секунд делает рывок на соперников (-100 HP при задевании в рывке)
+      lightningDashingTimer: 0,   // Длительность активного рывка Молнии (0.75 с)
+      skeletonCurseTimer: 7.0,    // Король скелетов: дебаф проклятой короны (-20 HP каждые 7 секунд)
       thrustTimer: 0,
       hitImmunityMap: {},
       // Статус-эффекты
@@ -432,7 +464,7 @@ class BattleRoyalPaperGame {
       this.stopBattleToPrep();
     });
 
-    // 2. Кнопки Магазина: вкладка «Контейнер бойцов» и новая вкладка «Бокс бойцов»
+    // 2. Кнопки Магазина: 6 вкладок (Контейнер + Стражник | Эксклюзив 1000 | Бокс 50 | Ящик 500 | Ящик 35 | Маленький ящик 20)
     document.getElementById('shopBackBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.showScreen('menu');
@@ -443,12 +475,52 @@ class BattleRoyalPaperGame {
       this.switchShopTab('container');
     });
 
+    document.getElementById('shopTabExclusiveBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('exclusive_crate');
+    });
+
     document.getElementById('shopTabFighterBoxBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.switchShopTab('fighter_box');
     });
 
+    document.getElementById('shopTabCrate500Btn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('crate_500');
+    });
+
+    document.getElementById('shopTabCrate35Btn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('crate_35');
+    });
+
+    document.getElementById('shopTabMiniCrate20Btn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('mini_crate_20');
+    });
+
     document.getElementById('fighterBoxBackToShelfBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('container');
+    });
+
+    document.getElementById('crate500BackToShelfBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('container');
+    });
+
+    document.getElementById('miniCrate20BackToShelfBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('container');
+    });
+
+    document.getElementById('exclusiveCrateBackToShelfBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('container');
+    });
+
+    document.getElementById('crate35BackToShelfBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.switchShopTab('container');
     });
@@ -457,6 +529,10 @@ class BattleRoyalPaperGame {
       window.sfx.click();
       document.getElementById('shopShelfView')?.classList.add('hidden');
       document.getElementById('fighterBoxTabView')?.classList.add('hidden');
+      document.getElementById('crate500TabView')?.classList.add('hidden');
+      document.getElementById('miniCrate20TabView')?.classList.add('hidden');
+      document.getElementById('exclusiveCrateTabView')?.classList.add('hidden');
+      document.getElementById('crate35TabView')?.classList.add('hidden');
       document.getElementById('cratePictureView')?.classList.remove('hidden');
       document.getElementById('crateUnboxedResult')?.classList.add('hidden');
       this.renderCrateRaritiesAndFighters();
@@ -476,11 +552,27 @@ class BattleRoyalPaperGame {
       this.openFighterBoxFor50Coins();
     });
 
+    document.getElementById('openCrate500Btn')?.addEventListener('click', () => {
+      this.openCrate500For500Coins();
+    });
+
+    document.getElementById('openMiniCrate20Btn')?.addEventListener('click', () => {
+      this.openMiniCrate20For20Coins();
+    });
+
+    document.getElementById('openExclusiveCrate1000Btn')?.addEventListener('click', () => {
+      this.openExclusiveCrateFor1000Coins();
+    });
+
+    document.getElementById('openCrate35Btn')?.addEventListener('click', () => {
+      this.openCrate35For35Coins();
+    });
+
     document.getElementById('buySkyGuardianBtn')?.addEventListener('click', () => {
       this.buySkyGuardianFor50000Coins();
     });
 
-    // 3. Кнопки Локации Уровня и Ячеек персонажей
+    // 3. Кнопки Локации Уровня и Ячеек персонажей (включая переключение на предыдущие и следующие уровни!)
     document.getElementById('hubBackToMenuBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.showScreen('menu');
@@ -489,6 +581,25 @@ class BattleRoyalPaperGame {
     document.getElementById('hubGoShopQuickBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.openShopScreen();
+    });
+
+    document.getElementById('hubPrevLevelBtn')?.addEventListener('click', () => {
+      if (this.campaignLevel > 1) {
+        window.sfx.click();
+        this.campaignLevel -= 1;
+        this.level = this.campaignLevel;
+        this.renderCampaignHub();
+      }
+    });
+
+    document.getElementById('hubNextLevelBtn')?.addEventListener('click', () => {
+      const maxLvl = Math.max(1, this.maxCampaignLevel || 1);
+      if (this.campaignLevel < maxLvl) {
+        window.sfx.click();
+        this.campaignLevel += 1;
+        this.level = this.campaignLevel;
+        this.renderCampaignHub();
+      }
     });
 
     document.getElementById('hubPlayLevelBtn')?.addEventListener('click', () => {
@@ -505,7 +616,7 @@ class BattleRoyalPaperGame {
       this.openUpgradeScreen(this.selectedCampaignFighterId);
     });
 
-    // 4. Кнопки Локации Прокачки Бойца (за 15 монет: +5 к здоровью или +2 к урону)
+    // 4. Кнопки Локации Прокачки Бойца (за 2 монеты: +5 к здоровью или +2 к урону)
     document.getElementById('upgradeBackBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.openCampaignHubScreen();
@@ -529,10 +640,10 @@ class BattleRoyalPaperGame {
     this.updateAllCoinsUI();
   }
 
-  // Подсчёт занятых мест в отряде (Стражник небес занимает сразу все 3 места!)
+  // Подсчёт занятых мест в отряде (Стражник небес, Молния и Король скелетов занимают сразу все 3 места!)
   getSquadSlotsUsed(squadList = this.campaignSquad) {
     if (!squadList || squadList.length === 0) return 0;
-    if (squadList.includes('sky_guardian')) return 3;
+    if (squadList.some(id => isTripleSlotFighter(id))) return 3;
     return Math.min(3, squadList.length);
   }
 
@@ -543,19 +654,25 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    // Если выбран Стражник небес — он занимает сразу 3 места и не может быть с другими бойцами!
-    if (cid === 'sky_guardian') {
-      if (this.campaignSquad.includes('sky_guardian')) {
+    // Если выбран боец на 3 места (Стражник небес, Молния или Король скелетов) — он занимает сразу все 3 места!
+    if (isTripleSlotFighter(cid)) {
+      if (this.campaignSquad.includes(cid)) {
         window.sfx.defeat();
         return;
       }
       window.sfx.click();
-      this.campaignSquad = ['sky_guardian'];
+      this.campaignSquad = [cid];
       this.renderCampaignHub();
       return;
     }
 
-    // Если в отряде уже стоит Стражник небес (занимает все 3 места) или уже 3 бойца — больше добавить нельзя!
+    // Каждый боец может быть взят в отряд только по 1 разу!
+    if (this.campaignSquad.includes(cid)) {
+      window.sfx.defeat();
+      return;
+    }
+
+    // Если в отряде уже стоит боец на 3 места или уже 3 бойца — больше добавить нельзя!
     if (this.getSquadSlotsUsed() >= 3) {
       window.sfx.defeat();
       return;
@@ -679,7 +796,7 @@ class BattleRoyalPaperGame {
         : `🔒 НУЖНО 1 000 МОНЕТ (У ВАС ${this.coins} 🪙)`;
     }
     if (statusMsg && this.coins < 1000) {
-      statusMsg.textContent = `Побеждайте на уровнях (+20 🪙 за победу), чтобы накопить 1 000 монет на Контейнер бойцов!`;
+      statusMsg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 1 000 монет на Контейнер бойцов!`;
     }
 
     // 2. Кнопка открытия «Бокса бойцов» (50 монет)
@@ -692,10 +809,62 @@ class BattleRoyalPaperGame {
         : `🔒 НУЖНО 50 МОНЕТ (У ВАС ${this.coins} 🪙)`;
     }
     if (boxStatusMsg && this.coins < 50) {
-      boxStatusMsg.textContent = `Побеждайте на уровнях (+20 🪙 за победу), чтобы накопить 50 монет на Бокс бойцов!`;
+      boxStatusMsg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 50 монет на Бокс бойцов!`;
     }
 
-    // 3. Кнопка покупки Стражника небес за 50 000 монет на витрине магазина
+    // 3. Кнопка открытия «Ящика за 500 монет» (500 монет)
+    const open500Btn = document.getElementById('openCrate500Btn');
+    const status500Msg = document.getElementById('crate500StatusMsg');
+    if (open500Btn) {
+      open500Btn.disabled = this.coins < 500;
+      open500Btn.textContent = this.coins >= 500
+        ? '🔓 ОТКРЫТЬ ЯЩИК ЗА 500 МОНЕТ 🪙'
+        : `🔒 НУЖНО 500 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+    }
+    if (status500Msg && this.coins < 500) {
+      status500Msg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 500 монет на этот ящик (12 редких, 6 эпических, 4 мифических)!`;
+    }
+
+    // 4. Кнопка открытия «Маленького ящика за 20 монет» (20 монет)
+    const open20Btn = document.getElementById('openMiniCrate20Btn');
+    const status20Msg = document.getElementById('miniCrate20StatusMsg');
+    if (open20Btn) {
+      open20Btn.disabled = this.coins < 20;
+      open20Btn.textContent = this.coins >= 20
+        ? '🔓 ОТКРЫТЬ МАЛЕНЬКИЙ ЯЩИК ЗА 20 МОНЕТ 🪙'
+        : `🔒 НУЖНО 20 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+    }
+    if (status20Msg && this.coins < 20) {
+      status20Msg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 20 монет на Маленький ящик!`;
+    }
+
+    // 4.1. Кнопка открытия ящика «Эксклюзив» (1 000 монет)
+    const openExclBtn = document.getElementById('openExclusiveCrate1000Btn');
+    const statusExclMsg = document.getElementById('exclusiveCrateStatusMsg');
+    if (openExclBtn) {
+      openExclBtn.disabled = this.coins < 1000;
+      openExclBtn.textContent = this.coins >= 1000
+        ? '🔓 ОТКРЫТЬ «ЭКСКЛЮЗИВ» ЗА 1 000 МОНЕТ 🪙'
+        : `🔒 НУЖНО 1 000 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+    }
+    if (statusExclMsg && this.coins < 1000) {
+      statusExclMsg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 1 000 монет на ящик «Эксклюзив» (включая Галактических бойцов ⚡Молнию и 💀Короля скелетов)!`;
+    }
+
+    // 4.2. Кнопка открытия «Ящика за 35 монет» (35 монет)
+    const open35Btn = document.getElementById('openCrate35Btn');
+    const status35Msg = document.getElementById('crate35StatusMsg');
+    if (open35Btn) {
+      open35Btn.disabled = this.coins < 35;
+      open35Btn.textContent = this.coins >= 35
+        ? '🔓 ОТКРЫТЬ ЯЩИК ЗА 35 МОНЕТ 🪙'
+        : `🔒 НУЖНО 35 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+    }
+    if (status35Msg && this.coins < 35) {
+      status35Msg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 35 монет на Ящик за 35 🪙 (10 обычных, 5 редких, 5 эпических)!`;
+    }
+
+    // 5. Кнопка покупки Стражника небес за 50 000 монет на витрине магазина
     const buyGuardianBtn = document.getElementById('buySkyGuardianBtn');
     const guardianMsg = document.getElementById('shopGuardianStatusMsg');
     if (buyGuardianBtn) {
@@ -719,7 +888,7 @@ class BattleRoyalPaperGame {
         buyGuardianBtn.classList.remove('guardian-owned');
         buyGuardianBtn.textContent = `🔒 КУПИТЬ ЗА 50 000 🪙 (У ВАС ${this.coins} 🪙)`;
         if (guardianMsg) {
-          guardianMsg.textContent = `Побеждайте в боях (+20 🪙) и продавайте повторки — осталось накопить ${50000 - this.coins} 🪙!`;
+          guardianMsg.textContent = `Побеждайте в боях (+2 🪙 за победу) — осталось накопить ${50000 - this.coins} 🪙!`;
         }
       }
     }
@@ -727,25 +896,63 @@ class BattleRoyalPaperGame {
 
   switchShopTab(tabName) {
     const tabContainerBtn = document.getElementById('shopTabContainerBtn');
+    const tabExclBtn = document.getElementById('shopTabExclusiveBtn');
     const tabBoxBtn = document.getElementById('shopTabFighterBoxBtn');
+    const tab500Btn = document.getElementById('shopTabCrate500Btn');
+    const tab35Btn = document.getElementById('shopTabCrate35Btn');
+    const tab20Btn = document.getElementById('shopTabMiniCrate20Btn');
+
     const shelfView = document.getElementById('shopShelfView');
     const crateView = document.getElementById('cratePictureView');
+    const exclView = document.getElementById('exclusiveCrateTabView');
     const boxView = document.getElementById('fighterBoxTabView');
+    const crate500View = document.getElementById('crate500TabView');
+    const crate35View = document.getElementById('crate35TabView');
+    const mini20View = document.getElementById('miniCrate20TabView');
 
-    if (tabName === 'fighter_box') {
-      tabContainerBtn?.classList.remove('active-shop-tab');
+    tabContainerBtn?.classList.remove('active-shop-tab');
+    tabExclBtn?.classList.remove('active-shop-tab');
+    tabBoxBtn?.classList.remove('active-shop-tab');
+    tab500Btn?.classList.remove('active-shop-tab');
+    tab35Btn?.classList.remove('active-shop-tab');
+    tab20Btn?.classList.remove('active-shop-tab');
+
+    shelfView?.classList.add('hidden');
+    crateView?.classList.add('hidden');
+    exclView?.classList.add('hidden');
+    boxView?.classList.add('hidden');
+    crate500View?.classList.add('hidden');
+    crate35View?.classList.add('hidden');
+    mini20View?.classList.add('hidden');
+
+    if (tabName === 'exclusive_crate') {
+      tabExclBtn?.classList.add('active-shop-tab');
+      exclView?.classList.remove('hidden');
+      document.getElementById('exclusiveCrateUnboxedResult')?.classList.add('hidden');
+      this.renderExclusiveCrateRaritiesAndFighters();
+    } else if (tabName === 'fighter_box') {
       tabBoxBtn?.classList.add('active-shop-tab');
-      shelfView?.classList.add('hidden');
-      crateView?.classList.add('hidden');
       boxView?.classList.remove('hidden');
       document.getElementById('fighterBoxUnboxedResult')?.classList.add('hidden');
       this.renderFighterBoxRaritiesAndFighters();
+    } else if (tabName === 'crate_500') {
+      tab500Btn?.classList.add('active-shop-tab');
+      crate500View?.classList.remove('hidden');
+      document.getElementById('crate500UnboxedResult')?.classList.add('hidden');
+      this.renderCrate500RaritiesAndFighters();
+    } else if (tabName === 'crate_35') {
+      tab35Btn?.classList.add('active-shop-tab');
+      crate35View?.classList.remove('hidden');
+      document.getElementById('crate35UnboxedResult')?.classList.add('hidden');
+      this.renderCrate35RaritiesAndFighters();
+    } else if (tabName === 'mini_crate_20') {
+      tab20Btn?.classList.add('active-shop-tab');
+      mini20View?.classList.remove('hidden');
+      document.getElementById('miniCrate20UnboxedResult')?.classList.add('hidden');
+      this.renderMiniCrate20RaritiesAndFighters();
     } else {
       tabContainerBtn?.classList.add('active-shop-tab');
-      tabBoxBtn?.classList.remove('active-shop-tab');
       shelfView?.classList.remove('hidden');
-      crateView?.classList.add('hidden');
-      boxView?.classList.add('hidden');
       this.renderShopSkyGuardianShowcase();
     }
     this.updateAllCoinsUI();
@@ -754,9 +961,23 @@ class BattleRoyalPaperGame {
   openShopScreen(initialTab = 'container') {
     this.renderShopSkyGuardianShowcase();
     this.renderCrateRaritiesAndFighters();
+    this.renderExclusiveCrateRaritiesAndFighters();
     this.renderFighterBoxRaritiesAndFighters();
+    this.renderCrate500RaritiesAndFighters();
+    this.renderCrate35RaritiesAndFighters();
+    this.renderMiniCrate20RaritiesAndFighters();
     this.switchShopTab(initialTab);
     this.showScreen('shop');
+  }
+
+  // Начисление +10 к здоровью и +10 к урону при выпадении повторки любого бойца из ящиков!
+  applyDuplicateFighterBonus(fighterId) {
+    if (!this.fighterUpgrades[fighterId]) {
+      this.fighterUpgrades[fighterId] = { hp: 0, damage: 0 };
+    }
+    this.fighterUpgrades[fighterId].hp += 10;
+    this.fighterUpgrades[fighterId].damage += 10;
+    return this.getUpgradedFighterStats(fighterId);
   }
 
   // Отрисовка нижней части «Контейнера бойцов»: 5 редкостей и 55 основных персонажей
@@ -767,6 +988,7 @@ class BattleRoyalPaperGame {
 
     for (const tier of FIGHTER_RARITIES) {
       const crateFighters = FIGHTER_CLASSES.filter(fc => fc.rarity === tier.id && fc.inCrate);
+      if (crateFighters.length === 0) continue;
       const block = document.createElement('div');
       block.className = 'rarity-tier-block';
       block.style.borderColor = tier.border;
@@ -784,12 +1006,13 @@ class BattleRoyalPaperGame {
       const row = block.querySelector('.rarity-fighters-row');
       for (const fc of crateFighters) {
         const isUnlocked = this.unlockedFighters.has(fc.id);
+        const st = this.getUpgradedFighterStats(fc.id);
         const item = document.createElement('div');
         item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
         item.innerHTML = `
           <canvas width="64" height="36"></canvas>
           <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${fc.name}</span>
-          <span class="cfm-chance">${fc.dropChance}%</span>
+          <span class="cfm-chance">❤️${st.hp} ⚔️${st.damage} • ${fc.dropChance}%</span>
         `;
         const cnv = item.querySelector('canvas');
         renderFighterThumbnail(cnv, fc, 'player', false);
@@ -800,7 +1023,7 @@ class BattleRoyalPaperGame {
     }
   }
 
-  // Отрисовка нижней части новой вкладки «Бокс бойцов»: 5 обычных (слабых без способностей), 5 редких и 6 эпических
+  // Отрисовка нижней части вкладки «Бокс бойцов»: 5 обычных (слабых без способностей), 5 редких и 6 эпических
   renderFighterBoxRaritiesAndFighters() {
     const listEl = document.getElementById('fighterBoxRaritiesList');
     if (!listEl) return;
@@ -828,12 +1051,192 @@ class BattleRoyalPaperGame {
       const row = block.querySelector('.rarity-fighters-row');
       for (const fc of boxFighters) {
         const isUnlocked = this.unlockedFighters.has(fc.id);
+        const st = this.getUpgradedFighterStats(fc.id);
         const item = document.createElement('div');
         item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
         item.innerHTML = `
           <canvas width="64" height="36"></canvas>
           <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${fc.name}</span>
-          <span class="cfm-chance">❤️${fc.hp} ⚔️${fc.damage} • ${fc.dropChance}%</span>
+          <span class="cfm-chance">❤️${st.hp} ⚔️${st.damage} • ${fc.dropChance}%</span>
+        `;
+        const cnv = item.querySelector('canvas');
+        renderFighterThumbnail(cnv, fc, 'player', false);
+        row.appendChild(item);
+      }
+
+      listEl.appendChild(block);
+    }
+  }
+
+  // Отрисовка нижней части вкладки «Ящик за 500 монет»: 12 редких, 6 эпических и 4 мифических
+  renderCrate500RaritiesAndFighters() {
+    const listEl = document.getElementById('crate500RaritiesList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    for (const tier of FIGHTER_RARITIES) {
+      const crateFighters = FIGHTER_CLASSES.filter(fc => fc.rarity === tier.id && fc.inCrate500);
+      if (crateFighters.length === 0) continue;
+
+      const block = document.createElement('div');
+      block.className = 'rarity-tier-block';
+      block.style.borderColor = tier.border;
+      block.style.background = tier.bg;
+
+      const perFighterChance = crateFighters[0]?.dropChance || 0;
+      block.innerHTML = `
+        <div class="rarity-tier-header">
+          <span class="rarity-tier-pill" style="background:${tier.color}">${tier.name} редкость</span>
+          <span>Шанс редкости в ящике 500: <strong>${tier.crate500TierChance}%</strong> (${crateFighters.length} шт. • по ${perFighterChance}%)</span>
+        </div>
+        <div class="rarity-fighters-row"></div>
+      `;
+
+      const row = block.querySelector('.rarity-fighters-row');
+      for (const fc of crateFighters) {
+        const isUnlocked = this.unlockedFighters.has(fc.id);
+        const st = this.getUpgradedFighterStats(fc.id);
+        const item = document.createElement('div');
+        item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
+        item.innerHTML = `
+          <canvas width="64" height="36"></canvas>
+          <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${fc.name}</span>
+          <span class="cfm-chance">❤️${st.hp} ⚔️${st.damage} • ${fc.dropChance}%</span>
+        `;
+        const cnv = item.querySelector('canvas');
+        renderFighterThumbnail(cnv, fc, 'player', false);
+        row.appendChild(item);
+      }
+
+      listEl.appendChild(block);
+    }
+  }
+
+  // Отрисовка нижней части вкладки «Маленький ящик за 20 монет»: 5 обычных, 4 редких и 2 эпических (малый шанс на эпик!)
+  renderMiniCrate20RaritiesAndFighters() {
+    const listEl = document.getElementById('miniCrate20RaritiesList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    for (const tier of FIGHTER_RARITIES) {
+      const miniFighters = FIGHTER_CLASSES.filter(fc => fc.rarity === tier.id && fc.inMiniCrate20);
+      if (miniFighters.length === 0) continue;
+
+      const block = document.createElement('div');
+      block.className = 'rarity-tier-block';
+      block.style.borderColor = tier.border;
+      block.style.background = tier.bg;
+
+      const perFighterChance = miniFighters[0]?.dropChance || 0;
+      const epicNote = tier.id === 'epic' ? ' (редкий шанс!)' : '';
+      block.innerHTML = `
+        <div class="rarity-tier-header">
+          <span class="rarity-tier-pill" style="background:${tier.color}">${tier.name} редкость${epicNote}</span>
+          <span>Шанс редкости: <strong>${tier.miniCrate20TierChance}%</strong> (${miniFighters.length} шт. • по ${perFighterChance}%)</span>
+        </div>
+        <div class="rarity-fighters-row"></div>
+      `;
+
+      const row = block.querySelector('.rarity-fighters-row');
+      for (const fc of miniFighters) {
+        const isUnlocked = this.unlockedFighters.has(fc.id);
+        const st = this.getUpgradedFighterStats(fc.id);
+        const item = document.createElement('div');
+        item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
+        item.innerHTML = `
+          <canvas width="64" height="36"></canvas>
+          <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${fc.name}</span>
+          <span class="cfm-chance">❤️${st.hp} ⚔️${st.damage} • ${fc.dropChance}%</span>
+        `;
+        const cnv = item.querySelector('canvas');
+        renderFighterThumbnail(cnv, fc, 'player', false);
+        row.appendChild(item);
+      }
+
+      listEl.appendChild(block);
+    }
+  }
+
+  // Отрисовка нижней части вкладки «Эксклюзив» за 1 000 монет: 10 эпических, 7 мифических, 5 легендарных и 2 галактических (на 3 места!)
+  renderExclusiveCrateRaritiesAndFighters() {
+    const listEl = document.getElementById('exclusiveCrateRaritiesList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    for (const tier of FIGHTER_RARITIES) {
+      const exclFighters = FIGHTER_CLASSES.filter(fc => fc.rarity === tier.id && fc.inExclusiveCrate);
+      if (exclFighters.length === 0) continue;
+
+      const block = document.createElement('div');
+      block.className = 'rarity-tier-block';
+      block.style.borderColor = tier.border;
+      block.style.background = tier.bg;
+
+      const perFighterChance = exclFighters[0]?.dropChance || 0;
+      const galNote = tier.id === 'galactic' ? ' (ЗАНИМАЮТ СРАЗУ 3 МЕСТА В ОТРЯДЕ!)' : '';
+      block.innerHTML = `
+        <div class="rarity-tier-header">
+          <span class="rarity-tier-pill" style="background:${tier.color}">${tier.name} редкость${galNote}</span>
+          <span>Шанс редкости в «Эксклюзиве»: <strong>${tier.exclusiveTierChance}%</strong> (${exclFighters.length} шт. • по ${perFighterChance}%)</span>
+        </div>
+        <div class="rarity-fighters-row"></div>
+      `;
+
+      const row = block.querySelector('.rarity-fighters-row');
+      for (const fc of exclFighters) {
+        const isUnlocked = this.unlockedFighters.has(fc.id);
+        const st = this.getUpgradedFighterStats(fc.id);
+        const slotTag = isTripleSlotFighter(fc.id) ? ' [3 МЕСТА]' : '';
+        const item = document.createElement('div');
+        item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
+        item.innerHTML = `
+          <canvas width="64" height="36"></canvas>
+          <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${fc.name}${slotTag}</span>
+          <span class="cfm-chance">❤️${st.hp} ⚔️${st.damage} • ${fc.dropChance}%</span>
+        `;
+        const cnv = item.querySelector('canvas');
+        renderFighterThumbnail(cnv, fc, 'player', false);
+        row.appendChild(item);
+      }
+
+      listEl.appendChild(block);
+    }
+  }
+
+  // Отрисовка нижней части вкладки «Ящик за 35 монет»: 10 обычных, 5 редких и 5 эпических
+  renderCrate35RaritiesAndFighters() {
+    const listEl = document.getElementById('crate35RaritiesList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    for (const tier of FIGHTER_RARITIES) {
+      const crate35Fighters = FIGHTER_CLASSES.filter(fc => fc.rarity === tier.id && fc.inCrate35);
+      if (crate35Fighters.length === 0) continue;
+
+      const block = document.createElement('div');
+      block.className = 'rarity-tier-block';
+      block.style.borderColor = tier.border;
+      block.style.background = tier.bg;
+
+      const perFighterChance = crate35Fighters[0]?.dropChance || 0;
+      block.innerHTML = `
+        <div class="rarity-tier-header">
+          <span class="rarity-tier-pill" style="background:${tier.color}">${tier.name} редкость</span>
+          <span>Шанс редкости в ящике 35: <strong>${tier.crate35TierChance}%</strong> (${crate35Fighters.length} шт. • по ${perFighterChance}%)</span>
+        </div>
+        <div class="rarity-fighters-row"></div>
+      `;
+
+      const row = block.querySelector('.rarity-fighters-row');
+      for (const fc of crate35Fighters) {
+        const isUnlocked = this.unlockedFighters.has(fc.id);
+        const st = this.getUpgradedFighterStats(fc.id);
+        const item = document.createElement('div');
+        item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
+        item.innerHTML = `
+          <canvas width="64" height="36"></canvas>
+          <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${fc.name}</span>
+          <span class="cfm-chance">❤️${st.hp} ⚔️${st.damage} • ${fc.dropChance}%</span>
         `;
         const cnv = item.querySelector('canvas');
         renderFighterThumbnail(cnv, fc, 'player', false);
@@ -861,10 +1264,11 @@ class BattleRoyalPaperGame {
       boxIll.classList.add('crate-shake');
     }
 
+    const crateTiers = FIGHTER_RARITIES.filter(t => (t.tierChance || 0) > 0);
     const roll = Math.random() * 100;
     let cumulative = 0;
-    let chosenTier = FIGHTER_RARITIES[0];
-    for (const tier of FIGHTER_RARITIES) {
+    let chosenTier = crateTiers[0];
+    for (const tier of crateTiers) {
       cumulative += tier.tierChance;
       if (roll <= cumulative) {
         chosenTier = tier;
@@ -876,8 +1280,9 @@ class BattleRoyalPaperGame {
     const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
     const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
 
+    let updatedStats = null;
     if (wasAlreadyUnlocked) {
-      this.coins += 20;
+      updatedStats = this.applyDuplicateFighterBonus(droppedFighter.id);
     } else {
       this.unlockedFighters.add(droppedFighter.id);
       this.selectedCampaignFighterId = droppedFighter.id;
@@ -895,18 +1300,18 @@ class BattleRoyalPaperGame {
       renderFighterThumbnail(cnv, droppedFighter, 'player', true);
       nameEl.textContent = droppedFighter.name.toUpperCase();
       rarEl.textContent = wasAlreadyUnlocked
-        ? `ПОВТОРКА • ПРОДАНА ЗА +20 🪙`
+        ? `ПОВТОРКА • +10 ❤️ HP И +10 ⚔️ УРОНА!`
         : `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
-      rarEl.style.background = wasAlreadyUnlocked ? '#d97706' : droppedFighter.rarityColor;
+      rarEl.style.background = wasAlreadyUnlocked ? '#16a34a' : droppedFighter.rarityColor;
     }
     if (headerEl) {
       headerEl.textContent = wasAlreadyUnlocked
-        ? '🔄 ПОВТОРКА! АВТОПРОДАЖА +20 🪙'
+        ? '⬆️ ПОВТОРКА! +10 К ЗДОРОВЬЮ И +10 К УРОНУ!'
         : '🎉 ВАМ ВЫПАЛ НОВЫЙ БОЕЦ!';
     }
     if (msgEl) {
       msgEl.textContent = wasAlreadyUnlocked
-        ? `🔄 Выпала повторка «${droppedFighter.name}» — автоматически продана за +20 монет!`
+        ? `⬆️ Выпала повторка «${droppedFighter.name}» — боец получил +10 ❤️ к здоровью и +10 ⚔️ к урону (теперь ❤️${updatedStats.hp} ⚔️${updatedStats.damage})!`
         : `🎉 Новый боец «${droppedFighter.name}» из Контейнера бойцов добавлен в вашу ячейку!`;
     }
 
@@ -914,7 +1319,7 @@ class BattleRoyalPaperGame {
     this.updateAllCoinsUI();
   }
 
-  // Открытие «Бокса бойцов» за 50 монет (содержит только 5 новых слабых обычных без способностей, 5 редких и 6 эпических)
+  // Открытие «Бокса бойцов» за 50 монет
   openFighterBoxFor50Coins() {
     if (this.coins < 50) {
       window.sfx.defeat();
@@ -947,8 +1352,9 @@ class BattleRoyalPaperGame {
     const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
     const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
 
+    let updatedStats = null;
     if (wasAlreadyUnlocked) {
-      this.coins += 20;
+      updatedStats = this.applyDuplicateFighterBonus(droppedFighter.id);
     } else {
       this.unlockedFighters.add(droppedFighter.id);
       this.selectedCampaignFighterId = droppedFighter.id;
@@ -966,22 +1372,310 @@ class BattleRoyalPaperGame {
       renderFighterThumbnail(cnv, droppedFighter, 'player', true);
       nameEl.textContent = droppedFighter.name.toUpperCase();
       rarEl.textContent = wasAlreadyUnlocked
-        ? `ПОВТОРКА • ПРОДАНА ЗА +20 🪙`
+        ? `ПОВТОРКА • +10 ❤️ HP И +10 ⚔️ УРОНА!`
         : `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
-      rarEl.style.background = wasAlreadyUnlocked ? '#d97706' : droppedFighter.rarityColor;
+      rarEl.style.background = wasAlreadyUnlocked ? '#16a34a' : droppedFighter.rarityColor;
     }
     if (headerEl) {
       headerEl.textContent = wasAlreadyUnlocked
-        ? '🔄 ПОВТОРКА! АВТОПРОДАЖА +20 🪙'
+        ? '⬆️ ПОВТОРКА! +10 К ЗДОРОВЬЮ И +10 К УРОНУ!'
         : '🎉 НОВЫЙ БОЕЦ ИЗ БОКСА!';
     }
     if (msgEl) {
       msgEl.textContent = wasAlreadyUnlocked
-        ? `🔄 Выпала повторка «${droppedFighter.name}» — автоматически продана за +20 монет!`
+        ? `⬆️ Выпала повторка «${droppedFighter.name}» — боец получил +10 ❤️ к здоровью и +10 ⚔️ к урону (теперь ❤️${updatedStats.hp} ⚔️${updatedStats.damage})!`
         : `🎉 Новый боец «${droppedFighter.name}» из Бокса бойцов добавлен в вашу коллекцию!`;
     }
 
     this.renderFighterBoxRaritiesAndFighters();
+    this.updateAllCoinsUI();
+  }
+
+  // Открытие «Ящика за 500 монет» (12 редких, 6 эпических, 4 мифических)
+  openCrate500For500Coins() {
+    if (this.coins < 500) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 500;
+    window.sfx.victory();
+
+    const boxIll = document.getElementById('crate500Illustration');
+    if (boxIll) {
+      boxIll.classList.remove('crate-shake');
+      void boxIll.offsetWidth;
+      boxIll.classList.add('crate-shake');
+    }
+
+    const tiers500 = FIGHTER_RARITIES.filter(t => (t.crate500TierChance || 0) > 0);
+    const roll = Math.random() * 100;
+    let cumulative = 0;
+    let chosenTier = tiers500[0];
+    for (const tier of tiers500) {
+      cumulative += tier.crate500TierChance;
+      if (roll <= cumulative) {
+        chosenTier = tier;
+        break;
+      }
+    }
+
+    const pool = FIGHTER_CLASSES.filter(fc => fc.inCrate500 && fc.rarity === chosenTier.id);
+    const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
+    const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
+
+    let updatedStats = null;
+    if (wasAlreadyUnlocked) {
+      updatedStats = this.applyDuplicateFighterBonus(droppedFighter.id);
+    } else {
+      this.unlockedFighters.add(droppedFighter.id);
+      this.selectedCampaignFighterId = droppedFighter.id;
+    }
+
+    const resBox = document.getElementById('crate500UnboxedResult');
+    const headerEl = document.getElementById('crate500UnboxedHeader');
+    const cnv = document.getElementById('crate500UnboxedCanvas');
+    const nameEl = document.getElementById('crate500UnboxedName');
+    const rarEl = document.getElementById('crate500UnboxedRarity');
+    const msgEl = document.getElementById('crate500StatusMsg');
+
+    if (resBox && cnv && nameEl && rarEl) {
+      resBox.classList.remove('hidden');
+      renderFighterThumbnail(cnv, droppedFighter, 'player', true);
+      nameEl.textContent = droppedFighter.name.toUpperCase();
+      rarEl.textContent = wasAlreadyUnlocked
+        ? `ПОВТОРКА • +10 ❤️ HP И +10 ⚔️ УРОНА!`
+        : `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
+      rarEl.style.background = wasAlreadyUnlocked ? '#16a34a' : droppedFighter.rarityColor;
+    }
+    if (headerEl) {
+      headerEl.textContent = wasAlreadyUnlocked
+        ? '⬆️ ПОВТОРКА! +10 К ЗДОРОВЬЮ И +10 К УРОНУ!'
+        : '🎉 НОВЫЙ БОЕЦ ИЗ ЯЩИКА ЗА 500 🪙!';
+    }
+    if (msgEl) {
+      msgEl.textContent = wasAlreadyUnlocked
+        ? `⬆️ Выпала повторка «${droppedFighter.name}» — боец получил +10 ❤️ к здоровью и +10 ⚔️ к урону (теперь ❤️${updatedStats.hp} ⚔️${updatedStats.damage})!`
+        : `🎉 Новый боец «${droppedFighter.name}» (${droppedFighter.rarityName}) добавлен в вашу коллекцию!`;
+    }
+
+    this.renderCrate500RaritiesAndFighters();
+    this.updateAllCoinsUI();
+  }
+
+  // Открытие «Маленького ящика за 20 монет» (5 обычных, 4 редких, 2 эпических с малым шансом)
+  openMiniCrate20For20Coins() {
+    if (this.coins < 20) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 20;
+    window.sfx.victory();
+
+    const boxIll = document.getElementById('miniCrate20Illustration');
+    if (boxIll) {
+      boxIll.classList.remove('crate-shake');
+      void boxIll.offsetWidth;
+      boxIll.classList.add('crate-shake');
+    }
+
+    const tiers20 = FIGHTER_RARITIES.filter(t => (t.miniCrate20TierChance || 0) > 0);
+    const roll = Math.random() * 100;
+    let cumulative = 0;
+    let chosenTier = tiers20[0];
+    for (const tier of tiers20) {
+      cumulative += tier.miniCrate20TierChance;
+      if (roll <= cumulative) {
+        chosenTier = tier;
+        break;
+      }
+    }
+
+    const pool = FIGHTER_CLASSES.filter(fc => fc.inMiniCrate20 && fc.rarity === chosenTier.id);
+    const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
+    const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
+
+    let updatedStats = null;
+    if (wasAlreadyUnlocked) {
+      updatedStats = this.applyDuplicateFighterBonus(droppedFighter.id);
+    } else {
+      this.unlockedFighters.add(droppedFighter.id);
+      this.selectedCampaignFighterId = droppedFighter.id;
+    }
+
+    const resBox = document.getElementById('miniCrate20UnboxedResult');
+    const headerEl = document.getElementById('miniCrate20UnboxedHeader');
+    const cnv = document.getElementById('miniCrate20UnboxedCanvas');
+    const nameEl = document.getElementById('miniCrate20UnboxedName');
+    const rarEl = document.getElementById('miniCrate20UnboxedRarity');
+    const msgEl = document.getElementById('miniCrate20StatusMsg');
+
+    if (resBox && cnv && nameEl && rarEl) {
+      resBox.classList.remove('hidden');
+      renderFighterThumbnail(cnv, droppedFighter, 'player', true);
+      nameEl.textContent = droppedFighter.name.toUpperCase();
+      rarEl.textContent = wasAlreadyUnlocked
+        ? `ПОВТОРКА • +10 ❤️ HP И +10 ⚔️ УРОНА!`
+        : `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
+      rarEl.style.background = wasAlreadyUnlocked ? '#16a34a' : droppedFighter.rarityColor;
+    }
+    if (headerEl) {
+      headerEl.textContent = wasAlreadyUnlocked
+        ? '⬆️ ПОВТОРКА! +10 К ЗДОРОВЬЮ И +10 К УРОНУ!'
+        : '🎉 НОВЫЙ БОЕЦ ИЗ МАЛЕНЬКОГО ЯЩИКА!';
+    }
+    if (msgEl) {
+      msgEl.textContent = wasAlreadyUnlocked
+        ? `⬆️ Выпала повторка «${droppedFighter.name}» — боец получил +10 ❤️ к здоровью и +10 ⚔️ к урону (теперь ❤️${updatedStats.hp} ⚔️${updatedStats.damage})!`
+        : `🎉 Новый боец «${droppedFighter.name}» (${droppedFighter.rarityName}) добавлен в вашу коллекцию!`;
+    }
+
+    this.renderMiniCrate20RaritiesAndFighters();
+    this.updateAllCoinsUI();
+  }
+
+  // Открытие ящика «Эксклюзив» за 1 000 монет (10 эпических, 7 мифических, 5 легендарных и 2 галактических бойца!)
+  openExclusiveCrateFor1000Coins() {
+    if (this.coins < 1000) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 1000;
+    window.sfx.victory();
+
+    const boxIll = document.getElementById('exclusiveCrateIllustration');
+    if (boxIll) {
+      boxIll.classList.remove('crate-shake');
+      void boxIll.offsetWidth;
+      boxIll.classList.add('crate-shake');
+    }
+
+    const exclTiers = FIGHTER_RARITIES.filter(t => (t.exclusiveTierChance || 0) > 0);
+    const roll = Math.random() * 100;
+    let cumulative = 0;
+    let chosenTier = exclTiers[0];
+    for (const tier of exclTiers) {
+      cumulative += tier.exclusiveTierChance;
+      if (roll <= cumulative) {
+        chosenTier = tier;
+        break;
+      }
+    }
+
+    const pool = FIGHTER_CLASSES.filter(fc => fc.inExclusiveCrate && fc.rarity === chosenTier.id);
+    const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
+    const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
+
+    let updatedStats = null;
+    if (wasAlreadyUnlocked) {
+      updatedStats = this.applyDuplicateFighterBonus(droppedFighter.id);
+    } else {
+      this.unlockedFighters.add(droppedFighter.id);
+      this.selectedCampaignFighterId = droppedFighter.id;
+    }
+
+    const resBox = document.getElementById('exclusiveCrateUnboxedResult');
+    const headerEl = document.getElementById('exclusiveCrateUnboxedHeader');
+    const cnv = document.getElementById('exclusiveCrateUnboxedCanvas');
+    const nameEl = document.getElementById('exclusiveCrateUnboxedName');
+    const rarEl = document.getElementById('exclusiveCrateUnboxedRarity');
+    const msgEl = document.getElementById('exclusiveCrateStatusMsg');
+
+    if (resBox && cnv && nameEl && rarEl) {
+      resBox.classList.remove('hidden');
+      renderFighterThumbnail(cnv, droppedFighter, 'player', true);
+      nameEl.textContent = droppedFighter.name.toUpperCase();
+      rarEl.textContent = wasAlreadyUnlocked
+        ? `ПОВТОРКА • +10 ❤️ HP И +10 ⚔️ УРОНА!`
+        : `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
+      rarEl.style.background = wasAlreadyUnlocked ? '#16a34a' : droppedFighter.rarityColor;
+    }
+    if (headerEl) {
+      headerEl.textContent = wasAlreadyUnlocked
+        ? '⬆️ ПОВТОРКА! +10 К ЗДОРОВЬЮ И +10 К УРОНУ!'
+        : (droppedFighter.rarity === 'galactic' ? '🌌 ГАЛАКТИЧЕСКИЙ БОЕЦ (3 СЛОТА)!' : '🎉 НОВЫЙ БОЕЦ ИЗ «ЭКСКЛЮЗИВА»!');
+    }
+    if (msgEl) {
+      msgEl.textContent = wasAlreadyUnlocked
+        ? `⬆️ Выпала повторка «${droppedFighter.name}» — боец получил +10 ❤️ к здоровью и +10 ⚔️ к урону (теперь ❤️${updatedStats.hp} ⚔️${updatedStats.damage})!`
+        : `🎉 Новый боец «${droppedFighter.name}» (${droppedFighter.rarityName}) из ящика «Эксклюзив» добавлен в вашу коллекцию!`;
+    }
+
+    this.renderExclusiveCrateRaritiesAndFighters();
+    this.updateAllCoinsUI();
+  }
+
+  // Открытие «Ящика за 35 монет» (10 обычных, 5 редких и 5 эпических бойцов!)
+  openCrate35For35Coins() {
+    if (this.coins < 35) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 35;
+    window.sfx.victory();
+
+    const boxIll = document.getElementById('crate35Illustration');
+    if (boxIll) {
+      boxIll.classList.remove('crate-shake');
+      void boxIll.offsetWidth;
+      boxIll.classList.add('crate-shake');
+    }
+
+    const tiers35 = FIGHTER_RARITIES.filter(t => (t.crate35TierChance || 0) > 0);
+    const roll = Math.random() * 100;
+    let cumulative = 0;
+    let chosenTier = tiers35[0];
+    for (const tier of tiers35) {
+      cumulative += tier.crate35TierChance;
+      if (roll <= cumulative) {
+        chosenTier = tier;
+        break;
+      }
+    }
+
+    const pool = FIGHTER_CLASSES.filter(fc => fc.inCrate35 && fc.rarity === chosenTier.id);
+    const droppedFighter = pool[Math.floor(Math.random() * pool.length)];
+    const wasAlreadyUnlocked = this.unlockedFighters.has(droppedFighter.id);
+
+    let updatedStats = null;
+    if (wasAlreadyUnlocked) {
+      updatedStats = this.applyDuplicateFighterBonus(droppedFighter.id);
+    } else {
+      this.unlockedFighters.add(droppedFighter.id);
+      this.selectedCampaignFighterId = droppedFighter.id;
+    }
+
+    const resBox = document.getElementById('crate35UnboxedResult');
+    const headerEl = document.getElementById('crate35UnboxedHeader');
+    const cnv = document.getElementById('crate35UnboxedCanvas');
+    const nameEl = document.getElementById('crate35UnboxedName');
+    const rarEl = document.getElementById('crate35UnboxedRarity');
+    const msgEl = document.getElementById('crate35StatusMsg');
+
+    if (resBox && cnv && nameEl && rarEl) {
+      resBox.classList.remove('hidden');
+      renderFighterThumbnail(cnv, droppedFighter, 'player', true);
+      nameEl.textContent = droppedFighter.name.toUpperCase();
+      rarEl.textContent = wasAlreadyUnlocked
+        ? `ПОВТОРКА • +10 ❤️ HP И +10 ⚔️ УРОНА!`
+        : `${droppedFighter.rarityName} редкость (${droppedFighter.dropChance}%)`;
+      rarEl.style.background = wasAlreadyUnlocked ? '#16a34a' : droppedFighter.rarityColor;
+    }
+    if (headerEl) {
+      headerEl.textContent = wasAlreadyUnlocked
+        ? '⬆️ ПОВТОРКА! +10 К ЗДОРОВЬЮ И +10 К УРОНУ!'
+        : '🎉 НОВЫЙ БОЕЦ ИЗ ЯЩИКА ЗА 35 🪙!';
+    }
+    if (msgEl) {
+      msgEl.textContent = wasAlreadyUnlocked
+        ? `⬆️ Выпала повторка «${droppedFighter.name}» — боец получил +10 ❤️ к здоровью и +10 ⚔️ к урону (теперь ❤️${updatedStats.hp} ⚔️${updatedStats.damage})!`
+        : `🎉 Новый боец «${droppedFighter.name}» (${droppedFighter.rarityName}) добавлен в вашу коллекцию!`;
+    }
+
+    this.renderCrate35RaritiesAndFighters();
     this.updateAllCoinsUI();
   }
 
@@ -995,32 +1689,52 @@ class BattleRoyalPaperGame {
     const lvlNumEl = document.getElementById('hubLevelNumber');
     if (lvlNumEl) lvlNumEl.textContent = this.campaignLevel;
 
-    // Следим, чтобы в отряде были только открытые бойцы и максимум 3 места
-    this.campaignSquad = (this.campaignSquad || []).filter(id => this.unlockedFighters.has(id)).slice(0, 3);
-    // Если в отряде есть Стражник небес — он занимает сразу все 3 места и не может быть ещё с 2 бойцами!
-    if (this.campaignSquad.includes('sky_guardian')) {
-      this.campaignSquad = ['sky_guardian'];
+    const maxLvl = Math.max(1, this.maxCampaignLevel || 1);
+    const prevLvlBtn = document.getElementById('hubPrevLevelBtn');
+    const nextLvlBtn = document.getElementById('hubNextLevelBtn');
+    if (prevLvlBtn) {
+      prevLvlBtn.disabled = this.campaignLevel <= 1;
+      prevLvlBtn.textContent = this.campaignLevel > 1
+        ? `◀ УРОВЕНЬ ${this.campaignLevel - 1}`
+        : '◀ ПРЕД. УРОВЕНЬ';
+    }
+    if (nextLvlBtn) {
+      nextLvlBtn.disabled = this.campaignLevel >= maxLvl;
+      nextLvlBtn.textContent = this.campaignLevel < maxLvl
+        ? `УРОВЕНЬ ${this.campaignLevel + 1} ▶`
+        : `МАКС. ОТКРЫТ: ${maxLvl}`;
+    }
+
+    // Следим, чтобы в отряде были только открытые бойцы, без повторов (каждого бойца можно брать только по 1 разу!) и максимум 3 места
+    this.campaignSquad = [...new Set((this.campaignSquad || []).filter(id => this.unlockedFighters.has(id)))].slice(0, 3);
+    // Если в отряде есть боец на 3 слота (Стражник небес, Молния или Король скелетов) — он занимает сразу все 3 места!
+    const tripleFighterInSquad = this.campaignSquad.find(id => isTripleSlotFighter(id));
+    if (tripleFighterInSquad) {
+      this.campaignSquad = [tripleFighterInSquad];
     }
     if (this.campaignSquad.length === 0 && this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId)) {
       this.campaignSquad = [this.selectedCampaignFighterId];
     }
 
     const slotsUsed = this.getSquadSlotsUsed();
-    const hasGuardianInSquad = this.campaignSquad.includes('sky_guardian');
+    const activeTripleId = this.campaignSquad.find(id => isTripleSlotFighter(id)) || null;
+    const activeTripleCls = activeTripleId ? getFighterClass(activeTripleId) : null;
 
     const enemies = this.getCampaignEnemiesForLevel(this.campaignLevel);
-    const enemyNames = enemies.map(e => getFighterClass(e.classId).name).join(', ');
+    const enemyNames = enemies.map(e => `${getFighterClass(e.classId).name} (❤️${e.hp} ⚔️${e.damage})`).join(', ');
+    const isCompleted = this.completedLevels.has(this.campaignLevel);
+    const completedTag = isCompleted ? ' <span style="color:#16a34a">(✓ Пройден — можно играть снова!)</span>' : '';
     const previewEl = document.getElementById('hubEnemyPreviewText');
     if (previewEl) {
       previewEl.innerHTML =
-        `На <strong>${this.campaignLevel} уровне</strong> вас ждёт (${enemies.length} шт., макс. 6 бойцов на арене): <strong>${enemyNames}</strong> • Награда: <strong>+20 🪙</strong>`;
+        `На <strong>${this.campaignLevel} уровне</strong>${completedTag} вас ждёт (${enemies.length} шт.): <strong>${enemyNames}</strong> • Приз за победу: <strong>+2 🪙</strong>`;
     }
 
-    // Отрисовываем панель отряда (до 3 мест; Стражник небес занимает сразу 3 места!)
+    // Отрисовываем панель отряда (до 3 мест; Стражник небес, Молния и Король скелетов занимают сразу 3 места!)
     const squadCountEl = document.getElementById('hubSquadCountLabel');
     if (squadCountEl) {
-      squadCountEl.textContent = hasGuardianInSquad
-        ? '3 / 3 (Стражник небес — 3 места!)'
+      squadCountEl.textContent = activeTripleCls
+        ? `3 / 3 (${activeTripleCls.name} — 3 места!)`
         : `${slotsUsed} / 3`;
     }
 
@@ -1029,17 +1743,21 @@ class BattleRoyalPaperGame {
       const selId = this.selectedCampaignFighterId;
       const selUnlocked = selId && this.unlockedFighters.has(selId);
       const selName = selId ? getFighterClass(selId).name : '';
+      const alreadyInSquad = selId && this.campaignSquad.includes(selId);
 
-      if (selId === 'sky_guardian' && selUnlocked) {
-        addSquadBtn.disabled = hasGuardianInSquad;
-        addSquadBtn.textContent = hasGuardianInSquad
-          ? '👑 СТРАЖНИК НЕБЕС УЖЕ В ОТРЯДЕ (ЗАНИМАЕТ ВСЕ 3 МЕСТА)'
-          : '👑 ВЗЯТЬ СТРАЖНИКА НЕБЕС (ЗАЙМЁТ СРАЗУ ВСЕ 3 МЕСТА!)';
-      } else if (hasGuardianInSquad) {
+      if (selId && isTripleSlotFighter(selId) && selUnlocked) {
+        addSquadBtn.disabled = activeTripleId === selId;
+        addSquadBtn.textContent = activeTripleId === selId
+          ? `👑 ${selName.toUpperCase()} УЖЕ В ОТРЯДЕ (ЗАНИМАЕТ ВСЕ 3 МЕСТА)`
+          : `👑 ВЗЯТЬ: ${selName.toUpperCase()} (ЗАЙМЁТ СРАЗУ ВСЕ 3 МЕСТА!)`;
+      } else if (activeTripleCls) {
         addSquadBtn.disabled = true;
-        addSquadBtn.textContent = '👑 СТРАЖНИК НЕБЕС ЗАНИМАЕТ ВСЕ 3 МЕСТА (УБЕРИТЕ ЕГО ✕)';
+        addSquadBtn.textContent = `👑 ${activeTripleCls.name.toUpperCase()} ЗАНИМАЕТ ВСЕ 3 МЕСТА (УБЕРИТЕ ЕГО ✕)`;
+      } else if (alreadyInSquad) {
+        addSquadBtn.disabled = true;
+        addSquadBtn.textContent = `✅ ${selName.toUpperCase()} УЖЕ В ОТРЯДЕ (МОЖНО ТОЛЬКО ПО 1 РАЗУ)`;
       } else {
-        const canAdd = slotsUsed < 3 && selUnlocked;
+        const canAdd = slotsUsed < 3 && selUnlocked && !alreadyInSquad;
         addSquadBtn.disabled = !canAdd;
         addSquadBtn.textContent = slotsUsed >= 3
           ? 'ЗАНЯТЫ ВСЕ 3 МЕСТА В ОТРЯДЕ'
@@ -1050,24 +1768,23 @@ class BattleRoyalPaperGame {
     const squadSlotsEl = document.getElementById('hubSquadSlots');
     if (squadSlotsEl) {
       squadSlotsEl.innerHTML = '';
-      if (hasGuardianInSquad) {
-        // Стражник небес занимает сразу все 3 слота!
-        const cls = getFighterClass('sky_guardian');
-        const st = this.getUpgradedFighterStats('sky_guardian');
+      if (activeTripleId && activeTripleCls) {
+        // Боец на 3 места (Стражник небес, Молния или Король скелетов) занимает сразу все 3 слота!
+        const st = this.getUpgradedFighterStats(activeTripleId);
         const slotEl = document.createElement('div');
         slotEl.className = 'hub-squad-slot-card guardian-triple-slot';
         slotEl.innerHTML = `
           <canvas width="44" height="28"></canvas>
-          <span>👑 МЕСТА #1, #2 и #3 (ВСЕ 3 МЕСТА): ${cls.name.toUpperCase()} (❤️${st.hp} • ☀️Луч ${st.damage} HP всем)</span>
-          <button type="button" class="hub-squad-remove-btn" title="Убрать Стражника небес и освободить 3 места">✕</button>
+          <span>👑 МЕСТА #1, #2 и #3 (ВСЕ 3 МЕСТА): ${activeTripleCls.name.toUpperCase()} (❤️${st.hp} ⚔️${st.damage})</span>
+          <button type="button" class="hub-squad-remove-btn" title="Убрать из отряда и освободить 3 места">✕</button>
         `;
         const cnv = slotEl.querySelector('canvas');
-        renderFighterThumbnail(cnv, cls, 'player', false);
+        renderFighterThumbnail(cnv, activeTripleCls, 'player', false);
         slotEl.querySelector('.hub-squad-remove-btn').addEventListener('click', (e) => {
           e.stopPropagation();
           window.sfx.click();
           this.campaignSquad = [];
-          if (this.selectedCampaignFighterId === 'sky_guardian') {
+          if (this.selectedCampaignFighterId === activeTripleId) {
             this.selectedCampaignFighterId = 'swordsman';
           }
           this.renderCampaignHub();
@@ -1119,8 +1836,8 @@ class BattleRoyalPaperGame {
     if (this.campaignSquad.length > 0) {
       if (playBtn) {
         playBtn.disabled = false;
-        playBtn.textContent = hasGuardianInSquad
-          ? `⚔️ ИГРАТЬ (СТРАЖНИК НЕБЕС [3 МЕСТА] ПРОТИВ ${enemies.length})`
+        playBtn.textContent = activeTripleCls
+          ? `⚔️ ИГРАТЬ (${activeTripleCls.name.toUpperCase()} [3 МЕСТА] ПРОТИВ ${enemies.length})`
           : `⚔️ ИГРАТЬ (ВАШИХ БОЙЦОВ: ${this.campaignSquad.length} ПРОТИВ ${enemies.length})`;
       }
     } else {
@@ -1138,20 +1855,20 @@ class BattleRoyalPaperGame {
         upgBtn.textContent = `⬆️ ПРОКАЧАТЬ (${selCls.name.toUpperCase()})`;
       }
       if (hintEl) {
-        hintEl.textContent = selCls.id === 'sky_guardian'
-          ? `Выбран: 👼 ${selCls.name} (❤️ ${st.hp} HP • ☀️ Луч ${st.damage} урона всем каждые 10 с в непробиваемом щите). Занимает сразу все 3 места!`
-          : `Выбран: ${selCls.name} (❤️ ${st.hp} HP • ⚔️ ${st.damage} урона). Можно взять до 3 наших бойцов (всего на арене макс. 6)!`;
+        hintEl.textContent = isTripleSlotFighter(selCls.id)
+          ? `Выбран титан на 3 слота: 👑 ${selCls.name} (❤️ ${st.hp} HP • ⚔️ ${st.damage} урона • ${selCls.desc}). Занимает сразу все 3 места!`
+          : `Выбран: ${selCls.name} (❤️ ${st.hp} HP • ⚔️ ${st.damage} урона). Можно взять до 3 разных бойцов (по 1 каждого вида)!`;
       }
     } else {
       if (upgBtn) {
         upgBtn.classList.add('hidden');
       }
       if (hintEl) {
-        hintEl.textContent = '👇 Выберите персонажа в ячейках снизу, чтобы добавить в отряд (до 3 мест) или прокачать!';
+        hintEl.textContent = '👇 Выберите персонажа в ячейках снизу, чтобы добавить в отряд (до 3 разных бойцов) или прокачать!';
       }
     }
 
-    // Отрисовываем сетку с ячейками по редкости (все 73 места)
+    // Отрисовываем сетку с ячейками по редкости (все 150 мест)
     const grid = document.getElementById('hubRarityCellsGrid');
     if (!grid) return;
     grid.innerHTML = '';
@@ -1160,7 +1877,7 @@ class BattleRoyalPaperGame {
     for (const fc of sortedFighters) {
       const isUnlocked = this.unlockedFighters.has(fc.id);
       const isSelected = this.selectedCampaignFighterId === fc.id;
-      const inSquadCount = this.campaignSquad.filter(id => id === fc.id).length;
+      const inSquadCount = this.campaignSquad.includes(fc.id) ? 1 : 0;
       const cell = document.createElement('div');
       cell.className =
         'hub-cell-card' +
@@ -1172,7 +1889,7 @@ class BattleRoyalPaperGame {
       if (isUnlocked) {
         const st = this.getUpgradedFighterStats(fc.id);
         const countBadge = inSquadCount > 0
-          ? (fc.id === 'sky_guardian' ? ' (3/3 места)' : ` (×${inSquadCount})`)
+          ? (isTripleSlotFighter(fc.id) ? ' (3/3 места)' : ' (В отряде)')
           : '';
         cell.innerHTML = `
           <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}${countBadge}</div>
@@ -1185,14 +1902,13 @@ class BattleRoyalPaperGame {
 
         cell.addEventListener('click', () => {
           window.sfx.click();
-          if (fc.id === 'sky_guardian') {
-            this.selectedCampaignFighterId = 'sky_guardian';
-            this.campaignSquad = ['sky_guardian'];
-          } else if (this.selectedCampaignFighterId === fc.id && this.getSquadSlotsUsed() < 3) {
-            this.campaignSquad.push(fc.id);
+          if (isTripleSlotFighter(fc.id)) {
+            this.selectedCampaignFighterId = fc.id;
+            this.campaignSquad = [fc.id];
           } else {
             this.selectedCampaignFighterId = fc.id;
-            if (this.campaignSquad.length === 0) {
+            // Каждого бойца можно брать только по 1 разу! Если его ещё нет в отряде и есть свободный слот — добавляем
+            if (!this.campaignSquad.includes(fc.id) && !this.campaignSquad.some(id => isTripleSlotFighter(id)) && this.getSquadSlotsUsed() < 3) {
               this.campaignSquad.push(fc.id);
             }
           }
@@ -1211,11 +1927,24 @@ class BattleRoyalPaperGame {
           window.sfx.click();
           this.openShopScreen('container');
         });
+      } else if (fc.inExclusiveCrate) {
+        cell.innerHTML = `
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <div class="hcc-lock">🌌</div>
+          <div class="hcc-name">В Эксклюзиве</div>
+          <div class="hcc-stats">${fc.dropChance}%</div>
+        `;
+        cell.style.cursor = 'pointer';
+        cell.title = 'Нажмите, чтобы перейти во вкладку ящика «Эксклюзив» (1 000 🪙)';
+        cell.addEventListener('click', () => {
+          window.sfx.click();
+          this.openShopScreen('exclusive_crate');
+        });
       } else if (fc.inFighterBox) {
         cell.innerHTML = `
           <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
           <div class="hcc-lock">🎁</div>
-          <div class="hcc-name">В боксе</div>
+          <div class="hcc-name">В боксе 50</div>
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
         cell.style.cursor = 'pointer';
@@ -1224,6 +1953,45 @@ class BattleRoyalPaperGame {
           window.sfx.click();
           this.openShopScreen('fighter_box');
         });
+      } else if (fc.inCrate500) {
+        cell.innerHTML = `
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <div class="hcc-lock">💎</div>
+          <div class="hcc-name">В ящике 500</div>
+          <div class="hcc-stats">${fc.dropChance}%</div>
+        `;
+        cell.style.cursor = 'pointer';
+        cell.title = 'Нажмите, чтобы перейти во вкладку «Ящик за 500 🪙»';
+        cell.addEventListener('click', () => {
+          window.sfx.click();
+          this.openShopScreen('crate_500');
+        });
+      } else if (fc.inCrate35) {
+        cell.innerHTML = `
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <div class="hcc-lock">🎒</div>
+          <div class="hcc-name">В ящике 35</div>
+          <div class="hcc-stats">${fc.dropChance}%</div>
+        `;
+        cell.style.cursor = 'pointer';
+        cell.title = 'Нажмите, чтобы перейти во вкладку «Ящик за 35 🪙»';
+        cell.addEventListener('click', () => {
+          window.sfx.click();
+          this.openShopScreen('crate_35');
+        });
+      } else if (fc.inMiniCrate20) {
+        cell.innerHTML = `
+          <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
+          <div class="hcc-lock">🧰</div>
+          <div class="hcc-name">В ящике 20</div>
+          <div class="hcc-stats">${fc.dropChance}%</div>
+        `;
+        cell.style.cursor = 'pointer';
+        cell.title = 'Нажмите, чтобы перейти во вкладку «Маленький ящик за 20 🪙»';
+        cell.addEventListener('click', () => {
+          window.sfx.click();
+          this.openShopScreen('mini_crate_20');
+        });
       } else {
         cell.innerHTML = `
           <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
@@ -1231,6 +1999,12 @@ class BattleRoyalPaperGame {
           <div class="hcc-name">В контейнере</div>
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
+        cell.style.cursor = 'pointer';
+        cell.title = 'Нажмите, чтобы перейти к Контейнеру бойцов (1 000 🪙)';
+        cell.addEventListener('click', () => {
+          window.sfx.click();
+          this.openShopScreen('container');
+        });
       }
 
       grid.appendChild(cell);
@@ -1271,7 +2045,7 @@ class BattleRoyalPaperGame {
     if (hpNumEl) hpNumEl.textContent = st.hp;
     if (dmgNumEl) dmgNumEl.textContent = st.damage;
 
-    const canAfford = this.coins >= 15;
+    const canAfford = this.coins >= 2;
     const hpBtn = document.getElementById('upgradeHp15Btn');
     const dmgBtn = document.getElementById('upgradeDmg15Btn');
     if (hpBtn) hpBtn.disabled = !canAfford;
@@ -1280,14 +2054,14 @@ class BattleRoyalPaperGame {
     this.updateAllCoinsUI();
   }
 
-  // Прокачка за 15 монет: добавляет +5 к здоровью или +2 к урону
+  // Прокачка за 2 монеты: добавляет +5 к здоровью или +2 к урону
   buyStatUpgrade(statType) {
-    if (this.coins < 15 || !this.selectedCampaignFighterId) {
+    if (this.coins < 2 || !this.selectedCampaignFighterId) {
       window.sfx.defeat();
       return;
     }
 
-    this.coins -= 15;
+    this.coins -= 2;
     window.sfx.heal();
 
     const cid = this.selectedCampaignFighterId;
@@ -1298,18 +2072,18 @@ class BattleRoyalPaperGame {
     const msgEl = document.getElementById('upgradeStatusFeedback');
     if (statType === 'hp') {
       this.fighterUpgrades[cid].hp += 5;
-      if (msgEl) msgEl.textContent = `✅ Здоровье бойца увеличено на +5 за 15 монет!`;
+      if (msgEl) msgEl.textContent = `✅ Здоровье бойца увеличено на +5 за 2 монеты!`;
     } else {
       this.fighterUpgrades[cid].damage += 2;
-      if (msgEl) msgEl.textContent = `✅ Урон бойца увеличен на +2 за 15 монет!`;
+      if (msgEl) msgEl.textContent = `✅ Урон бойца увеличен на +2 за 2 монеты!`;
     }
 
     this.renderUpgradeScreen();
   }
 
-  // Переход из локации с ячейками на арену и запуск боя уровня (до 3 наших бойцов, максимум 6 на арене)!
+  // Переход из локации с ячейками на арену и запуск боя уровня (до 3 наших разных бойцов, максимум 6 на арене)!
   startCampaignBattleFromHub() {
-    const validSquad = (this.campaignSquad || []).filter(id => this.unlockedFighters.has(id)).slice(0, 3);
+    const validSquad = [...new Set((this.campaignSquad || []).filter(id => this.unlockedFighters.has(id)))].slice(0, 3);
     if (validSquad.length === 0 && this.selectedCampaignFighterId && this.unlockedFighters.has(this.selectedCampaignFighterId)) {
       validSquad.push(this.selectedCampaignFighterId);
     }
@@ -1586,7 +2360,15 @@ class BattleRoyalPaperGame {
 
     document.getElementById('replayLevelBtn').addEventListener('click', () => {
       window.sfx.click();
+      if (this.campaignReturnTimer) {
+        clearTimeout(this.campaignReturnTimer);
+        this.campaignReturnTimer = null;
+      }
       if (this.isCampaignBattle) {
+        if (this.state === 'ended' && this.lastFinishedCampaignLevel) {
+          this.campaignLevel = this.lastFinishedCampaignLevel;
+          this.level = this.campaignLevel;
+        }
         this.startCampaignBattleFromHub();
       } else {
         this.stopBattleToPrep();
@@ -1594,6 +2376,10 @@ class BattleRoyalPaperGame {
     });
     document.getElementById('nextStageBtn').addEventListener('click', () => {
       window.sfx.click();
+      if (this.campaignReturnTimer) {
+        clearTimeout(this.campaignReturnTimer);
+        this.campaignReturnTimer = null;
+      }
       if (this.isCampaignBattle) {
         this.openCampaignHubScreen();
       } else {
@@ -1615,6 +2401,13 @@ class BattleRoyalPaperGame {
 
   // ==================== ЛОГИКА КОМАНД И СТАТОВ ====================
   setLevel(lvl) {
+    if (this.isCampaignBattle) {
+      const maxLvl = Math.max(1, this.maxCampaignLevel || 1);
+      this.campaignLevel = Math.max(1, Math.min(maxLvl, lvl));
+      this.level = this.campaignLevel;
+      this.startCampaignBattleFromHub();
+      return;
+    }
     this.level = Math.max(1, lvl);
     this.stopBattleToPrep();
     this.generateBotTeamForLevel(this.level);
@@ -1658,7 +2451,7 @@ class BattleRoyalPaperGame {
   getTeamUsedSlots(list) {
     let used = 0;
     for (const u of list) {
-      used += (u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian') ? 3 : 1;
+      used += (isTripleSlotFighter(u.classId) || isTripleSlotFighter(u.abilityId)) ? 3 : 1;
     }
     return used;
   }
@@ -1666,11 +2459,11 @@ class BattleRoyalPaperGame {
   addUnitToTeam(team, classId) {
     if (this.state !== 'prep') this.stopBattleToPrep();
     const list = team === 'player' ? this.playerBlueprints : this.botBlueprints;
-    const hasGuardian = list.some(u => u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian');
+    const hasTripleSlot = list.some(u => isTripleSlotFighter(u.classId) || isTripleSlotFighter(u.abilityId));
 
-    // Стражник небес занимает сразу 3 места и не может быть с другими бойцами в команде!
-    if (classId === 'sky_guardian') {
-      if (hasGuardian) {
+    // Бойцы на 3 места (Стражник небес, Молния, Король скелетов) занимают сразу все 3 ячейки отряда!
+    if (isTripleSlotFighter(classId)) {
+      if (hasTripleSlot) {
         window.sfx.defeat();
         return;
       }
@@ -1688,8 +2481,8 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    // Если в команде уже стоит Стражник небес — больше никого добавить нельзя!
-    if (hasGuardian) {
+    // Если в команде уже стоит боец на 3 места — больше никого добавить нельзя!
+    if (hasTripleSlot) {
       window.sfx.defeat();
       return;
     }
@@ -1725,7 +2518,7 @@ class BattleRoyalPaperGame {
   duplicateSelectedUnit(team) {
     if (this.state !== 'prep') this.stopBattleToPrep();
     const list = team === 'player' ? this.playerBlueprints : this.botBlueprints;
-    if (list.some(u => u.classId === 'sky_guardian' || u.abilityId === 'sky_guardian')) {
+    if (list.some(u => isTripleSlotFighter(u.classId) || isTripleSlotFighter(u.abilityId))) {
       window.sfx.defeat();
       return;
     }
@@ -2004,15 +2797,17 @@ class BattleRoyalPaperGame {
       window.sfx.victory();
       if (this.isCampaignBattle) {
         const finishedLvl = this.campaignLevel;
+        this.lastFinishedCampaignLevel = finishedLvl;
         this.completedLevels.add(finishedLvl);
-        this.coins += 20;
-        this.campaignLevel += 1;
+        this.coins += 2;
+        this.maxCampaignLevel = Math.max(this.maxCampaignLevel || 1, finishedLvl + 1);
+        this.campaignLevel = finishedLvl + 1;
         this.level = this.campaignLevel;
         this.updateAllCoinsUI();
         this.renderLevelBar();
         icon.textContent = '🪙';
-        title.textContent = `УРОВЕНЬ ${finishedLvl} ПРОЙДЕН! +20 МОНЕТ!`;
-        sub.textContent = `Начислено +20 монет (всего: ${this.coins} 🪙)! Переход к Уровню ${this.campaignLevel}...`;
+        title.textContent = `УРОВЕНЬ ${finishedLvl} ПРОЙДЕН! +2 МОНЕТЫ!`;
+        sub.textContent = `Начислено +2 монеты (всего: ${this.coins} 🪙)! Переход к Уровню ${this.campaignLevel}...`;
         nextBtn.textContent = `К ЯЧЕЙКАМ (${this.campaignLevel} УРОВЕНЬ) ➔`;
         nextBtn.classList.remove('hidden');
         if (this.campaignReturnTimer) clearTimeout(this.campaignReturnTimer);
@@ -2023,10 +2818,12 @@ class BattleRoyalPaperGame {
         }, 1500);
       } else {
         this.completedLevels.add(this.level);
+        this.coins += 2;
+        this.updateAllCoinsUI();
         this.renderLevelBar();
         icon.textContent = '🏆';
-        title.textContent = `УРОВЕНЬ ${this.level} ПРОЙДЕН!`;
-        sub.textContent = 'Ваши бумажные бойцы одержали чистую победу на ринге!';
+        title.textContent = `УРОВЕНЬ ${this.level} ПРОЙДЕН! +2 МОНЕТЫ!`;
+        sub.textContent = `Ваши бойцы одержали победу! Начислено +2 монеты (всего: ${this.coins} 🪙).`;
         nextBtn.textContent = 'СЛЕД. УРОВЕНЬ ➔';
         nextBtn.classList.remove('hidden');
       }
@@ -2333,6 +3130,22 @@ class BattleRoyalPaperGame {
       if (u.smokeTimer > 0) u.smokeTimer -= dt;
       if (u.cocoonTimer > 0) u.cocoonTimer -= dt;
       if (u.pavukDashingTimer > 0) u.pavukDashingTimer -= dt;
+      if (u.lightningDashingTimer > 0) u.lightningDashingTimer -= dt;
+
+      // КОРОЛЬ СКЕЛЕТОВ (ГАЛАКТИЧЕСКИЙ): небольшой дебаф — каждые 7 секунд проклятая корона отнимает у него 20 HP (не ниже 1 HP)!
+      if ((u.classId === 'skeleton_king' || u.abilityId === 'skeleton_king') && !u.isMinion) {
+        u.skeletonCurseTimer = (u.skeletonCurseTimer !== undefined ? u.skeletonCurseTimer : 7.0) - dt;
+        if (u.skeletonCurseTimer <= 0) {
+          u.skeletonCurseTimer = 7.0;
+          if (u.hp > 1) {
+            const drain = Math.min(20, u.hp - 1);
+            u.hp -= drain;
+            u.flashTimer = 0.1;
+            this.addFloatingText(u.x, u.y - u.radius - 18, `👑 ПРОКЛЯТИЕ КОРОНЫ -${drain} HP`, '#9333ea');
+            this.spawnConfetti(u.x, u.y - u.radius, '#a855f7', 5);
+          }
+        }
+      }
 
       // ОБОРОТЕНЬ: каждые 40 секунд меняет команду через дым, НО если остался 1 на 1 — способность не действует!
       if ((u.classId === 'werewolf' || u.abilityId === 'werewolf') && !u.isMinion) {
@@ -2463,8 +3276,10 @@ class BattleRoyalPaperGame {
         rageMult = 1 + missingRatio * 1.15;
       }
 
-      // Ускорение Супермена во время 2-секундного супер-полёта и Павука во время резкого рывка
-      const superSpeedMult = u.superFlightTimer > 0 ? 2.15 : (u.pavukDashingTimer > 0 ? 2.65 : 1.0);
+      // Ускорение Супермена во время 2-секундного супер-полёта, Павука и Галактической Молнии во время рывка
+      const superSpeedMult = u.superFlightTimer > 0
+        ? 2.15
+        : ((u.pavukDashingTimer > 0 || u.lightningDashingTimer > 0) ? 2.65 : 1.0);
       const slowMult = u.slowTimer > 0 ? 0.5 : 1.0;
       const finalSpeedMult = slowMult * rageMult * superSpeedMult * (u.isMinion ? 1.0 : endgameSpeedMult);
       const targetSpeed = u.baseSpeed * 44 * finalSpeedMult;
@@ -2478,12 +3293,12 @@ class BattleRoyalPaperGame {
         const newAng = curAng + angDiff * Math.min(1, dt * 5.5);
         u.vx = Math.cos(newAng) * targetSpeed;
         u.vy = Math.sin(newAng) * targetSpeed;
-      } else if ((u.superFlightTimer > 0 || u.pavukDashingTimer > 0) && enemy) {
-        // Во время 2-секундного полёта Супермен и во время рывка Павук наводятся на врага
+      } else if ((u.superFlightTimer > 0 || u.pavukDashingTimer > 0 || u.lightningDashingTimer > 0) && enemy) {
+        // Во время 2-секундного полёта Супермен и во время рывка Павук / Молния наводятся на врага
         const desiredAng = Math.atan2(enemy.y - u.y, enemy.x - u.x);
         const curAng = Math.atan2(u.vy, u.vx);
         const angDiff = this.normalizeAngle(desiredAng - curAng);
-        const turnSpeed = u.pavukDashingTimer > 0 ? 7.5 : 3.5;
+        const turnSpeed = (u.pavukDashingTimer > 0 || u.lightningDashingTimer > 0) ? 8.0 : 3.5;
         const newAng = curAng + angDiff * Math.min(1, dt * turnSpeed);
         u.vx = Math.cos(newAng) * targetSpeed;
         u.vy = Math.sin(newAng) * targetSpeed;
@@ -2765,7 +3580,11 @@ class BattleRoyalPaperGame {
     }
 
     // Контактные бойцы и Стражник небес держат оружие по курсу к врагу
-    if (['shield', 'vampire', 'worm', 'claws', 'robo_mech', 'boxer', 'zombie', 'werewolf', 'death', 'doubler', 'lumberjack', 'musketeer', 'sky_guardian'].includes(u.abilityId)) {
+    if ([
+      'shield', 'vampire', 'worm', 'claws', 'robo_mech', 'boxer', 'zombie', 'werewolf',
+      'death', 'doubler', 'lumberjack', 'musketeer', 'sky_guardian',
+      'baker_pin', 'carpenter_saw', 'tailor_scissors', 'shepherd_crook', 'chimney_sweep'
+    ].includes(u.abilityId)) {
       u.weaponAngle = u.aimAngle;
       return;
     }
@@ -2808,11 +3627,28 @@ class BattleRoyalPaperGame {
       }
     }
 
+    // МОЛНИЯ (ГАЛАКТИЧЕСКИЙ): каждые 5 секунд делает рывок на соперников (если задевает во время рывка — сносит 100 ХП)!
+    if (u.abilityId === 'galactic_lightning' || u.classId === 'galactic_lightning') {
+      u.lightningDashTimer = (u.lightningDashTimer !== undefined ? u.lightningDashTimer : 5.0) - dt;
+      if (u.lightningDashTimer <= 0 && enemy) {
+        u.lightningDashTimer = 5.0;
+        u.lightningDashingTimer = 0.78;
+        const dashAng = Math.atan2(enemy.y - u.y, enemy.x - u.x);
+        u.aimAngle = dashAng;
+        u.vx = Math.cos(dashAng) * 420;
+        u.vy = Math.sin(dashAng) * 420;
+        window.sfx.lightning();
+        this.spawnConfetti(u.x, u.y, '#38bdf8', 12);
+        this.addFloatingText(u.x, u.y - u.radius - 20, `⚡ РЫВОК МОЛНИИ (-${u.damage || 100})!`, '#0284c7');
+      }
+    }
+
     // Бойцы со снарядами ориентируют оружие по курсу к цели
     if ([
       'ninja', 'bomber', 'checkmate', 'fairy', 'card_master', 'musician', 'pavuk', 'bibizyana',
       'slinger', 'blacksmith', 'beekeeper', 'ice_golem', 'samurai', 'cactus', 'magician_hat',
-      'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus'
+      'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus',
+      'galactic_lightning', 'skeleton_king'
     ].includes(u.abilityId)) {
       u.weaponAngle = u.aimAngle;
     }
@@ -4162,6 +4998,622 @@ class BattleRoyalPaperGame {
         this.addFloatingText(enemy.x, enemy.y - 24, `🌑 ЖАТВА ТЕНИ -${u.damage}!`, '#7e22ce');
         break;
       }
+
+      // ==================== СПОСОБНОСТИ 22 БОЙЦОВ ИЗ «ЯЩИКА ЗА 500 МОНЕТ» И 11 БОЙЦОВ ИЗ «МАЛЕНЬКОГО ЯЩИКА ЗА 20 МОНЕТ» ====================
+      case 'dart_frog':
+      case 'harpoon_diver':
+      case 'postman_bag': {
+        if (!enemy) break;
+        u.cooldown = 2.7;
+        window.sfx.shootArrow();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'arrow',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 420,
+          vy: Math.sin(ang) * 420,
+          radius: 5,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'cannon_pirate': {
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        window.sfx.magicFire();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'fireball',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 10),
+          y: u.y + Math.sin(ang) * (u.radius + 10),
+          vx: Math.cos(ang) * 340,
+          vy: Math.sin(ang) * 340,
+          radius: 8,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'rune_monk':
+      case 'drum_shaman': {
+        u.cooldown = 3.6;
+        window.sfx.heal();
+        const healAmt = Math.max(8, Math.round(u.damage * 0.9));
+        for (const ally of this.units) {
+          if (ally.team !== u.team || ally.hp <= 0) continue;
+          ally.hp = Math.min(ally.maxHp, ally.hp + healAmt);
+          this.addFloatingText(ally.x, ally.y - ally.radius - 12, `+${healAmt} HP`, '#16a34a');
+        }
+        if (enemy) {
+          this.applyDamage(enemy, u.damage, u, '#0891b2');
+        }
+        break;
+      }
+
+      case 'phantom_duelist':
+      case 'sand_nomad':
+      case 'ice_skater':
+      case 'emerald_valkyrie': {
+        if (!enemy) break;
+        u.cooldown = 3.0;
+        window.sfx.bounce();
+        const ang = Math.atan2(enemy.y - u.y, enemy.x - u.x);
+        u.vx = Math.cos(ang) * 310;
+        u.vy = Math.sin(ang) * 310;
+        if (u.abilityId === 'ice_skater') {
+          enemy.slowTimer = 2.0;
+        }
+        break;
+      }
+
+      case 'cyber_sniper': {
+        if (!enemy) break;
+        u.cooldown = 3.3;
+        window.sfx.pistolShot();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'piercing_bullet',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 10),
+          y: u.y + Math.sin(ang) * (u.radius + 10),
+          vx: Math.cos(ang) * 610,
+          vy: Math.sin(ang) * 610,
+          radius: 6,
+          damage: u.damage,
+          piercing: true,
+          hitSet: new Set()
+        });
+        this.addFloatingText(u.x, u.y - u.radius - 14, '🎯 РЕЛЬСОТРОН!', '#0891b2');
+        break;
+      }
+
+      case 'frost_valkyrie': {
+        if (!enemy) break;
+        u.cooldown = 3.1;
+        window.sfx.magicIce();
+        for (const sp of [-0.18, 0, 0.18]) {
+          const ang = u.aimAngle + sp;
+          this.projectiles.push({
+            type: 'ice_shard',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 9),
+            y: u.y + Math.sin(ang) * (u.radius + 9),
+            vx: Math.cos(ang) * 370,
+            vy: Math.sin(ang) * 370,
+            radius: 6,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        break;
+      }
+
+      case 'inferno_executioner': {
+        if (!enemy) break;
+        u.cooldown = 3.4;
+        window.sfx.magicFire();
+        for (const sp of [-0.22, 0.22]) {
+          const ang = u.aimAngle + sp;
+          this.projectiles.push({
+            type: 'fireball',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 9),
+            y: u.y + Math.sin(ang) * (u.radius + 9),
+            vx: Math.cos(ang) * 340,
+            vy: Math.sin(ang) * 340,
+            radius: 8,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        break;
+      }
+
+      case 'storm_caller': {
+        if (!enemy) break;
+        u.cooldown = 3.2;
+        window.sfx.lightning();
+        let hits = 0;
+        for (const other of this.units) {
+          if (other.team === u.team || other.hp <= 0) continue;
+          if (hits < 3) {
+            hits++;
+            this.lightnings.push({
+              x1: u.x,
+              y1: u.y,
+              x2: other.x,
+              y2: other.y,
+              color: '#60a5fa',
+              life: 0.3
+            });
+            other.stunTimer = 0.4;
+            this.applyDamage(other, u.damage, u, '#2563eb');
+          }
+        }
+        break;
+      }
+
+      case 'venom_queen':
+      case 'alchemist_apprentice': {
+        if (!enemy) break;
+        u.cooldown = 3.3;
+        window.sfx.magicFire();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'acid_flask',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 290,
+          vy: Math.sin(ang) * 290,
+          targetX: enemy.x,
+          targetY: enemy.y,
+          radius: 7,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'jester_cards': {
+        if (!enemy) break;
+        u.cooldown = 2.8;
+        window.sfx.shootArrow();
+        for (const sp of [-0.15, 0.15]) {
+          const ang = u.aimAngle + sp;
+          this.projectiles.push({
+            type: 'playing_card',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 9),
+            y: u.y + Math.sin(ang) * (u.radius + 9),
+            vx: Math.cos(ang) * 410,
+            vy: Math.sin(ang) * 410,
+            suitColor: sp < 0 ? '#dc2626' : '#1e293b',
+            radius: 6,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        break;
+      }
+
+      case 'eclipse_ninja': {
+        if (!enemy) break;
+        u.cooldown = 3.0;
+        window.sfx.shootArrow();
+        for (const sp of [-0.22, 0, 0.22]) {
+          const ang = u.aimAngle + sp;
+          this.projectiles.push({
+            type: 'shuriken',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 9),
+            y: u.y + Math.sin(ang) * (u.radius + 9),
+            vx: Math.cos(ang) * 440,
+            vy: Math.sin(ang) * 440,
+            spin: 0,
+            knockback: 180,
+            radius: 7,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        break;
+      }
+
+      case 'solar_pharaoh': {
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        window.sfx.magicFire();
+        for (const other of this.units) {
+          if (other.team === u.team || other.hp <= 0) continue;
+          this.lightnings.push({
+            x1: u.x,
+            y1: u.y,
+            x2: other.x,
+            y2: other.y,
+            color: '#facc15',
+            life: 0.35
+          });
+          this.applyDamage(other, u.damage, u, '#ca8a04');
+        }
+        u.hp = Math.min(u.maxHp, u.hp + 18);
+        this.addFloatingText(u.x, u.y - u.radius - 16, '☀️ ЛУЧ РА +18 HP!', '#ca8a04');
+        break;
+      }
+
+      case 'void_reaper': {
+        if (!enemy) break;
+        u.cooldown = 3.6;
+        const destX = Math.max(30, Math.min(this.canvas.width - 30, enemy.x));
+        const destY = Math.max(30, Math.min(this.canvas.height - 30, enemy.y));
+        this.lightnings.push({
+          x1: u.x,
+          y1: u.y,
+          x2: destX,
+          y2: destY,
+          color: '#a855f7',
+          life: 0.3
+        });
+        u.x = destX;
+        u.y = destY;
+        window.sfx.hit();
+        this.applyDamage(enemy, u.damage, u, '#581c87');
+        this.addFloatingText(enemy.x, enemy.y - 24, `🌌 ЖАТВА БЕЗДНЫ -${u.damage}!`, '#6b21a8');
+        break;
+      }
+
+      case 'mecha_titan': {
+        if (!enemy) break;
+        u.cooldown = 3.2;
+        window.sfx.pistolShot();
+        for (const sp of [-0.24, -0.08, 0.08, 0.24]) {
+          const ang = u.aimAngle + sp;
+          this.projectiles.push({
+            type: 'small_laser',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 10),
+            y: u.y + Math.sin(ang) * (u.radius + 10),
+            vx: Math.cos(ang) * 480,
+            vy: Math.sin(ang) * 480,
+            radius: 6,
+            damage: Math.round(u.damage * 0.65),
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 16, '🤖 ЗАЛП МЕХА-ТИТАНА!', '#1d4ed8');
+        break;
+      }
+
+      case 'blood_archduke': {
+        if (!enemy) break;
+        u.cooldown = 3.3;
+        window.sfx.hit();
+        this.lightnings.push({
+          x1: u.x,
+          y1: u.y,
+          x2: enemy.x,
+          y2: enemy.y,
+          color: '#e11d48',
+          life: 0.3
+        });
+        this.applyDamage(enemy, u.damage, u, '#9f1239');
+        const leech = Math.max(10, Math.round(u.damage * 0.45));
+        u.hp = Math.min(u.maxHp, u.hp + leech);
+        this.addFloatingText(u.x, u.y - u.radius - 16, `🩸 +${leech} HP`, '#be123c');
+        break;
+      }
+
+      // ==================== ГАЛАКТИЧЕСКИЕ БОЙЦЫ (ЯЩИК ЭКСКЛЮЗИВ 1000 🪙) ====================
+      case 'galactic_lightning': {
+        // МОЛНИЯ (ГАЛАКТИЧЕСКИЙ): стреляет молнией каждые 3.5 секунды!
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        window.sfx.lightning();
+        this.lightnings.push({
+          x1: u.x,
+          y1: u.y,
+          x2: enemy.x,
+          y2: enemy.y,
+          color: '#38bdf8',
+          life: 0.38
+        });
+        this.lightnings.push({
+          x1: u.x,
+          y1: u.y,
+          x2: enemy.x,
+          y2: enemy.y,
+          color: '#fde047',
+          life: 0.25
+        });
+        const boltDmg = u.damage || 100;
+        this.applyDamage(enemy, boltDmg, u, '#0284c7');
+        this.spawnConfetti(enemy.x, enemy.y, '#38bdf8', 10);
+        this.addFloatingText(enemy.x, enemy.y - enemy.radius - 18, `⚡ РАЗРЯД МОЛНИИ -${boltDmg}!`, '#0284c7');
+        break;
+      }
+
+      case 'skeleton_king': {
+        // КОРОЛЬ СКЕЛЕТОВ (ГАЛАКТИЧЕСКИЙ): каждые 4 секунды выпускает веер из 3 проклятых черепов душ (по 50 урона) и призывает Скелета-стража!
+        if (!enemy) break;
+        u.cooldown = 4.0;
+        window.sfx.magicFire();
+        for (const sp of [-0.24, 0, 0.24]) {
+          const ang = u.aimAngle + sp;
+          this.projectiles.push({
+            type: 'fireball',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 11),
+            y: u.y + Math.sin(ang) * (u.radius + 11),
+            vx: Math.cos(ang) * 350,
+            vy: Math.sin(ang) * 350,
+            radius: 8,
+            damage: 50,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        const mySkelMinions = this.units.filter(m => m.isMinion && m.ownerId === u.id && m.hp > 0);
+        if (mySkelMinions.length < 3) {
+          const spawnAng = u.aimAngle + (Math.random() * 0.8 - 0.4);
+          const mx = Math.max(36, Math.min(this.canvas.width - 36, u.x + Math.cos(spawnAng) * (u.radius + 22)));
+          const my = Math.max(36, Math.min(this.canvas.height - 36, u.y + Math.sin(spawnAng) * (u.radius + 22)));
+          const mUnit = this.instantiateUnit({
+            id: this.nextUid(),
+            classId: 'bone_warrior',
+            abilityId: 'bone_warrior',
+            name: 'Скелет-страж',
+            team: u.team,
+            shape: 'diamond',
+            hp: 45,
+            speed: 3.8,
+            damage: 16,
+            x: mx,
+            y: my
+          }, true);
+          mUnit.ownerId = u.id;
+          this.units.push(mUnit);
+          this.spawnConfetti(mx, my, '#10b981', 10);
+        }
+        this.addFloatingText(u.x, u.y - u.radius - 18, '👑 ПРИЗЫВ СКЕЛЕТА + 3 ЧЕРЕПА!', '#10b981');
+        break;
+      }
+
+      // ==================== ОСТАЛЬНЫЕ БОЙЦЫ ЯЩИКА «ЭКСКЛЮЗИВ» (1000 🪙) И ЯЩИКА ЗА 35 🪙 ====================
+      case 'chrono_assassin':
+      case 'crimson_duelist':
+      case 'blood_samurai':
+      case 'desert_dervish': {
+        if (!enemy) break;
+        u.cooldown = 2.9;
+        window.sfx.bounce();
+        const ang = Math.atan2(enemy.y - u.y, enemy.x - u.x);
+        u.vx = Math.cos(ang) * 330;
+        u.vy = Math.sin(ang) * 330;
+        if (u.abilityId === 'chrono_assassin') {
+          enemy.slowTimer = 2.2;
+        } else if (u.abilityId === 'blood_samurai') {
+          u.hp = Math.min(u.maxHp, u.hp + 12);
+          this.addFloatingText(u.x, u.y - u.radius - 14, '🩸 +12 HP', '#dc2626');
+        }
+        break;
+      }
+
+      case 'lava_berserker':
+      case 'magma_behemoth':
+      case 'celestial_phoenix': {
+        if (!enemy) break;
+        u.cooldown = 3.3;
+        window.sfx.magicFire();
+        for (const sp of [-0.2, 0, 0.2]) {
+          const ang = u.aimAngle + sp;
+          this.projectiles.push({
+            type: 'fireball',
+            team: u.team,
+            owner: u,
+            x: u.x + Math.cos(ang) * (u.radius + 9),
+            y: u.y + Math.sin(ang) * (u.radius + 9),
+            vx: Math.cos(ang) * 350,
+            vy: Math.sin(ang) * 350,
+            radius: 8,
+            damage: u.damage,
+            piercing: false,
+            hitSet: new Set()
+          });
+        }
+        if (u.abilityId === 'celestial_phoenix') {
+          u.hp = Math.min(u.maxHp, u.hp + 25);
+          this.addFloatingText(u.x, u.y - u.radius - 16, '🦅 ФЕНИКС +25 HP!', '#f59e0b');
+        }
+        break;
+      }
+
+      case 'electro_spear':
+      case 'tempest_djinn':
+      case 'thunder_golem':
+      case 'valkyrie_queen': {
+        if (!enemy) break;
+        u.cooldown = 3.2;
+        window.sfx.lightning();
+        this.lightnings.push({
+          x1: u.x,
+          y1: u.y,
+          x2: enemy.x,
+          y2: enemy.y,
+          color: '#38bdf8',
+          life: 0.32
+        });
+        enemy.stunTimer = Math.max(enemy.stunTimer, 0.35);
+        this.applyDamage(enemy, u.damage, u, '#0284c7');
+        break;
+      }
+
+      case 'mirror_mage':
+      case 'crystal_archon':
+      case 'omega_prime':
+      case 'cyber_valkyrie': {
+        if (!enemy) break;
+        u.cooldown = 3.1;
+        window.sfx.lightning();
+        this.fireLaserBeam(u, u.aimAngle, 1.0, '#38bdf8');
+        break;
+      }
+
+      case 'plague_doctor':
+      case 'necro_alchemist':
+      case 'alchemist_bomb':
+      case 'toxic_arachnid': {
+        if (!enemy) break;
+        u.cooldown = 3.4;
+        window.sfx.magicFire();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'acid_flask',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 300,
+          vy: Math.sin(ang) * 300,
+          targetX: enemy.x,
+          targetY: enemy.y,
+          radius: 7,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'gravity_hammer':
+      case 'iron_juggernaut':
+      case 'abyss_leviathan':
+      case 'chaos_overlord':
+      case 'shadow_emperor': {
+        if (!enemy) break;
+        u.cooldown = 3.5;
+        window.sfx.shieldBash();
+        for (const other of this.units) {
+          if (other.team === u.team || other.hp <= 0) continue;
+          if (Math.hypot(other.x - u.x, other.y - u.y) <= 185) {
+            this.applyDamage(other, u.damage, u, '#7e22ce');
+            const pushAng = Math.atan2(other.y - u.y, other.x - u.x);
+            other.vx += Math.cos(pushAng) * 190;
+            other.vy += Math.sin(pushAng) * 190;
+          }
+        }
+        this.spawnConfetti(u.x, u.y, '#a855f7', 10);
+        break;
+      }
+
+      case 'starlight_archer':
+      case 'arcane_arbalester':
+      case 'falconer_hawk':
+      case 'fisherman_rod':
+      case 'potter_jug': {
+        if (!enemy) break;
+        u.cooldown = 2.8;
+        window.sfx.shootArrow();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'arrow',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 430,
+          vy: Math.sin(ang) * 430,
+          radius: 6,
+          damage: u.damage,
+          piercing: u.abilityId === 'arcane_arbalester',
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'frost_shaman':
+      case 'glacier_pikeman': {
+        if (!enemy) break;
+        u.cooldown = 3.1;
+        window.sfx.magicIce();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'ice_shard',
+          team: u.team,
+          owner: u,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 370,
+          vy: Math.sin(ang) * 370,
+          radius: 6,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
+
+      case 'astral_monk':
+      case 'sun_paladin':
+      case 'lantern_watchman':
+      case 'drummer_boy':
+      case 'bell_ringer': {
+        u.cooldown = 3.4;
+        window.sfx.heal();
+        const healAmt = Math.max(8, Math.round(u.damage * 0.75));
+        u.hp = Math.min(u.maxHp, u.hp + healAmt);
+        this.addFloatingText(u.x, u.y - u.radius - 14, `+${healAmt} HP`, '#16a34a');
+        if (enemy) {
+          this.applyDamage(enemy, u.damage, u, '#d97706');
+        }
+        break;
+      }
+
+      case 'gladiator_net': {
+        if (!enemy) break;
+        u.cooldown = 3.6;
+        window.sfx.shootArrow();
+        const ang = u.aimAngle;
+        this.projectiles.push({
+          type: 'spider_web',
+          team: u.team,
+          owner: u,
+          cocoonChance: 0.25,
+          spin: 0,
+          x: u.x + Math.cos(ang) * (u.radius + 9),
+          y: u.y + Math.sin(ang) * (u.radius + 9),
+          vx: Math.cos(ang) * 340,
+          vy: Math.sin(ang) * 340,
+          radius: 9,
+          damage: u.damage,
+          piercing: false,
+          hitSet: new Set()
+        });
+        break;
+      }
     }
   }
 
@@ -4230,6 +5682,31 @@ class BattleRoyalPaperGame {
 
     // 0. СТРАЖНИК НЕБЕС: не наносит никакого урона при столкновении (только получает урон от соперника и просто отлетает)!
     if (attacker.abilityId === 'sky_guardian' || attacker.classId === 'sky_guardian') {
+      return;
+    }
+
+    // 0.1. МОЛНИЯ (ГАЛАКТИЧЕСКИЙ): когда просто двигается — НЕ наносит никакого урона при задевании!
+    // А во время рывка (каждые 5 секунд) при задевании сносит 100 единиц здоровья!
+    if (attacker.abilityId === 'galactic_lightning' || attacker.classId === 'galactic_lightning') {
+      if (attacker.lightningDashingTimer > 0) {
+        attacker.hitImmunityMap[target.id] = 0.45;
+        const dashDmg = attacker.damage || 100;
+        window.sfx.lightning();
+        window.sfx.shieldBash();
+        this.applyDamage(target, dashDmg, attacker, '#0284c7');
+        this.spawnConfetti(target.x, target.y, '#fde047', 12);
+        this.addFloatingText(target.x, target.y - 24, `⚡ РЫВОК МОЛНИИ -${dashDmg}!`, '#0284c7');
+      }
+      return;
+    }
+
+    // 0.2. КОРОЛЬ СКЕЛЕТОВ (ГАЛАКТИЧЕСКИЙ): при ударе проклятым костяным мечом наносит 65 урона и похищает +18 HP!
+    if (attacker.abilityId === 'skeleton_king' || attacker.classId === 'skeleton_king') {
+      attacker.hitImmunityMap[target.id] = 0.45;
+      window.sfx.shieldBash();
+      this.applyDamage(target, attacker.damage, attacker, '#059669');
+      attacker.hp = Math.min(attacker.maxHp, attacker.hp + 18);
+      this.addFloatingText(attacker.x, attacker.y - attacker.radius - 16, '👑 ЖАТВА КОРОЛЯ +18 HP!', '#10b981');
       return;
     }
 
@@ -4405,25 +5882,33 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    // 10. Робо-Мех, Зомби, Оборотень, Червь, Сферы Призывателя, Ассасин, 5 обычных бойцов из «Бокса бойцов», а также ЛЮБОЙ соперник, об которого бьётся Стражник небес!
+    // 10. Контактный урон бойцов ближнего боя (включая новых бойцов из ящиков за 500, 20, 35 и 1000 монет)
+    const contactFighterIds = [
+      'assassin', 'worm', 'robo_mech', 'zombie', 'werewolf',
+      'blacksmith', 'musketeer', 'samurai', 'cactus',
+      'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus',
+      'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant',
+      'fencer_fox', 'torch_bearer', 'anchor_sailor', 'wind_ronin', 'magma_guard', 'shadow_scythe',
+      'halberd_guard', 'shield_maiden', 'whip_tamer', 'bone_warrior', 'rune_monk',
+      'saw_bot', 'flail_templar', 'sand_nomad', 'harpoon_diver', 'drum_shaman',
+      'phantom_duelist', 'frost_valkyrie', 'inferno_executioner', 'storm_caller', 'venom_queen',
+      'solar_pharaoh', 'void_reaper', 'mecha_titan', 'blood_archduke',
+      'broom_janitor', 'cook_pan', 'gardener_fork', 'postman_bag', 'miner_pickaxe',
+      'ice_skater', 'bamboo_panda', 'emerald_valkyrie', 'eclipse_ninja',
+      'chrono_assassin', 'lava_berserker', 'electro_spear', 'gravity_hammer', 'iron_juggernaut', 'crimson_duelist',
+      'astral_monk', 'cyber_valkyrie', 'magma_behemoth', 'shadow_emperor', 'crystal_archon', 'tempest_djinn', 'necro_alchemist',
+      'celestial_phoenix', 'abyss_leviathan', 'omega_prime', 'valkyrie_queen', 'chaos_overlord',
+      'baker_pin', 'fisherman_rod', 'carpenter_saw', 'tailor_scissors', 'lantern_watchman',
+      'shepherd_crook', 'potter_jug', 'chimney_sweep', 'drummer_boy', 'bell_ringer',
+      'gladiator_net', 'glacier_pikeman', 'desert_dervish',
+      'blood_samurai', 'thunder_golem', 'toxic_arachnid', 'sun_paladin'
+    ];
     if (
       attacker.isMinion ||
       target.classId === 'sky_guardian' ||
       target.abilityId === 'sky_guardian' ||
-      [
-        'assassin', 'worm', 'robo_mech', 'zombie', 'werewolf',
-        'blacksmith', 'musketeer', 'samurai', 'cactus',
-        'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus',
-        'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant',
-        'fencer_fox', 'torch_bearer', 'anchor_sailor', 'wind_ronin', 'magma_guard', 'shadow_scythe'
-      ].includes(attacker.abilityId) ||
-      [
-        'robo_mech', 'zombie', 'werewolf',
-        'blacksmith', 'musketeer', 'samurai', 'cactus',
-        'anubis', 'poseidon', 'meteor_knight', 'dragon', 'chronos', 'zeus',
-        'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant',
-        'fencer_fox', 'torch_bearer', 'anchor_sailor', 'wind_ronin', 'magma_guard', 'shadow_scythe'
-      ].includes(attacker.classId)
+      contactFighterIds.includes(attacker.abilityId) ||
+      contactFighterIds.includes(attacker.classId)
     ) {
       attacker.hitImmunityMap[target.id] = 0.42;
       window.sfx.hit();
@@ -4743,6 +6228,10 @@ class BattleRoyalPaperGame {
     let dmg = rawAmount;
     if (!isExactDamage && target.vulnTimer > 0) {
       dmg = Math.round(dmg * 1.25);
+    }
+    // Дебаф Короля скелетов: сухие древние кости получают +20% урона, когда он горит!
+    if (!isExactDamage && (target.classId === 'skeleton_king' || target.abilityId === 'skeleton_king') && target.burnTimer > 0) {
+      dmg = Math.round(dmg * 1.20);
     }
     dmg = Math.max(1, Math.round(dmg));
     target.hp = Math.max(0, target.hp - dmg);
@@ -5498,6 +6987,32 @@ class BattleRoyalPaperGame {
       }
     }
 
+    // МОЛНИЯ (ГАЛАКТИЧЕСКИЙ): электрический ореол, искры и мощное кольцо рывка
+    if (u.classId === 'galactic_lightning' || u.abilityId === 'galactic_lightning') {
+      drawGalacticLightningDetails(ctx, u.x, u.y, u.radius, timeSec);
+      if (u.lightningDashingTimer > 0) {
+        ctx.save();
+        ctx.strokeStyle = '#fde047';
+        ctx.lineWidth = 3.8;
+        ctx.beginPath();
+        ctx.arc(u.x, u.y, u.radius + 10, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 2.4;
+        ctx.setLineDash([6, 4]);
+        ctx.beginPath();
+        ctx.arc(u.x, u.y, u.radius + 15, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.restore();
+      }
+    }
+
+    // КОРОЛЬ СКЕЛЕТОВ (ГАЛАКТИЧЕСКИЙ): королевская мантия, золотая корона и изумрудные глазницы
+    if (u.classId === 'skeleton_king' || u.abilityId === 'skeleton_king') {
+      drawSkeletonKingDetails(ctx, u.x, u.y, u.radius, timeSec);
+    }
+
     // Усики и глазки Червя (гусеницы)
     if (u.classId === 'worm' || u.abilityId === 'worm') {
       const headAng = this.state === 'prep' ? (u.team === 'player' ? 0 : Math.PI) : Math.atan2(u.vy, u.vx);
@@ -5687,7 +7202,28 @@ class BattleRoyalPaperGame {
       return;
     }
 
-    if (['archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'robo_mech', 'zombie', 'fairy', 'card_master', 'checkmate', 'doubler', 'musician', 'pavuk', 'bibizyana', 'sky_guardian', 'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant', 'crossbow_scout', 'fencer_fox', 'snow_thrower', 'torch_bearer', 'anchor_sailor', 'wind_ronin', 'tesla_bot', 'witch_brew', 'magma_guard', 'crystal_sniper', 'shadow_scythe'].includes(u.abilityId)) {
+    if ([
+      'archer', 'shield', 'soldier', 'claws', 'laser_bot', 'plasma_rex', 'boxer', 'hunter', 'robo_mech', 'zombie',
+      'fairy', 'card_master', 'checkmate', 'doubler', 'musician', 'pavuk', 'bibizyana', 'sky_guardian',
+      'paper_recruit', 'cardboard_pug', 'wooden_dummy', 'origami_frog', 'tin_peasant',
+      'crossbow_scout', 'fencer_fox', 'snow_thrower', 'torch_bearer', 'anchor_sailor',
+      'wind_ronin', 'tesla_bot', 'witch_brew', 'magma_guard', 'crystal_sniper', 'shadow_scythe',
+      'halberd_guard', 'dart_frog', 'shield_maiden', 'cannon_pirate', 'whip_tamer', 'bone_warrior',
+      'rune_monk', 'saw_bot', 'flail_templar', 'sand_nomad', 'harpoon_diver', 'drum_shaman',
+      'phantom_duelist', 'cyber_sniper', 'frost_valkyrie', 'inferno_executioner', 'storm_caller', 'venom_queen',
+      'solar_pharaoh', 'void_reaper', 'mecha_titan', 'blood_archduke',
+      'broom_janitor', 'cook_pan', 'gardener_fork', 'postman_bag', 'miner_pickaxe',
+      'jester_cards', 'ice_skater', 'bamboo_panda', 'alchemist_apprentice', 'emerald_valkyrie', 'eclipse_ninja',
+      'chrono_assassin', 'lava_berserker', 'electro_spear', 'mirror_mage', 'plague_doctor',
+      'gravity_hammer', 'starlight_archer', 'iron_juggernaut', 'crimson_duelist', 'frost_shaman',
+      'astral_monk', 'cyber_valkyrie', 'magma_behemoth', 'shadow_emperor', 'crystal_archon', 'tempest_djinn', 'necro_alchemist',
+      'celestial_phoenix', 'abyss_leviathan', 'omega_prime', 'valkyrie_queen', 'chaos_overlord',
+      'galactic_lightning', 'skeleton_king',
+      'baker_pin', 'fisherman_rod', 'carpenter_saw', 'tailor_scissors', 'lantern_watchman',
+      'shepherd_crook', 'potter_jug', 'chimney_sweep', 'drummer_boy', 'bell_ringer',
+      'falconer_hawk', 'alchemist_bomb', 'gladiator_net', 'glacier_pikeman', 'desert_dervish',
+      'arcane_arbalester', 'blood_samurai', 'thunder_golem', 'toxic_arachnid', 'sun_paladin'
+    ].includes(u.abilityId)) {
       const ang = this.state === 'prep' ? (isPlayer ? 0 : Math.PI) : u.aimAngle;
       const dist = u.radius + 7;
       drawWeaponGraphic(ctx, u.abilityId, u.x + Math.cos(ang) * dist, u.y + Math.sin(ang) * dist, 0.95, ang, u.team);
