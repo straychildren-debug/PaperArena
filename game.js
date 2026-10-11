@@ -1,4 +1,6 @@
-// Основной игровой движок Battle Royal Paper: физика Bouncing Arena, 37 способностей, финальное ускорение и UI
+// Основной игровой движок Paper Arena: физика Bouncing Arena, 150 бойцов, финальное ускорение и UI
+
+const COIN_HTML = '<span class="coin-icon" aria-hidden="true"></span>';
 
 const CircledNumbers = [
   '①','②','③','④','⑤','⑥','⑦','⑧','⑨','⑩','⑪','⑫','⑬','⑭','⑮','⑯',
@@ -752,7 +754,7 @@ class BattleRoyalPaperGame {
 
     const statusMsg = document.getElementById('shopGuardianStatusMsg');
     if (statusMsg) {
-      statusMsg.textContent = '🎉 СТРАЖНИК НЕБЕС КУПЛЕН ЗА 50 000 🪙 И ДОБАВЛЕН В ВАШИ ЯЧЕЙКИ (ЗАНИМАЕТ 3 МЕСТА)!';
+      statusMsg.innerHTML = `🎉 СТРАЖНИК НЕБЕС КУПЛЕН ЗА 50 000 ${COIN_HTML} И ДОБАВЛЕН В ВАШИ ЯЧЕЙКИ (ЗАНИМАЕТ 3 МЕСТА)!`;
     }
     this.updateAllCoinsUI();
   }
@@ -791,12 +793,12 @@ class BattleRoyalPaperGame {
     const statusMsg = document.getElementById('crateOpenStatusMsg');
     if (openBtn) {
       openBtn.disabled = this.coins < 1000;
-      openBtn.textContent = this.coins >= 1000
-        ? '🔓 ОТКРЫТЬ КОНТЕЙНЕР ЗА 1 000 МОНЕТ 🪙'
-        : `🔒 НУЖНО 1 000 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+      openBtn.innerHTML = this.coins >= 1000
+        ? `🔓 ОТКРЫТЬ КОНТЕЙНЕР ЗА 1 000 МОНЕТ ${COIN_HTML}`
+        : `🔒 НУЖНО 1 000 МОНЕТ (У ВАС ${this.coins} ${COIN_HTML})`;
     }
     if (statusMsg && this.coins < 1000) {
-      statusMsg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 1 000 монет на Контейнер бойцов!`;
+      statusMsg.innerHTML = `Побеждайте на уровнях (+2 ${COIN_HTML} за победу), чтобы накопить 1 000 монет на Контейнер бойцов!`;
     }
 
     // 2. Кнопка открытия «Бокса бойцов» (50 монет)
@@ -804,12 +806,12 @@ class BattleRoyalPaperGame {
     const boxStatusMsg = document.getElementById('fighterBoxStatusMsg');
     if (openBoxBtn) {
       openBoxBtn.disabled = this.coins < 50;
-      openBoxBtn.textContent = this.coins >= 50
-        ? '🔓 ОТКРЫТЬ БОКС БОЙЦОВ ЗА 50 МОНЕТ 🪙'
-        : `🔒 НУЖНО 50 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+      openBoxBtn.innerHTML = this.coins >= 50
+        ? `🔓 ОТКРЫТЬ БОКС БОЙЦОВ ЗА 50 МОНЕТ ${COIN_HTML}`
+        : `🔒 НУЖНО 50 МОНЕТ (У ВАС ${this.coins} ${COIN_HTML})`;
     }
     if (boxStatusMsg && this.coins < 50) {
-      boxStatusMsg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 50 монет на Бокс бойцов!`;
+      boxStatusMsg.innerHTML = `Побеждайте на уровнях (+2 ${COIN_HTML} за победу), чтобы накопить 50 монет на Бокс бойцов!`;
     }
 
     // 3. Кнопка открытия «Ящика за 500 монет» (500 монет)
@@ -817,12 +819,12 @@ class BattleRoyalPaperGame {
     const status500Msg = document.getElementById('crate500StatusMsg');
     if (open500Btn) {
       open500Btn.disabled = this.coins < 500;
-      open500Btn.textContent = this.coins >= 500
-        ? '🔓 ОТКРЫТЬ ЯЩИК ЗА 500 МОНЕТ 🪙'
-        : `🔒 НУЖНО 500 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+      open500Btn.innerHTML = this.coins >= 500
+        ? `🔓 ОТКРЫТЬ ЯЩИК ЗА 500 МОНЕТ ${COIN_HTML}`
+        : `🔒 НУЖНО 500 МОНЕТ (У ВАС ${this.coins} ${COIN_HTML})`;
     }
     if (status500Msg && this.coins < 500) {
-      status500Msg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 500 монет на этот ящик (12 редких, 6 эпических, 4 мифических)!`;
+      status500Msg.innerHTML = `Побеждайте на уровнях (+2 ${COIN_HTML} за победу), чтобы накопить 500 монет на этот ящик (12 редких, 6 эпических, 4 мифических)!`;
     }
 
     // 4. Кнопка открытия «Маленького ящика за 20 монет» (20 монет)
@@ -830,12 +832,12 @@ class BattleRoyalPaperGame {
     const status20Msg = document.getElementById('miniCrate20StatusMsg');
     if (open20Btn) {
       open20Btn.disabled = this.coins < 20;
-      open20Btn.textContent = this.coins >= 20
-        ? '🔓 ОТКРЫТЬ МАЛЕНЬКИЙ ЯЩИК ЗА 20 МОНЕТ 🪙'
-        : `🔒 НУЖНО 20 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+      open20Btn.innerHTML = this.coins >= 20
+        ? `🔓 ОТКРЫТЬ МАЛЕНЬКИЙ ЯЩИК ЗА 20 МОНЕТ ${COIN_HTML}`
+        : `🔒 НУЖНО 20 МОНЕТ (У ВАС ${this.coins} ${COIN_HTML})`;
     }
     if (status20Msg && this.coins < 20) {
-      status20Msg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 20 монет на Маленький ящик!`;
+      status20Msg.innerHTML = `Побеждайте на уровнях (+2 ${COIN_HTML} за победу), чтобы накопить 20 монет на Маленький ящик!`;
     }
 
     // 4.1. Кнопка открытия ящика «Эксклюзив» (1 000 монет)
@@ -843,12 +845,12 @@ class BattleRoyalPaperGame {
     const statusExclMsg = document.getElementById('exclusiveCrateStatusMsg');
     if (openExclBtn) {
       openExclBtn.disabled = this.coins < 1000;
-      openExclBtn.textContent = this.coins >= 1000
-        ? '🔓 ОТКРЫТЬ «ЭКСКЛЮЗИВ» ЗА 1 000 МОНЕТ 🪙'
-        : `🔒 НУЖНО 1 000 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+      openExclBtn.innerHTML = this.coins >= 1000
+        ? `🔓 ОТКРЫТЬ «ЭКСКЛЮЗИВ» ЗА 1 000 МОНЕТ ${COIN_HTML}`
+        : `🔒 НУЖНО 1 000 МОНЕТ (У ВАС ${this.coins} ${COIN_HTML})`;
     }
     if (statusExclMsg && this.coins < 1000) {
-      statusExclMsg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 1 000 монет на ящик «Эксклюзив» (включая Галактических бойцов ⚡Молнию и 💀Короля скелетов)!`;
+      statusExclMsg.innerHTML = `Побеждайте на уровнях (+2 ${COIN_HTML} за победу), чтобы накопить 1 000 монет на ящик «Эксклюзив» (включая Галактических бойцов ⚡Молнию и 💀Короля скелетов)!`;
     }
 
     // 4.2. Кнопка открытия «Ящика за 35 монет» (35 монет)
@@ -856,12 +858,12 @@ class BattleRoyalPaperGame {
     const status35Msg = document.getElementById('crate35StatusMsg');
     if (open35Btn) {
       open35Btn.disabled = this.coins < 35;
-      open35Btn.textContent = this.coins >= 35
-        ? '🔓 ОТКРЫТЬ ЯЩИК ЗА 35 МОНЕТ 🪙'
-        : `🔒 НУЖНО 35 МОНЕТ (У ВАС ${this.coins} 🪙)`;
+      open35Btn.innerHTML = this.coins >= 35
+        ? `🔓 ОТКРЫТЬ ЯЩИК ЗА 35 МОНЕТ ${COIN_HTML}`
+        : `🔒 НУЖНО 35 МОНЕТ (У ВАС ${this.coins} ${COIN_HTML})`;
     }
     if (status35Msg && this.coins < 35) {
-      status35Msg.textContent = `Побеждайте на уровнях (+2 🪙 за победу), чтобы накопить 35 монет на Ящик за 35 🪙 (10 обычных, 5 редких, 5 эпических)!`;
+      status35Msg.innerHTML = `Побеждайте на уровнях (+2 ${COIN_HTML} за победу), чтобы накопить 35 монет на Ящик за 35 ${COIN_HTML} (10 обычных, 5 редких, 5 эпических)!`;
     }
 
     // 5. Кнопка покупки Стражника небес за 50 000 монет на витрине магазина
@@ -879,16 +881,16 @@ class BattleRoyalPaperGame {
       } else if (this.coins >= 50000) {
         buyGuardianBtn.disabled = false;
         buyGuardianBtn.classList.remove('guardian-owned');
-        buyGuardianBtn.textContent = '👑 КУПИТЬ ЗА 50 000 МОНЕТ 🪙';
+        buyGuardianBtn.innerHTML = `👑 КУПИТЬ ЗА 50 000 МОНЕТ ${COIN_HTML}`;
         if (guardianMsg) {
           guardianMsg.textContent = '✨ У вас достаточно монет! Нажмите, чтобы купить Стражника небес!';
         }
       } else {
         buyGuardianBtn.disabled = true;
         buyGuardianBtn.classList.remove('guardian-owned');
-        buyGuardianBtn.textContent = `🔒 КУПИТЬ ЗА 50 000 🪙 (У ВАС ${this.coins} 🪙)`;
+        buyGuardianBtn.innerHTML = `🔒 КУПИТЬ ЗА 50 000 ${COIN_HTML} (У ВАС ${this.coins} ${COIN_HTML})`;
         if (guardianMsg) {
-          guardianMsg.textContent = `Побеждайте в боях (+2 🪙 за победу) — осталось накопить ${50000 - this.coins} 🪙!`;
+          guardianMsg.innerHTML = `Побеждайте в боях (+2 ${COIN_HTML} за победу) — осталось накопить ${50000 - this.coins} ${COIN_HTML}!`;
         }
       }
     }
@@ -1449,9 +1451,9 @@ class BattleRoyalPaperGame {
       rarEl.style.background = wasAlreadyUnlocked ? '#16a34a' : droppedFighter.rarityColor;
     }
     if (headerEl) {
-      headerEl.textContent = wasAlreadyUnlocked
+      headerEl.innerHTML = wasAlreadyUnlocked
         ? '⬆️ ПОВТОРКА! +10 К ЗДОРОВЬЮ И +10 К УРОНУ!'
-        : '🎉 НОВЫЙ БОЕЦ ИЗ ЯЩИКА ЗА 500 🪙!';
+        : `🎉 НОВЫЙ БОЕЦ ИЗ ЯЩИКА ЗА 500 ${COIN_HTML}!`;
     }
     if (msgEl) {
       msgEl.textContent = wasAlreadyUnlocked
@@ -1665,9 +1667,9 @@ class BattleRoyalPaperGame {
       rarEl.style.background = wasAlreadyUnlocked ? '#16a34a' : droppedFighter.rarityColor;
     }
     if (headerEl) {
-      headerEl.textContent = wasAlreadyUnlocked
+      headerEl.innerHTML = wasAlreadyUnlocked
         ? '⬆️ ПОВТОРКА! +10 К ЗДОРОВЬЮ И +10 К УРОНУ!'
-        : '🎉 НОВЫЙ БОЕЦ ИЗ ЯЩИКА ЗА 35 🪙!';
+        : `🎉 НОВЫЙ БОЕЦ ИЗ ЯЩИКА ЗА 35 ${COIN_HTML}!`;
     }
     if (msgEl) {
       msgEl.textContent = wasAlreadyUnlocked
@@ -1727,7 +1729,7 @@ class BattleRoyalPaperGame {
     const previewEl = document.getElementById('hubEnemyPreviewText');
     if (previewEl) {
       previewEl.innerHTML =
-        `На <strong>${this.campaignLevel} уровне</strong>${completedTag} вас ждёт (${enemies.length} шт.): <strong>${enemyNames}</strong> • Приз за победу: <strong>+2 🪙</strong>`;
+        `На <strong>${this.campaignLevel} уровне</strong>${completedTag} вас ждёт (${enemies.length} шт.): <strong>${enemyNames}</strong> • Приз за победу: <strong>+2 ${COIN_HTML}</strong>`;
     }
 
     // Отрисовываем панель отряда (до 3 мест; Стражник небес, Молния и Король скелетов занимают сразу 3 места!)
@@ -1919,10 +1921,10 @@ class BattleRoyalPaperGame {
           <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}</div>
           <div class="hcc-lock">👼</div>
           <div class="hcc-name">В магазине</div>
-          <div class="hcc-stats">50 000 🪙</div>
+          <div class="hcc-stats">50 000 ${COIN_HTML}</div>
         `;
         cell.style.cursor = 'pointer';
-        cell.title = 'Нажмите, чтобы перейти в Магазин к Стражнику небес (50 000 🪙)';
+        cell.title = 'Нажмите, чтобы перейти в Магазин к Стражнику небес (50 000 монет)';
         cell.addEventListener('click', () => {
           window.sfx.click();
           this.openShopScreen('container');
@@ -1935,7 +1937,7 @@ class BattleRoyalPaperGame {
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
         cell.style.cursor = 'pointer';
-        cell.title = 'Нажмите, чтобы перейти во вкладку ящика «Эксклюзив» (1 000 🪙)';
+        cell.title = 'Нажмите, чтобы перейти во вкладку ящика «Эксклюзив» (1 000 монет)';
         cell.addEventListener('click', () => {
           window.sfx.click();
           this.openShopScreen('exclusive_crate');
@@ -1948,7 +1950,7 @@ class BattleRoyalPaperGame {
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
         cell.style.cursor = 'pointer';
-        cell.title = 'Нажмите, чтобы перейти во вкладку «Бокс бойцов» (50 🪙)';
+        cell.title = 'Нажмите, чтобы перейти во вкладку «Бокс бойцов» (50 монет)';
         cell.addEventListener('click', () => {
           window.sfx.click();
           this.openShopScreen('fighter_box');
@@ -1961,7 +1963,7 @@ class BattleRoyalPaperGame {
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
         cell.style.cursor = 'pointer';
-        cell.title = 'Нажмите, чтобы перейти во вкладку «Ящик за 500 🪙»';
+        cell.title = 'Нажмите, чтобы перейти во вкладку «Ящик за 500 монет»';
         cell.addEventListener('click', () => {
           window.sfx.click();
           this.openShopScreen('crate_500');
@@ -1974,7 +1976,7 @@ class BattleRoyalPaperGame {
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
         cell.style.cursor = 'pointer';
-        cell.title = 'Нажмите, чтобы перейти во вкладку «Ящик за 35 🪙»';
+        cell.title = 'Нажмите, чтобы перейти во вкладку «Ящик за 35 монет»';
         cell.addEventListener('click', () => {
           window.sfx.click();
           this.openShopScreen('crate_35');
@@ -1987,7 +1989,7 @@ class BattleRoyalPaperGame {
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
         cell.style.cursor = 'pointer';
-        cell.title = 'Нажмите, чтобы перейти во вкладку «Маленький ящик за 20 🪙»';
+        cell.title = 'Нажмите, чтобы перейти во вкладку «Маленький ящик за 20 монет»';
         cell.addEventListener('click', () => {
           window.sfx.click();
           this.openShopScreen('mini_crate_20');
@@ -2000,7 +2002,7 @@ class BattleRoyalPaperGame {
           <div class="hcc-stats">${fc.dropChance}%</div>
         `;
         cell.style.cursor = 'pointer';
-        cell.title = 'Нажмите, чтобы перейти к Контейнеру бойцов (1 000 🪙)';
+        cell.title = 'Нажмите, чтобы перейти к Контейнеру бойцов (1 000 монет)';
         cell.addEventListener('click', () => {
           window.sfx.click();
           this.openShopScreen('container');
@@ -2805,9 +2807,9 @@ class BattleRoyalPaperGame {
         this.level = this.campaignLevel;
         this.updateAllCoinsUI();
         this.renderLevelBar();
-        icon.textContent = '🪙';
+        icon.innerHTML = COIN_HTML;
         title.textContent = `УРОВЕНЬ ${finishedLvl} ПРОЙДЕН! +2 МОНЕТЫ!`;
-        sub.textContent = `Начислено +2 монеты (всего: ${this.coins} 🪙)! Переход к Уровню ${this.campaignLevel}...`;
+        sub.innerHTML = `Начислено +2 монеты (всего: ${this.coins} ${COIN_HTML})! Переход к Уровню ${this.campaignLevel}...`;
         nextBtn.textContent = `К ЯЧЕЙКАМ (${this.campaignLevel} УРОВЕНЬ) ➔`;
         nextBtn.classList.remove('hidden');
         if (this.campaignReturnTimer) clearTimeout(this.campaignReturnTimer);
@@ -2823,7 +2825,7 @@ class BattleRoyalPaperGame {
         this.renderLevelBar();
         icon.textContent = '🏆';
         title.textContent = `УРОВЕНЬ ${this.level} ПРОЙДЕН! +2 МОНЕТЫ!`;
-        sub.textContent = `Ваши бойцы одержали победу! Начислено +2 монеты (всего: ${this.coins} 🪙).`;
+        sub.innerHTML = `Ваши бойцы одержали победу! Начислено +2 монеты (всего: ${this.coins} ${COIN_HTML}).`;
         nextBtn.textContent = 'СЛЕД. УРОВЕНЬ ➔';
         nextBtn.classList.remove('hidden');
       }
