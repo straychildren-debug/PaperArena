@@ -26,6 +26,8 @@ class BattleRoyalPaperGame {
     this.selectedCampaignFighterId = 'swordsman'; // Выбранный персонаж в ячейке
     this.campaignSquad = ['swordsman']; // Отряд игрока на бой (от 1 до 3 бойцов, максимум на арене 6 бойцов!)
     this.fighterUpgrades = {}; // { [classId]: { hp: 0, damage: 0 } }
+    this.unlockedBadges = new Set(); // Открытые значки из Контейнера со значками (70 монет)
+    this.fighterBadges = {}; // { [classId]: badgeId } — надетый значок на конкретного бойца
     this.isCampaignBattle = true;
     this.currentScreen = 'menu'; // 'menu' | 'shop' | 'hub' | 'upgrade' | 'arena'
 
@@ -85,14 +87,38 @@ class BattleRoyalPaperGame {
     return 'u_' + (this.uidCounter++);
   }
 
-  // Возвращает характеристики бойца с учётом купленных прокачек (+5 HP / +2 урона за 15 монет)
+  // Возвращает характеристики бойца с учётом купленных прокачек и надетого значка
+  // Когда значок снимается с персонажа — все бонусы значка мгновенно убираются, и боец становится прежним!
   getUpgradedFighterStats(classId) {
     const cls = getFighterClass(classId);
     const upg = this.fighterUpgrades[classId] || { hp: 0, damage: 0 };
+    const badgeId = (this.fighterBadges && this.fighterBadges[classId]) || null;
+    const badge = (badgeId && canApplyBadgeToFighter(badgeId, classId).allowed)
+      ? getBadgeById(badgeId)
+      : null;
+
+    const bonusHp = badge ? (badge.bonusHp || 0) : 0;
+    const bonusSpeed = badge ? (badge.bonusSpeed || 0) : 0;
+    const bonusDamage = badge ? (badge.bonusDamage || 0) : 0;
+
+    const baseHpWithUpg = cls.hp + upg.hp + bonusHp;
+    const baseDmgWithUpg = cls.damage + upg.damage + bonusDamage;
+    const baseSpdWithUpg = Number((cls.speed + bonusSpeed).toFixed(1));
+
+    // Рассчитываем также итоговое здоровье в начале боя с учётом боевых значков (#6: +35 HP, #8: ×1.5 HP, #9: ×2 HP)
+    let battleHp = baseHpWithUpg;
+    if (badge) {
+      if (badge.battleStartHpBonus) battleHp += badge.battleStartHpBonus;
+      if (badge.battleHpMultiplier) battleHp = Math.round(battleHp * badge.battleHpMultiplier);
+    }
+
     return {
-      hp: cls.hp + upg.hp,
-      damage: cls.damage + upg.damage,
-      speed: cls.speed
+      hp: baseHpWithUpg,
+      battleHp,
+      damage: baseDmgWithUpg,
+      speed: baseSpdWithUpg,
+      badgeId: badge ? badge.id : null,
+      badge
     };
   }
 
@@ -153,6 +179,8 @@ class BattleRoyalPaperGame {
       y = 38 + Math.random() * (h - 76);
     }
 
+    const playerSt = team === 'player' ? this.getUpgradedFighterStats(cls.id) : null;
+
     return {
       id: this.nextUid(),
       team,
@@ -160,9 +188,10 @@ class BattleRoyalPaperGame {
       abilityId: cls.id,
       name: cls.name,
       shape: cls.shape,
-      hp: customStats?.hp ?? cls.hp,
-      speed: customStats?.speed ?? cls.speed,
-      damage: customStats?.damage ?? cls.damage,
+      hp: customStats?.hp ?? (playerSt ? playerSt.hp : cls.hp),
+      speed: customStats?.speed ?? (playerSt ? playerSt.speed : cls.speed),
+      damage: customStats?.damage ?? (playerSt ? playerSt.damage : cls.damage),
+      badgeId: customStats?.badgeId !== undefined ? customStats.badgeId : (playerSt ? playerSt.badgeId : null),
       x,
       y
     };
@@ -269,6 +298,7 @@ class BattleRoyalPaperGame {
       this.units.push(this.instantiateUnit(bp));
     }
     this.initialCombatantCount = this.units.length;
+    this.renderOverheadBattleIcons();
   }
 
   instantiateUnit(bp, isMinion = false) {
@@ -296,7 +326,7 @@ class BattleRoyalPaperGame {
     }
 
     let initialCd = 0.6 + Math.random() * 0.5;
-    if (abilityId === 'soldier') initialCd = 0.35;      // Стреляет каждые 0.5 с
+    if (abilityId === 'soldier') initialCd = 1.0;       // Стреляет каждую 1 с
     if (abilityId === 'ninja') initialCd = 2.0;         // Первый бросок сюрикенов пораньше, далее каждые 5 с
     if (abilityId === 'hunter') initialCd = 1.8;        // Первый выстрел дробовика пораньше, далее каждые 4 с
     if (abilityId === 'bomber') initialCd = 0.85;       // Сначала бомба уже в руках, после броска ждёт ровно 8 секунд!
@@ -311,6 +341,23 @@ class BattleRoyalPaperGame {
     if (abilityId === 'galactic_lightning') initialCd = 3.5; // Молния стреляет молнией каждые 3.5 секунды!
     if (abilityId === 'skeleton_king') initialCd = 2.2;      // Король скелетов каждые 4 с выпускает черепа и призывает скелета-стража!
 
+    // Проверяем надетый значок (для бойцов игрока)
+    const rawBadgeId = !isMinion
+      ? (bp.badgeId !== undefined ? bp.badgeId : (bp.team === 'player' ? ((this.fighterBadges && this.fighterBadges[bp.classId]) || null) : null))
+      : null;
+    const badgeId = (rawBadgeId && canApplyBadgeToFighter(rawBadgeId, bp.classId).allowed) ? rawBadgeId : null;
+    const badge = getBadgeById(badgeId);
+
+    let startHp = bp.hp;
+    if (badge && !isMinion) {
+      if (badge.battleStartHpBonus) {
+        startHp += badge.battleStartHpBonus; // Шестой значок: +35 к здоровью в начале матча
+      }
+      if (badge.battleHpMultiplier) {
+        startHp = Math.round(startHp * badge.battleHpMultiplier); // Восьмой (×1.5) и Девятый (×2) значки
+      }
+    }
+
     return {
       id: bp.id || this.nextUid(),
       blueprintId: bp.id,
@@ -319,10 +366,13 @@ class BattleRoyalPaperGame {
       abilityId,
       name: bp.name,
       shape: bp.shape,
-      maxHp: bp.hp,
-      hp: bp.hp,
+      maxHp: startHp,
+      hp: startHp,
       baseSpeed: bp.speed,
       damage: bp.damage,
+      badgeId,
+      badgeTimer: 10.0, // Четвёртый (+10 HP / 10 с) и Пятый (+3 урона / 10 с) значки
+      isRebornClone: Boolean(bp.isRebornClone), // Седьмой значок (возрождение 1 раз, слабее в 2.5 раза и чуть меньше)
       x: bp.x,
       y: bp.y,
       vx: Math.cos(angle) * speedPx,
@@ -477,6 +527,11 @@ class BattleRoyalPaperGame {
       this.switchShopTab('container');
     });
 
+    document.getElementById('shopTabBadgeCrateBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('badge_crate');
+    });
+
     document.getElementById('shopTabExclusiveBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.switchShopTab('exclusive_crate');
@@ -527,6 +582,11 @@ class BattleRoyalPaperGame {
       this.switchShopTab('container');
     });
 
+    document.getElementById('badgeCrateBackToShelfBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.switchShopTab('container');
+    });
+
     document.getElementById('shopCrateItemBtn')?.addEventListener('click', () => {
       window.sfx.click();
       document.getElementById('shopShelfView')?.classList.add('hidden');
@@ -535,6 +595,7 @@ class BattleRoyalPaperGame {
       document.getElementById('miniCrate20TabView')?.classList.add('hidden');
       document.getElementById('exclusiveCrateTabView')?.classList.add('hidden');
       document.getElementById('crate35TabView')?.classList.add('hidden');
+      document.getElementById('badgeCrateTabView')?.classList.add('hidden');
       document.getElementById('cratePictureView')?.classList.remove('hidden');
       document.getElementById('crateUnboxedResult')?.classList.add('hidden');
       this.renderCrateRaritiesAndFighters();
@@ -568,6 +629,10 @@ class BattleRoyalPaperGame {
 
     document.getElementById('openCrate35Btn')?.addEventListener('click', () => {
       this.openCrate35For35Coins();
+    });
+
+    document.getElementById('openBadgeCrate70Btn')?.addEventListener('click', () => {
+      this.openBadgeCrateFor70Coins();
     });
 
     document.getElementById('buySkyGuardianBtn')?.addEventListener('click', () => {
@@ -618,10 +683,15 @@ class BattleRoyalPaperGame {
       this.openUpgradeScreen(this.selectedCampaignFighterId);
     });
 
-    // 4. Кнопки Локации Прокачки Бойца (за 2 монеты: +5 к здоровью или +2 к урону)
+    // 4. Кнопки Локации Прокачки Бойца (за 2 монеты: +5 к здоровью или +2 к урону + значки)
     document.getElementById('upgradeBackBtn')?.addEventListener('click', () => {
       window.sfx.click();
       this.openCampaignHubScreen();
+    });
+
+    document.getElementById('upgradeGoBadgeShopBtn')?.addEventListener('click', () => {
+      window.sfx.click();
+      this.openShopScreen('badge_crate');
     });
 
     document.getElementById('upgradeHp15Btn')?.addEventListener('click', () => {
@@ -866,6 +936,19 @@ class BattleRoyalPaperGame {
       status35Msg.innerHTML = `Побеждайте на уровнях (+2 ${COIN_HTML} за победу), чтобы накопить 35 монет на Ящик за 35 ${COIN_HTML} (10 обычных, 5 редких, 5 эпических)!`;
     }
 
+    // 4.3. Кнопка открытия «Контейнера со значками» (70 монет)
+    const openBadge70Btn = document.getElementById('openBadgeCrate70Btn');
+    const statusBadge70Msg = document.getElementById('badgeCrateStatusMsg');
+    if (openBadge70Btn) {
+      openBadge70Btn.disabled = this.coins < 70;
+      openBadge70Btn.innerHTML = this.coins >= 70
+        ? `🔓 ОТКРЫТЬ КОНТЕЙНЕР ЗНАЧКОВ ЗА 70 МОНЕТ ${COIN_HTML}`
+        : `🔒 НУЖНО 70 МОНЕТ (У ВАС ${this.coins} ${COIN_HTML})`;
+    }
+    if (statusBadge70Msg && this.coins < 70) {
+      statusBadge70Msg.innerHTML = `Побеждайте на уровнях (+2 ${COIN_HTML} за победу), чтобы накопить 70 монет на Контейнер со значками (5 редких, 3 эпических, 1 легендарный)!`;
+    }
+
     // 5. Кнопка покупки Стражника небес за 50 000 монет на витрине магазина
     const buyGuardianBtn = document.getElementById('buySkyGuardianBtn');
     const guardianMsg = document.getElementById('shopGuardianStatusMsg');
@@ -898,6 +981,7 @@ class BattleRoyalPaperGame {
 
   switchShopTab(tabName) {
     const tabContainerBtn = document.getElementById('shopTabContainerBtn');
+    const tabBadgeBtn = document.getElementById('shopTabBadgeCrateBtn');
     const tabExclBtn = document.getElementById('shopTabExclusiveBtn');
     const tabBoxBtn = document.getElementById('shopTabFighterBoxBtn');
     const tab500Btn = document.getElementById('shopTabCrate500Btn');
@@ -906,6 +990,7 @@ class BattleRoyalPaperGame {
 
     const shelfView = document.getElementById('shopShelfView');
     const crateView = document.getElementById('cratePictureView');
+    const badgeView = document.getElementById('badgeCrateTabView');
     const exclView = document.getElementById('exclusiveCrateTabView');
     const boxView = document.getElementById('fighterBoxTabView');
     const crate500View = document.getElementById('crate500TabView');
@@ -913,6 +998,7 @@ class BattleRoyalPaperGame {
     const mini20View = document.getElementById('miniCrate20TabView');
 
     tabContainerBtn?.classList.remove('active-shop-tab');
+    tabBadgeBtn?.classList.remove('active-shop-tab');
     tabExclBtn?.classList.remove('active-shop-tab');
     tabBoxBtn?.classList.remove('active-shop-tab');
     tab500Btn?.classList.remove('active-shop-tab');
@@ -921,13 +1007,19 @@ class BattleRoyalPaperGame {
 
     shelfView?.classList.add('hidden');
     crateView?.classList.add('hidden');
+    badgeView?.classList.add('hidden');
     exclView?.classList.add('hidden');
     boxView?.classList.add('hidden');
     crate500View?.classList.add('hidden');
     crate35View?.classList.add('hidden');
     mini20View?.classList.add('hidden');
 
-    if (tabName === 'exclusive_crate') {
+    if (tabName === 'badge_crate') {
+      tabBadgeBtn?.classList.add('active-shop-tab');
+      badgeView?.classList.remove('hidden');
+      document.getElementById('badgeCrateUnboxedResult')?.classList.add('hidden');
+      this.renderBadgeCrateRaritiesAndBadges();
+    } else if (tabName === 'exclusive_crate') {
       tabExclBtn?.classList.add('active-shop-tab');
       exclView?.classList.remove('hidden');
       document.getElementById('exclusiveCrateUnboxedResult')?.classList.add('hidden');
@@ -963,6 +1055,7 @@ class BattleRoyalPaperGame {
   openShopScreen(initialTab = 'container') {
     this.renderShopSkyGuardianShowcase();
     this.renderCrateRaritiesAndFighters();
+    this.renderBadgeCrateRaritiesAndBadges();
     this.renderExclusiveCrateRaritiesAndFighters();
     this.renderFighterBoxRaritiesAndFighters();
     this.renderCrate500RaritiesAndFighters();
@@ -1681,6 +1774,113 @@ class BattleRoyalPaperGame {
     this.updateAllCoinsUI();
   }
 
+  // Отрисовка нижней части вкладки «Контейнер со значками» (70 монет): 5 редких, 3 эпических, 1 легендарный
+  renderBadgeCrateRaritiesAndBadges() {
+    const listEl = document.getElementById('badgeCrateRaritiesList');
+    if (!listEl) return;
+    listEl.innerHTML = '';
+
+    for (const tier of BADGE_RARITIES) {
+      const tierBadges = FIGHTER_BADGES.filter(b => b.rarity === tier.id);
+      if (tierBadges.length === 0) continue;
+
+      const block = document.createElement('div');
+      block.className = 'rarity-tier-block';
+      block.style.borderColor = tier.border;
+      block.style.background = tier.bg;
+
+      const chanceNote = tier.id === 'legendary'
+        ? ' (ОЧЕНЬ-ПРЕОЧЕНЬ МАЛЫЙ ШАНС!)'
+        : (tier.id === 'epic' ? ' (очень малый шанс!)' : '');
+
+      block.innerHTML = `
+        <div class="rarity-tier-header">
+          <span class="rarity-tier-pill" style="background:${tier.color}">${tier.tierName} редкость${chanceNote}</span>
+          <span>Шанс редкости: <strong>${tier.tierChance}%</strong> (${tierBadges.length} шт. • по ${tier.perItemChance}%)</span>
+        </div>
+        <div class="rarity-fighters-row"></div>
+      `;
+
+      const row = block.querySelector('.rarity-fighters-row');
+      for (const badge of tierBadges) {
+        const isUnlocked = this.unlockedBadges.has(badge.id);
+        const item = document.createElement('div');
+        item.className = 'crate-fighter-mini' + (isUnlocked ? ' unlocked-in-crate' : '');
+        item.title = `${badge.name}: ${badge.desc}`;
+        item.innerHTML = `
+          <canvas width="52" height="40"></canvas>
+          <span class="cfm-name">${isUnlocked ? '✓ ' : ''}${badge.name}</span>
+          <span class="cfm-chance">${badge.shortLabel} • ${badge.dropChance}%</span>
+        `;
+        const cnv = item.querySelector('canvas');
+        renderBadgeIcon(cnv, badge);
+        row.appendChild(item);
+      }
+
+      listEl.appendChild(block);
+    }
+  }
+
+  // Открытие «Контейнера со значками» за 70 монет (5 редких [96.5%], 3 эпических [3%], 1 легендарный [0.5%])
+  openBadgeCrateFor70Coins() {
+    if (this.coins < 70) {
+      window.sfx.defeat();
+      return;
+    }
+
+    this.coins -= 70;
+    window.sfx.victory();
+
+    const boxIll = document.getElementById('badgeCrateIllustration');
+    if (boxIll) {
+      boxIll.classList.remove('crate-shake');
+      void boxIll.offsetWidth;
+      boxIll.classList.add('crate-shake');
+    }
+
+    const roll = Math.random() * 100;
+    let cumulative = 0;
+    let chosenTier = BADGE_RARITIES[0];
+    for (const tier of BADGE_RARITIES) {
+      cumulative += tier.tierChance;
+      if (roll <= cumulative) {
+        chosenTier = tier;
+        break;
+      }
+    }
+
+    const pool = FIGHTER_BADGES.filter(b => b.rarity === chosenTier.id);
+    const droppedBadge = pool[Math.floor(Math.random() * pool.length)] || FIGHTER_BADGES[0];
+    const wasAlreadyUnlocked = this.unlockedBadges.has(droppedBadge.id);
+    this.unlockedBadges.add(droppedBadge.id);
+
+    const resBox = document.getElementById('badgeCrateUnboxedResult');
+    const headerEl = document.getElementById('badgeCrateUnboxedHeader');
+    const cnv = document.getElementById('badgeCrateUnboxedCanvas');
+    const nameEl = document.getElementById('badgeCrateUnboxedName');
+    const rarEl = document.getElementById('badgeCrateUnboxedRarity');
+    const msgEl = document.getElementById('badgeCrateStatusMsg');
+
+    if (resBox && cnv && nameEl && rarEl) {
+      resBox.classList.remove('hidden');
+      renderBadgeIcon(cnv, droppedBadge);
+      nameEl.textContent = `${droppedBadge.emoji} ${droppedBadge.name.toUpperCase()}`;
+      rarEl.textContent = `${droppedBadge.rarityName} значок • ${droppedBadge.shortLabel}`;
+      rarEl.style.background = droppedBadge.rarityColor;
+    }
+    if (headerEl) {
+      headerEl.textContent = wasAlreadyUnlocked
+        ? '🏅 ВЫПАЛ ЗНАЧОК (УЖЕ ОТКРЫТ В КОЛЛЕКЦИИ)!'
+        : '🎉 ВАМ ВЫПАЛ НОВЫЙ ЗНАЧОК!';
+    }
+    if (msgEl) {
+      msgEl.textContent = `🏅 Выпал «${droppedBadge.name}» (${droppedBadge.rarityName}): ${droppedBadge.desc} Примените его во вкладке Прокачки любого бойца!`;
+    }
+
+    this.renderBadgeCrateRaritiesAndBadges();
+    this.updateAllCoinsUI();
+  }
+
   // Открытие локации с уровнем, кнопкой ИГРАТЬ и сеткой ячеек по редкости
   openCampaignHubScreen() {
     this.renderCampaignHub();
@@ -1893,11 +2093,12 @@ class BattleRoyalPaperGame {
         const countBadge = inSquadCount > 0
           ? (isTripleSlotFighter(fc.id) ? ' (3/3 места)' : ' (В отряде)')
           : '';
+        const badgeTag = st.badge ? ` ${st.badge.emoji}` : '';
         cell.innerHTML = `
           <div class="hcc-rarity-strip" style="background:${fc.rarityColor}">${fc.rarityBadge}${countBadge}</div>
           <canvas class="hcc-canvas" width="60" height="32"></canvas>
-          <div class="hcc-name">${fc.name}</div>
-          <div class="hcc-stats">❤️${st.hp} ⚔️${st.damage}</div>
+          <div class="hcc-name">${fc.name}${badgeTag}</div>
+          <div class="hcc-stats">❤️${st.battleHp !== st.hp ? st.battleHp : st.hp} ⚔️${st.damage}</div>
         `;
         const cnv = cell.querySelector('canvas');
         renderFighterThumbnail(cnv, fc, 'player', false);
@@ -2036,15 +2237,24 @@ class BattleRoyalPaperGame {
       rarBadge.style.background = cls.rarityColor;
     }
 
+    const spdPill = document.getElementById('upgradeFighterSpeedPill');
+    if (spdPill) {
+      spdPill.textContent = `⚡ Скорость: ${st.speed}`;
+    }
+
     const nameEl = document.getElementById('upgradeFighterName');
-    if (nameEl) nameEl.textContent = cls.name.toUpperCase();
+    if (nameEl) {
+      nameEl.textContent = st.badge ? `${cls.name.toUpperCase()} ${st.badge.emoji}` : cls.name.toUpperCase();
+    }
 
     const descEl = document.getElementById('upgradeFighterDesc');
     if (descEl) descEl.textContent = cls.desc;
 
     const hpNumEl = document.getElementById('upgradeStatHpNum');
     const dmgNumEl = document.getElementById('upgradeStatDmgNum');
-    if (hpNumEl) hpNumEl.textContent = st.hp;
+    if (hpNumEl) {
+      hpNumEl.textContent = st.battleHp !== st.hp ? `${st.hp} (в бою ${st.battleHp})` : st.hp;
+    }
     if (dmgNumEl) dmgNumEl.textContent = st.damage;
 
     const canAfford = this.coins >= 2;
@@ -2053,7 +2263,168 @@ class BattleRoyalPaperGame {
     if (hpBtn) hpBtn.disabled = !canAfford;
     if (dmgBtn) dmgBtn.disabled = !canAfford;
 
+    // Отрисовываем секцию значков во вкладке Прокачки бойца
+    const countEl = document.getElementById('upgradeUnlockedBadgesCount');
+    if (countEl) {
+      countEl.textContent = `Открыто значков: ${this.unlockedBadges.size} / ${FIGHTER_BADGES.length}`;
+    }
+
+    const activeBox = document.getElementById('upgradeActiveBadgeBox');
+    if (activeBox) {
+      activeBox.innerHTML = '';
+      if (st.badge) {
+        activeBox.classList.add('has-badge');
+        activeBox.innerHTML = `
+          <div class="uab-info">
+            <canvas width="44" height="38"></canvas>
+            <div class="uab-text">
+              <strong>Надет: ${st.badge.emoji} ${st.badge.name} (${st.badge.rarityName})</strong>
+              <small>${st.badge.desc}</small>
+            </div>
+          </div>
+          <button type="button" class="unequip-badge-btn" id="unequipCurrentBadgeBtn">✖ УБРАТЬ ЗНАЧОК</button>
+        `;
+        const bCnv = activeBox.querySelector('canvas');
+        renderBadgeIcon(bCnv, st.badge);
+        activeBox.querySelector('#unequipCurrentBadgeBtn')?.addEventListener('click', () => {
+          this.unequipBadgeFromFighter(cid);
+        });
+      } else {
+        activeBox.classList.remove('has-badge');
+        activeBox.innerHTML = `
+          <div class="uab-text">
+            <strong>Значок не выбран</strong>
+            <small>Примените любой открытый значок ниже для бонуса! Если убрать значок — все его эффекты сразу отменяются и боец становится прежним.</small>
+          </div>
+        `;
+      }
+    }
+
+    const badgesGrid = document.getElementById('upgradeBadgesGrid');
+    if (badgesGrid) {
+      badgesGrid.innerHTML = '';
+      const equippedBadgeId = st.badgeId;
+
+      for (const badge of FIGHTER_BADGES) {
+        const isUnlocked = this.unlockedBadges.has(badge.id);
+        const isEquipped = equippedBadgeId === badge.id;
+        const check = canApplyBadgeToFighter(badge.id, cid);
+
+        const card = document.createElement('div');
+        card.className =
+          'upgrade-badge-card' +
+          (isUnlocked ? '' : ' locked-badge-card') +
+          (isEquipped ? ' equipped-badge-card' : '');
+        card.style.borderColor = badge.rarityBorder;
+
+        card.innerHTML = `
+          <div class="ubc-top">
+            <canvas width="42" height="36"></canvas>
+            <div class="ubc-title-wrap">
+              <span class="ubc-rarity-tag" style="background:${badge.rarityColor}">${badge.rarityName} • ${badge.dropChance}%</span>
+              <span class="ubc-name">#${badge.num} ${badge.name}</span>
+            </div>
+          </div>
+          <div class="ubc-desc">${badge.desc}</div>
+          <button type="button" class="ubc-action-btn"></button>
+        `;
+
+        const cnv = card.querySelector('canvas');
+        renderBadgeIcon(cnv, badge);
+
+        const btn = card.querySelector('.ubc-action-btn');
+        if (!isUnlocked) {
+          btn.className = 'ubc-action-btn locked-btn';
+          btn.innerHTML = `🔒 В контейнере значков (70 ${COIN_HTML})`;
+          btn.addEventListener('click', () => {
+            window.sfx.click();
+            this.openShopScreen('badge_crate');
+          });
+        } else if (isEquipped) {
+          btn.className = 'ubc-action-btn remove-btn';
+          btn.textContent = '✖ УБРАТЬ ЗНАЧОК';
+          btn.addEventListener('click', () => {
+            this.unequipBadgeFromFighter(cid);
+          });
+        } else if (!check.allowed) {
+          btn.className = 'ubc-action-btn';
+          btn.disabled = true;
+          btn.textContent = '🚫 Только ниже Мифической редкости';
+          btn.title = check.reason;
+        } else {
+          btn.className = 'ubc-action-btn apply-btn';
+          btn.textContent = `✅ ПРИМЕНИТЬ (${badge.shortLabel})`;
+          btn.addEventListener('click', () => {
+            this.equipBadgeOnFighter(cid, badge.id);
+          });
+        }
+
+        badgesGrid.appendChild(card);
+      }
+    }
+
     this.updateAllCoinsUI();
+  }
+
+  // Надеть значок на персонажа
+  equipBadgeOnFighter(classId, badgeId) {
+    if (!this.unlockedBadges.has(badgeId)) {
+      window.sfx.defeat();
+      return;
+    }
+    const check = canApplyBadgeToFighter(badgeId, classId);
+    const msgEl = document.getElementById('upgradeStatusFeedback');
+    if (!check.allowed) {
+      window.sfx.defeat();
+      if (msgEl) msgEl.textContent = `🚫 ${check.reason}`;
+      return;
+    }
+
+    window.sfx.heal();
+    this.fighterBadges[classId] = badgeId;
+    this.syncPlayerBlueprintsForFighter(classId);
+    const badge = getBadgeById(badgeId);
+    if (msgEl && badge) {
+      msgEl.textContent = `🏅 Значок «${badge.name}» применён к бойцу! (${badge.desc})`;
+    }
+    this.renderUpgradeScreen();
+  }
+
+  // Убрать значок с персонажа: все бонусы и эффекты значка отменяются, и боец становится прежним!
+  unequipBadgeFromFighter(classId) {
+    const prevBadgeId = this.fighterBadges[classId];
+    const prevBadge = getBadgeById(prevBadgeId);
+    delete this.fighterBadges[classId];
+    this.syncPlayerBlueprintsForFighter(classId);
+    window.sfx.click();
+
+    const msgEl = document.getElementById('upgradeStatusFeedback');
+    if (msgEl) {
+      msgEl.textContent = prevBadge
+        ? `✖ Значок «${prevBadge.name}» убран — все его эффекты сняты, и характеристики бойца стали прежними!`
+        : '✖ Значок убран с бойца!';
+    }
+    this.renderUpgradeScreen();
+  }
+
+  // Синхронизирует чертежи бойца в команде игрока после надевания/снятия значка или прокачки
+  syncPlayerBlueprintsForFighter(classId) {
+    if (!classId || !this.playerBlueprints) return;
+    const st = this.getUpgradedFighterStats(classId);
+    let changed = false;
+    for (const bp of this.playerBlueprints) {
+      if (bp.classId === classId) {
+        bp.hp = st.hp;
+        bp.speed = st.speed;
+        bp.damage = st.damage;
+        bp.badgeId = st.badgeId;
+        changed = true;
+      }
+    }
+    if (changed && this.state === 'prep') {
+      this.syncUnitsFromBlueprints();
+      this.refreshAllUI();
+    }
   }
 
   // Прокачка за 2 монеты: добавляет +5 к здоровью или +2 к урону
@@ -2080,6 +2451,7 @@ class BattleRoyalPaperGame {
       if (msgEl) msgEl.textContent = `✅ Урон бойца увеличен на +2 за 2 монеты!`;
     }
 
+    this.syncPlayerBlueprintsForFighter(cid);
     this.renderUpgradeScreen();
   }
 
@@ -2105,7 +2477,7 @@ class BattleRoyalPaperGame {
     const w = this.canvas.width || 680;
     const h = this.canvas.height || 400;
 
-    // Ставим всех выбранных в отряд бойцов игрока (от 1 до 3) с их прокачанными здоровьем и уроном
+    // Ставим всех выбранных в отряд бойцов игрока (от 1 до 3) с их прокачанными здоровьем, уроном, скоростью и значком
     this.playerBlueprints = validSquad.map((cid, idx) => {
       const st = this.getUpgradedFighterStats(cid);
       const py = h * ((idx + 1) / (validSquad.length + 1));
@@ -2113,7 +2485,8 @@ class BattleRoyalPaperGame {
       return this.createBlueprint(cid, 'player', px, py, {
         hp: st.hp,
         speed: st.speed,
-        damage: st.damage
+        damage: st.damage,
+        badgeId: st.badgeId
       });
     });
     this.selectedPlayerUnitId = this.playerBlueprints[0].id;
@@ -2636,6 +3009,7 @@ class BattleRoyalPaperGame {
 
     this.renderTeamSlots('player', this.playerBlueprints, this.selectedPlayerUnitId, 'playerTeamSlots');
     this.renderTeamSlots('bot', this.botBlueprints, this.selectedBotUnitId, 'botTeamSlots');
+    this.renderOverheadBattleIcons();
     this.renderInspector('player', this.playerBlueprints, this.selectedPlayerUnitId);
     this.renderInspector('bot', this.botBlueprints, this.selectedBotUnitId);
   }
@@ -2721,6 +3095,72 @@ class BattleRoyalPaperGame {
     });
   }
 
+  // Отрисовка иконок ваших персонажей и персонажей врагов прямо над полем боя
+  renderOverheadBattleIcons() {
+    const buildTeamIcons = (team, blueprints, containerId) => {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      container.innerHTML = '';
+
+      blueprints.forEach((bp) => {
+        const iconCard = document.createElement('div');
+        iconCard.className = `overhead-unit-icon ${team === 'player' ? 'player-icon' : 'bot-icon'}`;
+        iconCard.dataset.blueprintId = bp.id;
+        iconCard.dataset.team = team;
+        iconCard.title = `${bp.name} (HP: ${bp.hp}, Урон: ${bp.damage})`;
+
+        const cnv = document.createElement('canvas');
+        cnv.width = 52;
+        cnv.height = 38;
+        renderFighterThumbnail(cnv, bp, team, false);
+
+        const nameSpan = document.createElement('span');
+        nameSpan.className = 'overhead-unit-name';
+        nameSpan.textContent = bp.name;
+
+        const crossOverlay = document.createElement('div');
+        crossOverlay.className = 'overhead-cross-overlay';
+        crossOverlay.setAttribute('aria-hidden', 'true');
+
+        iconCard.appendChild(cnv);
+        iconCard.appendChild(nameSpan);
+        iconCard.appendChild(crossOverlay);
+
+        iconCard.addEventListener('click', () => {
+          window.sfx.click();
+          if (team === 'player') this.selectedPlayerUnitId = bp.id;
+          else this.selectedBotUnitId = bp.id;
+          this.refreshAllUI();
+        });
+
+        container.appendChild(iconCard);
+      });
+    };
+
+    buildTeamIcons('player', this.playerBlueprints, 'overheadPlayerIcons');
+    buildTeamIcons('bot', this.botBlueprints, 'overheadBotIcons');
+    this.updateOverheadIconsStatus();
+  }
+
+  // Обновляет состояние иконок над полем: погибшие перечёркиваются и становятся тусклыми/серыми
+  updateOverheadIconsStatus() {
+    const bar = document.getElementById('arenaOverheadBar');
+    if (!bar) return;
+
+    const icons = bar.querySelectorAll('.overhead-unit-icon');
+    icons.forEach((iconEl) => {
+      const bpId = iconEl.dataset.blueprintId;
+      let isDead = false;
+      if (this.state !== 'prep') {
+        const aliveUnit = this.units.find(
+          u => u.blueprintId === bpId && !u.isMinion && u.hp > 0 && !u.infectedByZombie
+        );
+        isDead = !aliveUnit;
+      }
+      iconEl.classList.toggle('is-dead', isDead);
+    });
+  }
+
   renderInspector(team, blueprints, selectedId) {
     const bp = blueprints.find(u => u.id === selectedId) || blueprints[0];
     if (!bp) return;
@@ -2775,6 +3215,18 @@ class BattleRoyalPaperGame {
     this.endgameStage = 0;
     document.getElementById('battleResultOverlay').classList.add('hidden');
     this.updateReadyUI();
+
+    // Показываем всплывающие бонусы значков, срабатывающих в начале матча (#6: +35 HP, #8: ×1.5 HP, #9: ×2 HP)
+    for (const u of this.units) {
+      if (!u.badgeId || u.isMinion) continue;
+      if (u.badgeId === 'badge_start_hp_35') {
+        this.addFloatingText(u.x, u.y - u.radius - 20, '🛡️ ЗНАЧОК: +35 HP НА МАТЧ!', '#a855f7');
+      } else if (u.badgeId === 'badge_hp_mult_1_5') {
+        this.addFloatingText(u.x, u.y - u.radius - 20, `✨ ЗНАЧОК: HP ×1.5 (${u.maxHp} HP)!`, '#9333ea');
+      } else if (u.badgeId === 'badge_hp_mult_2') {
+        this.addFloatingText(u.x, u.y - u.radius - 20, `👑 ЗНАЧОК: HP ×2 (${u.maxHp} HP)!`, '#d97706');
+      }
+    }
   }
 
   stopBattleToPrep() {
@@ -3134,6 +3586,27 @@ class BattleRoyalPaperGame {
       if (u.pavukDashingTimer > 0) u.pavukDashingTimer -= dt;
       if (u.lightningDashingTimer > 0) u.lightningDashingTimer -= dt;
 
+      // СПОСОБНОСТИ ЗНАЧКОВ КАЖДЫЕ 10 СЕКУНД В БОЮ:
+      // 4-й редкий значок (badge_regen_10): каждые 10 секунд восстанавливает 10 единиц здоровья.
+      // 5-й редкий значок (badge_rage_dmg_3): каждые 10 секунд даёт +3 к урону до конца битвы (после битвы вся набранная сила испаряется!).
+      if (u.badgeId && !u.isMinion && (u.badgeId === 'badge_regen_10' || u.badgeId === 'badge_rage_dmg_3')) {
+        u.badgeTimer = (u.badgeTimer !== undefined ? u.badgeTimer : 10.0) - dt;
+        if (u.badgeTimer <= 0) {
+          u.badgeTimer = 10.0;
+          if (u.badgeId === 'badge_regen_10') {
+            u.hp = Math.min(u.maxHp, u.hp + 10);
+            window.sfx.heal();
+            this.spawnConfetti(u.x, u.y - u.radius, '#22c55e', 7);
+            this.addFloatingText(u.x, u.y - u.radius - 18, '💚 +10 HP (ЗНАЧОК)!', '#16a34a');
+          } else if (u.badgeId === 'badge_rage_dmg_3') {
+            u.damage += 3;
+            window.sfx.heal();
+            this.spawnConfetti(u.x, u.y - u.radius, '#f97316', 7);
+            this.addFloatingText(u.x, u.y - u.radius - 18, `🔥 +3 УРОНА (ЗНАЧОК: ${u.damage}⚔️)!`, '#ea580c');
+          }
+        }
+      }
+
       // КОРОЛЬ СКЕЛЕТОВ (ГАЛАКТИЧЕСКИЙ): небольшой дебаф — каждые 7 секунд проклятая корона отнимает у него 20 HP (не ниже 1 HP)!
       if ((u.classId === 'skeleton_king' || u.abilityId === 'skeleton_king') && !u.isMinion) {
         u.skeletonCurseTimer = (u.skeletonCurseTimer !== undefined ? u.skeletonCurseTimer : 7.0) - dt;
@@ -3421,6 +3894,7 @@ class BattleRoyalPaperGame {
 
     // 8. Удаление побеждённых бойцов и проверка победы
     this.units = this.units.filter(u => u.hp > 0);
+    this.updateOverheadIconsStatus();
 
     const alivePlayers = this.units.filter(u => u.team === 'player');
     const aliveBots = this.units.filter(u => u.team === 'bot');
@@ -4047,9 +4521,9 @@ class BattleRoyalPaperGame {
       }
 
       case 'soldier': {
-        // СОЛДАТ: каждые 0.5 секунды стреляет в цель мелкими белыми пульками!
+        // СОЛДАТ: каждую 1 секунду стреляет в цель мелкими белыми пульками!
         if (!enemy) break;
-        u.cooldown = 0.5;
+        u.cooldown = 1.0;
         window.sfx.shootArrow();
         const ang = u.aimAngle + (Math.random() * 0.08 - 0.04);
         this.projectiles.push({
@@ -6244,6 +6718,13 @@ class BattleRoyalPaperGame {
       const thornDmg = Math.max(2, Math.round(dmg * 0.4));
       attacker.hp = Math.max(0, attacker.hp - thornDmg);
       this.addFloatingText(attacker.x, attacker.y - attacker.radius - 14, `🌵 ШИПЫ -${thornDmg}`, '#15803d');
+      if (attacker.hp <= 0) {
+        if (!this.triggerUnitBadgeRebirth(attacker)) {
+          window.sfx.ko();
+          this.spawnConfetti(attacker.x, attacker.y, getUnitTeamColor(attacker.team, attacker.classId), 14);
+          this.updateOverheadIconsStatus();
+        }
+      }
     }
 
     const col = textColor || (target.team === 'player' ? '#d93829' : '#1c1a17');
@@ -6251,6 +6732,11 @@ class BattleRoyalPaperGame {
     this.spawnConfetti(target.x, target.y, getUnitTeamColor(target.team, target.classId), 5);
 
     if (target.hp <= 0) {
+      // 7-Й ЭПИЧЕСКИЙ ЗНАЧОК (badge_rebirth): когда боец с этим значком умирает, появляется точно такой же боец, но слабее в 2.5 раза и чуть меньше!
+      if (this.triggerUnitBadgeRebirth(target)) {
+        return;
+      }
+
       // СМЕРТЬ: когда умирает один (любой) боец на поле боя, Смерть получает +30 HP себе!
       for (const reaper of this.units) {
         if (reaper.id !== target.id && reaper.hp > 0 && (reaper.classId === 'death' || reaper.abilityId === 'death')) {
@@ -6273,6 +6759,7 @@ class BattleRoyalPaperGame {
       // ЗОМБИ: когда Зомби кого-то убивает, убитый превращается точно в такого же Зомби с полной шкалой здоровья!
       if (attacker && (attacker.classId === 'zombie' || attacker.abilityId === 'zombie')) {
         window.sfx.heal();
+        target.infectedByZombie = true;
         target.team = attacker.team;
         target.classId = attacker.classId;
         target.abilityId = attacker.abilityId;
@@ -6294,12 +6781,58 @@ class BattleRoyalPaperGame {
         target.hitImmunityMap = {};
         this.spawnConfetti(target.x, target.y, '#65a30d', 16);
         this.addFloatingText(target.x, target.y - target.radius - 18, '🧟 ЗАРАЖЕНИЕ! НОВЫЙ ЗОМБИ!', '#4d7c0f');
+        this.updateOverheadIconsStatus();
         return;
       }
 
       window.sfx.ko();
       this.spawnConfetti(target.x, target.y, getUnitTeamColor(target.team, target.classId), 18);
+      this.updateOverheadIconsStatus();
     }
+  }
+
+  // Срабатывание 7-го эпического значка «Значок Возрождения»:
+  // Когда боец с этим значком умирает, на его месте появляется точно такой же боец, но слабее в 2.5 раза и чуть меньше!
+  triggerUnitBadgeRebirth(unit) {
+    if (!unit || unit.isMinion || unit.isRebornClone || unit.badgeId !== 'badge_rebirth') {
+      return false;
+    }
+
+    unit.isRebornClone = true;
+    unit.badgeId = null; // Возрождение срабатывает 1 раз за бой
+    unit.maxHp = Math.max(1, Math.round(unit.maxHp / 2.5));
+    unit.hp = unit.maxHp;
+    unit.damage = Math.max(1, Math.round(unit.damage / 2.5));
+    unit.baseRadius = Math.max(11, Math.round(unit.baseRadius * 0.78));
+    unit.radius = unit.baseRadius;
+    unit.scaleX = 1.25;
+    unit.scaleY = 1.25;
+
+    if (unit.segments && unit.segments.length > 0) {
+      for (const seg of unit.segments) {
+        seg.r = Math.max(7, Math.round(seg.r * 0.78));
+      }
+    }
+
+    unit.burnTimer = 0;
+    unit.slowTimer = 0;
+    unit.stunTimer = 0;
+    unit.dizzyTimer = 0;
+    unit.cocoonTimer = 0;
+    unit.shockTimer = 0;
+    unit.vulnTimer = 0;
+    unit.hitImmunityMap = {};
+
+    window.sfx.heal();
+    this.spawnConfetti(unit.x, unit.y, '#a855f7', 20);
+    this.addFloatingText(
+      unit.x,
+      unit.y - unit.radius - 20,
+      `🐦‍🔥 ВОЗРОЖДЕНИЕ ЗНАЧКА (❤️${unit.maxHp} ⚔️${unit.damage})!`,
+      '#9333ea'
+    );
+    this.updateOverheadIconsStatus();
+    return true;
   }
 
   spawnConfetti(x, y, color, count = 6) {
@@ -7112,6 +7645,20 @@ class BattleRoyalPaperGame {
     const barW = u.isMinion ? 24 : Math.max(38, u.radius * 1.8);
     const barH = u.isMinion ? 5 : 7;
     this.drawHealthBar(ctx, u.x, u.y - u.radius - 13, barW, barH, u.hp, u.maxHp);
+
+    // Иконка надетого значка (или возрождённого бойца) рядом с полоской здоровья
+    if (!u.isMinion && (u.badgeId || u.isRebornClone)) {
+      const bObj = u.badgeId ? getBadgeById(u.badgeId) : null;
+      const badgeIconTxt = bObj ? bObj.emoji : (u.isRebornClone ? '🐦‍🔥' : '');
+      if (badgeIconTxt) {
+        ctx.save();
+        ctx.font = '900 11px "Nunito", sans-serif';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(badgeIconTxt, u.x - barW / 2 - 9, u.y - u.radius - 13);
+        ctx.restore();
+      }
+    }
 
     ctx.restore();
   }

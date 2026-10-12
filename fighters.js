@@ -260,8 +260,8 @@ const FIGHTER_CLASSES = [
     hp: 95,
     speed: 3.2,
     damage: 4,
-    cardSub: '0.5 с пульки',
-    desc: '🪖 Пистолет: каждые 0.5 с стреляет белыми пульками в цель'
+    cardSub: '1 с пульки',
+    desc: '🪖 Пистолет: каждую 1 с стреляет белыми пульками в цель'
   },
   {
     id: 'claws',
@@ -5667,4 +5667,263 @@ function renderFighterThumbnail(canvas, unitOrClass, team = 'player', showDualIc
     drawWeaponGraphic(ctx, abilityId, wx + 22, wy + 2, 0.75, -Math.PI / 4, team);
   }
 }
+
+// ==================== СИСТЕМА ЗНАЧКОВ (КОНТЕЙНЕР СО ЗНАЧКАМИ ЗА 70 МОНЕТ: 5 РЕДКИХ, 3 ЭПИЧЕСКИХ, 1 ЛЕГЕНДАРНЫЙ) ====================
+const BADGE_RARITIES = [
+  {
+    id: 'rare',
+    name: 'Редкий',
+    tierName: 'Редкая',
+    color: '#16a34a',
+    bg: '#dcfce7',
+    border: '#15803d',
+    tierChance: 96.5, // 96.5% суммарно (по 19.3% на каждый из 5 редких значков)
+    perItemChance: 19.3
+  },
+  {
+    id: 'epic',
+    name: 'Эпический',
+    tierName: 'Эпическая',
+    color: '#9333ea',
+    bg: '#f3e8ff',
+    border: '#7e22ce',
+    tierChance: 3.0,  // Очень малый шанс: 3.0% суммарно (по 1.0% на каждый из 3 эпических значков)
+    perItemChance: 1.0
+  },
+  {
+    id: 'legendary',
+    name: 'Легендарный',
+    tierName: 'Легендарная',
+    color: '#d97706',
+    bg: '#fef3c7',
+    border: '#b45309',
+    tierChance: 0.5,  // Очень-преочень малый шанс: 0.5% на легендарный значок!
+    perItemChance: 0.5
+  }
+];
+
+const FIGHTER_BADGES = [
+  // 5 РЕДКИХ ЗНАЧКОВ
+  {
+    id: 'badge_hp_20',
+    num: 1,
+    name: 'Значок Здоровья',
+    rarity: 'rare',
+    emoji: '❤️',
+    shortLabel: '+20 ❤️ HP',
+    desc: 'Даёт +20 к здоровью, когда применяешь его к бойцу.',
+    bonusHp: 20,
+    bonusSpeed: 0,
+    bonusDamage: 0
+  },
+  {
+    id: 'badge_speed_1',
+    num: 2,
+    name: 'Значок Скорости',
+    rarity: 'rare',
+    emoji: '⚡',
+    shortLabel: '+1 ⚡ Скорость',
+    desc: 'Даёт +1 к скорости передвижения бойца.',
+    bonusHp: 0,
+    bonusSpeed: 1,
+    bonusDamage: 0
+  },
+  {
+    id: 'badge_dmg_6',
+    num: 3,
+    name: 'Значок Силы',
+    rarity: 'rare',
+    emoji: '⚔️',
+    shortLabel: '+6 ⚔️ Урон',
+    desc: 'Даёт +6 к урону, когда применяешь его к бойцу.',
+    bonusHp: 0,
+    bonusSpeed: 0,
+    bonusDamage: 6
+  },
+  {
+    id: 'badge_regen_10',
+    num: 4,
+    name: 'Значок Регенерации',
+    rarity: 'rare',
+    emoji: '💚',
+    shortLabel: '+10 HP / 10 с',
+    desc: 'Способность: каждые 10 секунд восстанавливает 10 единиц здоровья в бою.',
+    bonusHp: 0,
+    bonusSpeed: 0,
+    bonusDamage: 0
+  },
+  {
+    id: 'badge_rage_dmg_3',
+    num: 5,
+    name: 'Значок Растущей Силы',
+    rarity: 'rare',
+    emoji: '🔥',
+    shortLabel: '+3 ⚔️ / 10 с (в бою)',
+    desc: 'Способность: каждые 10 секунд даёт +3 к урону до конца битвы (после битвы вся полученная сила испаряется до следующего боя).',
+    bonusHp: 0,
+    bonusSpeed: 0,
+    bonusDamage: 0
+  },
+
+  // 3 ЭПИЧЕСКИХ ЗНАЧКА
+  {
+    id: 'badge_start_hp_35',
+    num: 6,
+    name: 'Значок Крепости',
+    rarity: 'epic',
+    emoji: '🛡️',
+    shortLabel: '+35 ❤️ в начале боя',
+    desc: 'В начале матча даёт бойцу +35 к здоровью.',
+    bonusHp: 0,
+    bonusSpeed: 0,
+    bonusDamage: 0,
+    battleStartHpBonus: 35
+  },
+  {
+    id: 'badge_rebirth',
+    num: 7,
+    name: 'Значок Возрождения',
+    rarity: 'epic',
+    emoji: '🪽',
+    shortLabel: 'Возрождение (÷2.5)',
+    desc: 'Способность: когда боец с этим значком умирает, появляется точно такой же боец, но слабее в 2.5 раза и чуть меньше.',
+    bonusHp: 0,
+    bonusSpeed: 0,
+    bonusDamage: 0
+  },
+  {
+    id: 'badge_hp_mult_1_5',
+    num: 8,
+    name: 'Значок Гиганта ×1.5',
+    rarity: 'epic',
+    emoji: '🧬',
+    shortLabel: '×1.5 ❤️ HP (до Эпик)',
+    desc: 'Способность (только для бойцов с редкостью ниже Мифической): умножает здоровье бойца на 1.5 пока не кончится бой.',
+    bonusHp: 0,
+    bonusSpeed: 0,
+    bonusDamage: 0,
+    battleHpMultiplier: 1.5,
+    maxFighterRarityOrder: 3 // 1=Обычная, 2=Редкая, 3=Эпическая (ниже Мифической=4)
+  },
+
+  // 1 ЛЕГЕНДАРНЫЙ ЗНАЧОК
+  {
+    id: 'badge_hp_mult_2',
+    num: 9,
+    name: 'Значок Бессмертия ×2',
+    rarity: 'legendary',
+    emoji: '👑',
+    shortLabel: '×2 ❤️ HP на весь бой',
+    desc: 'Способность: на весь бой даёт бойцу умноженное в 2 раза его здоровье (×2 HP).',
+    bonusHp: 0,
+    bonusSpeed: 0,
+    bonusDamage: 0,
+    battleHpMultiplier: 2.0
+  }
+];
+
+(function assignBadgeRarityMeta() {
+  for (const b of FIGHTER_BADGES) {
+    const tier = BADGE_RARITIES.find(t => t.id === b.rarity) || BADGE_RARITIES[0];
+    b.rarityName = tier.name;
+    b.rarityTierName = tier.tierName;
+    b.rarityColor = tier.color;
+    b.rarityBg = tier.bg;
+    b.rarityBorder = tier.border;
+    b.dropChance = tier.perItemChance;
+  }
+})();
+
+function getBadgeById(badgeId) {
+  if (!badgeId) return null;
+  return FIGHTER_BADGES.find(b => b.id === badgeId) || null;
+}
+
+function canApplyBadgeToFighter(badgeId, fighterClassId) {
+  const badge = getBadgeById(badgeId);
+  if (!badge) return { allowed: false, reason: 'Значок не найден' };
+  const cls = getFighterClass(fighterClassId);
+  if (badge.maxFighterRarityOrder && (cls.rarityOrder || 1) > badge.maxFighterRarityOrder) {
+    return {
+      allowed: false,
+      reason: 'Этот значок можно применять только к бойцам с редкостью ниже Мифической (Обычная, Редкая, Эпическая)!'
+    };
+  }
+  return { allowed: true, reason: '' };
+}
+
+function renderBadgeIcon(canvas, badgeOrId) {
+  if (!canvas) return;
+  const badge = typeof badgeOrId === 'string' ? getBadgeById(badgeOrId) : badgeOrId;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width;
+  const h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+  if (!badge) return;
+
+  const cx = w / 2;
+  const cy = h / 2;
+  const r = Math.min(w, h) * 0.38;
+
+  ctx.save();
+  // Ленточки медали/значка снизу
+  ctx.fillStyle = badge.rarityColor || '#16a34a';
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(cx - r * 0.55, cy + r * 0.45);
+  ctx.lineTo(cx - r * 0.8, cy + r * 1.15);
+  ctx.lineTo(cx - r * 0.35, cy + r * 0.95);
+  ctx.lineTo(cx - r * 0.15, cy + r * 1.2);
+  ctx.lineTo(cx - r * 0.1, cy + r * 0.55);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  ctx.beginPath();
+  ctx.moveTo(cx + r * 0.55, cy + r * 0.45);
+  ctx.lineTo(cx + r * 0.8, cy + r * 1.15);
+  ctx.lineTo(cx + r * 0.35, cy + r * 0.95);
+  ctx.lineTo(cx + r * 0.15, cy + r * 1.2);
+  ctx.lineTo(cx + r * 0.1, cy + r * 0.55);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Основа значка (восьмиугольный/зубчатый щит или круглая медаль в зависимости от редкости)
+  const spikes = badge.rarity === 'legendary' ? 12 : (badge.rarity === 'epic' ? 8 : 6);
+  ctx.fillStyle = badge.rarityBg || '#dcfce7';
+  ctx.strokeStyle = '#1c1a17';
+  ctx.lineWidth = 2.4;
+  ctx.beginPath();
+  for (let i = 0; i < spikes * 2; i++) {
+    const rad = i % 2 === 0 ? r * 1.08 : r * 0.88;
+    const ang = (i * Math.PI) / spikes - Math.PI / 2;
+    const px = cx + Math.cos(ang) * rad;
+    const py = cy - 2 + Math.sin(ang) * rad;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+
+  // Внутренний ободок цвета редкости
+  ctx.fillStyle = '#ffffff';
+  ctx.strokeStyle = badge.rarityColor || '#16a34a';
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.arc(cx, cy - 2, r * 0.72, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.stroke();
+
+  // Символ внутри значка
+  ctx.font = `900 ${Math.round(r * 0.92)}px "Nunito", "Segoe UI Emoji", sans-serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#1c1a17';
+  ctx.fillText(badge.emoji || '🏅', cx, cy - 1);
+  ctx.restore();
+}
+
 

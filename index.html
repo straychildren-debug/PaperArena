@@ -41,7 +41,7 @@
         <button id="menuShopBtn" class="big-menu-btn shop-menu-btn" type="button">
           <span class="btn-emoji">📦</span>
           <span class="btn-label">МАГАЗИН</span>
-          <small class="btn-sub">Ящики: 20 <span class="coin-icon" aria-hidden="true"></span> | 35 <span class="coin-icon" aria-hidden="true"></span> | 50 <span class="coin-icon" aria-hidden="true"></span> | 500 <span class="coin-icon" aria-hidden="true"></span> | 1 000 <span class="coin-icon" aria-hidden="true"></span> | Эксклюзив 1 000 <span class="coin-icon" aria-hidden="true"></span></small>
+          <small class="btn-sub">Ящики: 20 <span class="coin-icon" aria-hidden="true"></span> | 35 <span class="coin-icon" aria-hidden="true"></span> | 50 <span class="coin-icon" aria-hidden="true"></span> | Значки 70 <span class="coin-icon" aria-hidden="true"></span> | 500 <span class="coin-icon" aria-hidden="true"></span> | 1 000 <span class="coin-icon" aria-hidden="true"></span></small>
         </button>
 
         <button id="menuPlayBtn" class="big-menu-btn play-menu-btn" type="button">
@@ -57,7 +57,7 @@
     </div>
   </div>
 
-  <!-- ==================== 2. МАГАЗИН (6 ВКЛАДОК: КОНТЕЙНЕР + СТРАЖНИК | ЭКСКЛЮЗИВ 1000 | ЯЩИК 500 | БОКС 50 | ЯЩИК 35 | МАЛЕНЬКИЙ ЯЩИК 20) ==================== -->
+  <!-- ==================== 2. МАГАЗИН (7 ВКЛАДОК ВКЛЮЧАЯ КОНТЕЙНЕР СО ЗНАЧКАМИ ЗА 70 МОНЕТ) ==================== -->
   <div id="shopScreen" class="screen-view hidden">
     <div class="paper-screen-card shop-screen-card paper-card">
       <div class="screen-top-bar">
@@ -70,6 +70,9 @@
       <div class="shop-tabs-bar">
         <button id="shopTabContainerBtn" class="shop-tab-btn active-shop-tab" type="button">
           📦 КОНТЕЙНЕР (1 000 <span class="coin-icon" aria-hidden="true"></span>) И СТРАЖНИК
+        </button>
+        <button id="shopTabBadgeCrateBtn" class="shop-tab-btn" type="button">
+          🏅 КОНТЕЙНЕР ЗНАЧКОВ (70 <span class="coin-icon" aria-hidden="true"></span> • 9 ЗНАЧКОВ)
         </button>
         <button id="shopTabExclusiveBtn" class="shop-tab-btn" type="button">
           🌌 ЭКСКЛЮЗИВ (1 000 <span class="coin-icon" aria-hidden="true"></span> • 24 БОЙЦА)
@@ -329,6 +332,38 @@
           <div id="crate35RaritiesList" class="crate-rarities-list"></div>
         </div>
       </div>
+
+      <!-- ВКЛАДКА 7: КОНТЕЙНЕР СО ЗНАЧКАМИ ЗА 70 МОНЕТ (5 РЕДКИХ, 3 ЭПИЧЕСКИХ, 1 ЛЕГЕНДАРНЫЙ) -->
+      <div id="badgeCrateTabView" class="crate-picture-view hidden">
+        <div class="crate-picture-center badge-crate-center paper-inner-card">
+          <div class="crate-center-header">
+            <button id="badgeCrateBackToShelfBtn" class="mini-back-link" type="button">← К Контейнеру и Стражнику</button>
+            <span class="crate-center-title">🏅 КОНТЕЙНЕР СО ЗНАЧКАМИ ЗА 70 <span class="coin-icon" aria-hidden="true"></span> (5 РЕДКИХ • 3 ЭПИЧЕСКИХ • 1 ЛЕГЕНДАРНЫЙ)</span>
+          </div>
+
+          <div class="crate-center-visual">
+            <div class="crate-box-illustration" id="badgeCrateIllustration">🏅</div>
+            <div id="badgeCrateUnboxedResult" class="crate-unboxed-result hidden">
+              <div class="unboxed-header" id="badgeCrateUnboxedHeader">🎉 ВАМ ВЫПАЛ ЗНАЧОК!</div>
+              <canvas id="badgeCrateUnboxedCanvas" width="84" height="72"></canvas>
+              <div id="badgeCrateUnboxedName" class="unboxed-name">ЗНАЧОК ЗДОРОВЬЯ</div>
+              <div id="badgeCrateUnboxedRarity" class="unboxed-rarity-badge">Редкий</div>
+            </div>
+          </div>
+
+          <button id="openBadgeCrate70Btn" class="open-crate-center-btn open-badge-crate-btn" type="button">
+            🔓 ОТКРЫТЬ КОНТЕЙНЕР ЗНАЧКОВ ЗА 70 МОНЕТ <span class="coin-icon" aria-hidden="true"></span>
+          </button>
+          <div id="badgeCrateStatusMsg" class="crate-status-msg">
+            В контейнере за 70 <span class="coin-icon" aria-hidden="true"></span> лежат 9 особых значков-бонусов (5 редких, 3 эпических и 1 легендарный с очень малым шансом)! Значки можно надевать и снимать во вкладке Прокачки любого бойца!
+          </div>
+        </div>
+
+        <div class="crate-rarities-bottom">
+          <div class="crate-rarities-title">СОДЕРЖИМОЕ КОНТЕЙНЕРА СО ЗНАЧКАМИ (9 ЗНАЧКОВ: 5 РЕДКИХ [96.5%], 3 ЭПИЧЕСКИХ [3%], 1 ЛЕГЕНДАРНЫЙ [0.5%]):</div>
+          <div id="badgeCrateRaritiesList" class="crate-rarities-list"></div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -392,19 +427,22 @@
     </div>
   </div>
 
-  <!-- ==================== 4. ЛОКАЦИЯ ПРОКАЧКИ ПЕРСОНАЖА (ЗА 2 МОНЕТЫ: +5 ХП ИЛИ +2 УРОНА) ==================== -->
+  <!-- ==================== 4. ЛОКАЦИЯ ПРОКАЧКИ ПЕРСОНАЖА (ЗА 2 МОНЕТЫ: +5 ХП ИЛИ +2 УРОНА + ЗНАЧКИ) ==================== -->
   <div id="upgradeScreen" class="screen-view hidden">
     <div class="paper-screen-card upgrade-screen-card paper-card">
       <div class="screen-top-bar">
         <button id="upgradeBackBtn" class="back-nav-btn" type="button">← К ЯЧЕЙКАМ</button>
-        <h2 class="screen-title">⬆️ ПРОКАЧКА БОЙЦА</h2>
+        <h2 class="screen-title">⬆️ ПРОКАЧКА И ЗНАЧКИ БОЙЦА</h2>
         <div class="coin-pill"><span class="coin-icon" aria-hidden="true"></span> <strong id="upgradeCoinsVal">20</strong></div>
       </div>
 
       <div class="upgrade-fighter-showcase paper-inner-card">
         <canvas id="upgradeFighterCanvas" width="110" height="88"></canvas>
         <div class="upgrade-fighter-meta">
-          <span id="upgradeFighterRarityBadge" class="upg-rarity-pill">Обычная</span>
+          <div class="upgrade-meta-pills-row">
+            <span id="upgradeFighterRarityBadge" class="upg-rarity-pill">Обычная</span>
+            <span id="upgradeFighterSpeedPill" class="upg-speed-pill">⚡ Скорость: 3</span>
+          </div>
           <h3 id="upgradeFighterName">МЕЧНИК</h3>
           <p id="upgradeFighterDesc">🗡️ Крутящийся меч</p>
         </div>
@@ -431,6 +469,25 @@
 
       <div id="upgradeStatusFeedback" class="upgrade-feedback-msg">
         Каждая прокачка стоит 2 монеты и навсегда усиливает этого бойца (+5 к здоровью или +2 к урону)!
+      </div>
+
+      <!-- БЛОК ЗНАЧКОВ БОЙЦА (МОЖНО НАДЕТЬ ИЛИ СНЯТЬ ЗНАЧОК, ПРИ СНЯТИИ ВСЕ БОНУСЫ ЗНАЧКА СБРАСЫВАЮТСЯ) -->
+      <div class="upgrade-badges-section paper-inner-card" id="upgradeBadgesSection">
+        <div class="upgrade-badges-header">
+          <div class="ubh-left">
+            <span class="ubh-title">🏅 ЗНАЧОК БОЙЦА (БОНУС)</span>
+            <span id="upgradeUnlockedBadgesCount" class="ubh-count">Открыто значков: 0 / 9</span>
+          </div>
+          <button id="upgradeGoBadgeShopBtn" class="ubh-shop-btn" type="button">
+            🏅 Контейнер значков (70 <span class="coin-icon" aria-hidden="true"></span>)
+          </button>
+        </div>
+
+        <!-- Текущий надетый значок на этом бойце (с кнопкой УБРАТЬ ЗНАЧОК) -->
+        <div id="upgradeActiveBadgeBox" class="upgrade-active-badge-box"></div>
+
+        <!-- Сетка всех 9 значков (5 редких, 3 эпических, 1 легендарный) -->
+        <div id="upgradeBadgesGrid" class="upgrade-badges-grid"></div>
       </div>
     </div>
   </div>
@@ -555,6 +612,13 @@
 
       <!-- ЦЕНТРАЛЬНЫЙ РИНГ (УВЕЛИЧЕННАЯ АРЕНА: 680x400) -->
       <section class="arena-section">
+        <!-- Полоса иконок бойцов над полем боя (слева ваши, справа враги) -->
+        <div class="arena-overhead-bar paper-card" id="arenaOverheadBar" aria-label="Бойцы на арене">
+          <div class="overhead-team overhead-player" id="overheadPlayerIcons"></div>
+          <div class="overhead-vs-badge">⚔️</div>
+          <div class="overhead-team overhead-bot" id="overheadBotIcons"></div>
+        </div>
+
         <div class="arena-frame compact-arena-frame" id="arenaFrame">
           <!-- Декоративные угловые крепления ринга -->
           <div class="corner-post tl"></div>
